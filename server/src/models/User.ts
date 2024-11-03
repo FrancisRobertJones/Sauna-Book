@@ -1,20 +1,37 @@
+// src/models/User.ts
 import mongoose, { Document } from 'mongoose';
 import { z } from 'zod';
 
+// Zod schema for validation
 export const UserSchema = z.object({
+    auth0Id: z.string(),
     email: z.string().email(),
     name: z.string().min(2),
-    saunaAccess: z.array(z.string()),  
+    saunaAccess: z.array(z.string()),
     role: z.enum(['admin', 'user'])
 });
 
 export type UserDTO = z.infer<typeof UserSchema>;
 
+export interface IUser extends Document {
+    auth0Id: string;
+    email: string;
+    name: string;
+    saunaAccess: string[];
+    role: 'admin' | 'user';
+    createdAt: Date;
+    updatedAt: Date;
+}
+
 const userSchema = new mongoose.Schema({
-    email: {
+    auth0Id: {
         type: String,
         required: true,
         unique: true
+    },
+    email: {
+        type: String,
+        required: true
     },
     name: {
         type: String,
@@ -32,14 +49,5 @@ const userSchema = new mongoose.Schema({
 }, {
     timestamps: true
 });
-
-export interface IUser extends Document {
-    email: string;
-    name: string;
-    saunaAccess: string[];
-    role: 'admin' | 'user';
-    createdAt: Date;
-    updatedAt: Date;
-}
 
 export const User = mongoose.model<IUser>('User', userSchema);

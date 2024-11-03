@@ -3,9 +3,9 @@ import { User, IUser, UserDTO } from '../models/User';
 
 @Service()
 export class UserRepository {
-    async findById(id: string): Promise<IUser | null> {
-        return User.findById(id);
-    }
+    async findByAuth0Id(auth0Id: string): Promise<IUser | null> {
+        return User.findOne({ auth0Id });
+      }
 
     async findByEmail(email: string): Promise<IUser | null> {
         return User.findOne({ email });
