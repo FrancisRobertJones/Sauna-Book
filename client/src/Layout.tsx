@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import Homepage from './pages/Homepage';
+import { Toaster } from './components/ui/toaster';
 
 const Layout = () => {
   const { isAuthenticated, loginWithRedirect, logout, user } = useAuth0();
@@ -23,6 +24,7 @@ const Layout = () => {
       <main className='max-w-screen-xl w-full p-16 my-0 mx-auto'>
         <Outlet />
       </main>
+      <Toaster />
     </>
   )
 };
