@@ -5,18 +5,18 @@ import { useAuth0 } from '@auth0/auth0-react';
 const Homepage = () => {
   const { loginWithRedirect } = useAuth0();
 
-  const handleRegisterSauna = () => {
+  const handleNormalLogin = () => {
+    localStorage.removeItem('register_intent'); 
     loginWithRedirect({
-      appState: { intent: 'register_sauna' },
       authorizationParams: {
         redirect_uri: `${window.location.origin}/callback`
       }
     });
   };
 
-  const handleNormalLogin = () => {
+  const handleRegisterSauna = () => {
+    localStorage.setItem('register_intent', 'true');
     loginWithRedirect({
-      appState: { intent: 'normal_login' },
       authorizationParams: {
         redirect_uri: `${window.location.origin}/callback`
       }
@@ -26,9 +26,9 @@ const Homepage = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh]">
       <h1 className="text-4xl font-bold mb-8">Sauna Booking System</h1>
-      
+
       <div className="space-y-4">
-        <button 
+        <button
           onClick={handleNormalLogin}
           className="w-full px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         >
@@ -44,7 +44,7 @@ const Homepage = () => {
           </div>
         </div>
 
-        <button 
+        <button
           onClick={handleRegisterSauna}
           className="w-full px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
         >
