@@ -11,4 +11,8 @@ export class SaunaRepository {
     async findById(id: string): Promise<ISauna | null> {
         return Sauna.findById(id);
     }
+
+    async findByAdminId(adminId: string): Promise<ISauna[]> {
+        return Sauna.find({ adminId });
+    }
 }

@@ -11,6 +11,8 @@ router.use(checkJwt);
 router.use(linkUser as RequestHandler);
 
 router.post('/', saunaController.createSauna as RequestHandler);
+router.get('/my-saunas', saunaController.getAdminSaunas as RequestHandler);
 router.get('/:id', saunaController.getSauna as RequestHandler);
+
 
 export default router;

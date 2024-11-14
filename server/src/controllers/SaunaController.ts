@@ -27,7 +27,7 @@ export class SaunaController {
         } catch (error) {
             next(error);
         }
-    };
+    }
 
     getSauna: RequestHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
@@ -41,4 +41,23 @@ export class SaunaController {
             next(error);
         }
     };
+    
+
+    getAdminSaunas: RequestHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const authReq = req as AuthRequest;
+            const adminId = authReq.auth?.payload.sub;
+            
+            console.log(adminId, "ZZZZZ")
+            if (!adminId) {
+                res.status(401).json({ error: 'Unauthorized' });
+                return;
+            }
+    
+            const saunas = await this.saunaService.findByAdminId(adminId);
+            res.json(saunas);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
