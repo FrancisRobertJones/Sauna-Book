@@ -1,4 +1,3 @@
-// src/types/sauna.ts
 import { z } from "zod"
 
 const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/
@@ -17,6 +16,7 @@ export const saunaFormSchema = z.object({
     }),
   }),
   maxConcurrentBookings: z.number().min(1),
+  maxTotalBookings: z.number().min(1),
   location: z.string().optional(),
   description: z.string().optional(),
 })

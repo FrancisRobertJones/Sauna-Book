@@ -8,6 +8,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import TestAuth from "./components/TestAuth";
 import Auth0Callback from "./components/AuthCallback";
 import Register from "./pages/Register";
+import SaunaAdminDashboard from "./pages/SaunaAdminDashboard";
 
 export const router = createBrowserRouter([
     {
@@ -37,6 +38,10 @@ export const router = createBrowserRouter([
               {
                 path: "/test-auth",  
                 element: <TestAuth />
+              },
+              {
+                path: "/admin/sauna/:saunaId",  
+                element: <SaunaAdminDashboard />
               }
             ]
           }

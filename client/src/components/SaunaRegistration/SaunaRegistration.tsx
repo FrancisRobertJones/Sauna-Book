@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
 import { useAuth0 } from '@auth0/auth0-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -14,8 +13,11 @@ import { OperatingHoursStep } from './OperatingHoursStep'
 import { Progress } from '@/components/ui/progress'
 import { useToast } from '@/hooks/use-toast'
 import { saunaFormSchema, SaunaFormValues } from '@/types/FormValues'
+import { SaunaSummaryModal } from './FormSummary'
+import { useNavigate } from 'react-router-dom'
 
 export default function SaunaRegistrationForm() {
+  const [showSummary, setShowSummary] = useState(false);
   const [step, setStep] = useState(0)
   const { getAccessTokenSilently } = useAuth0()
   const { toast } = useToast()
@@ -30,14 +32,24 @@ export default function SaunaRegistrationForm() {
         weekend: { start: '10:00', end: '16:00' },
       },
       maxConcurrentBookings: 1,
+      maxTotalBookings: 5,
       location: '',
       description: '',
     },
   })
 
-  const onSubmit = async (data: SaunaFormValues) => {
+  const handleSubmit = (data: SaunaFormValues) => {
+    setShowSummary(true);
+  };
+
+  const navigate = useNavigate();
+
+
+  const handleConfirmSubmit = async () => {
+    const data = form.getValues();
+    setShowSummary(false);
     console.log(data)
-/*     try {
+    try {
       const token = await getAccessTokenSilently()
       const response = await fetch('http://localhost:5001/api/saunas', {
         method: 'POST',
@@ -48,21 +60,26 @@ export default function SaunaRegistrationForm() {
         body: JSON.stringify(data),
       })
 
-      if (response.ok) {
-        toast({
-          title: 'Success',
-          description: 'Sauna registered successfully!',
-        })
-      } else {
-        throw new Error('Failed to register sauna')
+      if (!response.ok) {
+        throw new Error('Failed to register sauna');
       }
+
+      const sauna = await response.json();
+
+      toast({
+        title: 'Success',
+        description: 'Sauna registered successfully!',
+      });
+
+      navigate(`/admin/sauna/${sauna._id}`);
+
     } catch (error) {
       toast({
         title: 'Error',
         description: 'Failed to register sauna. Please try again.',
         variant: 'destructive',
       })
-    } */
+    }
   }
 
   const steps = [
@@ -81,7 +98,7 @@ export default function SaunaRegistrationForm() {
       <CardContent>
         <Progress value={(step + 1) / steps.length * 100} className="mb-4" />
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
             <CurrentStep form={form} />
           </form>
         </Form>
@@ -97,11 +114,18 @@ export default function SaunaRegistrationForm() {
             Next
           </Button>
         ) : (
-          <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
-            Submit
+          <Button type="button" onClick={form.handleSubmit(handleSubmit)}>
+            Review & Submit
           </Button>
         )}
       </CardFooter>
+
+      <SaunaSummaryModal
+        isOpen={showSummary}
+        onClose={() => setShowSummary(false)}
+        onConfirm={handleConfirmSubmit}
+        data={form.getValues()}
+      />
     </Card>
   )
 }

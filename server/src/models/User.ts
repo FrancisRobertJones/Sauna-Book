@@ -1,8 +1,6 @@
-// src/models/User.ts
 import mongoose, { Document } from 'mongoose';
 import { z } from 'zod';
 
-// Zod schema for validation
 export const UserSchema = z.object({
     auth0Id: z.string(),
     email: z.string().email(),

@@ -1,4 +1,3 @@
-// src/controllers/UserController.ts
 import { Service } from 'typedi';
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { UserService } from '../services/UserService';
@@ -34,12 +33,12 @@ export class UserController {
 
 
 
-updateUser = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const user = await this.userService.updateUser(req.params.id, req.body);
-        res.json(user);
-    } catch (error) {
-        next(error);
+    updateUser = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const user = await this.userService.updateUser(req.params.id, req.body);
+            res.json(user);
+        } catch (error) {
+            next(error);
+        }
     }
-}
 }

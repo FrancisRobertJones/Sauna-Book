@@ -5,6 +5,8 @@ import helmet from 'helmet';
 import mongoose from 'mongoose';
 import { config } from './config/config';
 import userRoutes from './routes/user.routes';
+import saunaRoutes from './routes/sauna.routes';
+
 
 const app = express();
 
@@ -37,6 +39,8 @@ app.listen(PORT, () => {
 });
 
 app.use('/api/users', userRoutes);
+app.use('/api/saunas', saunaRoutes);
+
 
 
 export default app;

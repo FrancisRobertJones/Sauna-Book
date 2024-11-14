@@ -1,4 +1,3 @@
-// src/types/sauna.types.ts
 export interface Sauna {
     _id: string;
     name: string;

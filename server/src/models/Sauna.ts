@@ -26,6 +26,7 @@ export const SaunaSchema = z.object({
     })
   }),
   maxConcurrentBookings: z.number().min(1),
+  maxTotalBookings: z.number().min(1).optional(),
   location: z.string().optional(),
   description: z.string().optional()
 });
@@ -56,6 +57,10 @@ const saunaSchema = new mongoose.Schema({
   maxConcurrentBookings: {
     type: Number,
     default: 1
+  },
+  maxTotalBookings: { 
+    type: Number,
+    default: 5 
   },
   location: String,
   description: String
