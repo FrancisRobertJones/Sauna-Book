@@ -9,8 +9,8 @@ import TestAuth from "./components/TestAuth";
 import Register from "./pages/Register";
 import SaunaAdminDashboard from "./pages/SaunaAdminDashboard";
 import MySaunas from "./pages/MySaunas";
-import { Auth0Callback } from "./components/AuthCallback";
 import { AdminRoute } from "./components/AdminRoute";
+import { Auth0Callback } from "./components/AuthCallback";
 
 export const router = createBrowserRouter([
     {
@@ -23,8 +23,8 @@ export const router = createBrowserRouter([
           index: true,
         },
         {
-            path: "/callback", 
-            element: <Auth0Callback />
+          path: "/callback",  
+          element: <Auth0Callback />
         },
         {
             element: <ProtectedRoute />,

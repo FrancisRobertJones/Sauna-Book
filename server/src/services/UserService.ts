@@ -49,4 +49,14 @@ export class UserService {
         }
         return updatedUser;
     }
+
+    async updateRole(auth0Id: string, role: 'admin' | 'user'): Promise<void> {
+        const user = await this.userRepository.findByAuth0Id(auth0Id);
+        
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        await this.userRepository.updateRole(auth0Id, role);
+    }
 }

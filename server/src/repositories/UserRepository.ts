@@ -7,6 +7,17 @@ export class UserRepository {
         return User.findOne({ auth0Id });
       }
 
+      async updateRole(auth0Id: string, role: 'admin' | 'user'): Promise<void> {
+        const result = await User.updateOne(
+            { auth0Id },
+            { $set: { role } }
+        );
+
+        if (result.matchedCount === 0) {
+            throw new Error('User not found');
+        }
+    }
+
     async findByEmail(email: string): Promise<IUser | null> {
         return User.findOne({ email });
     }

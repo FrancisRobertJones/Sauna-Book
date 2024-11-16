@@ -3,34 +3,20 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export const Auth0Callback = () => {
-  const { isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated, isLoading } = useAuth0();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkUserRole = async () => {
-      if (!isLoading && isAuthenticated) {
-        try {
-          const token = await getAccessTokenSilently();
-          const response = await fetch('http://localhost:5001/api/saunas/my-saunas', {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
-          const saunas = await response.json();
-          
-          if (saunas.length > 0) {
-            navigate('/my-saunas');
-          } else {
-            navigate('/booking');
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          navigate('/booking'); 
-        }
+    if (!isLoading && isAuthenticated) {
+      const isRegistering = localStorage.getItem('register_intent') === 'true';
+      localStorage.removeItem('register_intent');
+      
+      if (isRegistering) {
+        navigate('/register-sauna');
+      } else {
+        navigate('/booking');
       }
-    };
-
-    checkUserRole();
+    }
   }, [isAuthenticated, isLoading]);
 
   return <div>Loading...</div>;

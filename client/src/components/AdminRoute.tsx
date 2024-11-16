@@ -1,26 +1,29 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-
+import { useUser } from './state/userContext';
 export const AdminRoute = () => {
   const { getAccessTokenSilently } = useAuth0();
   const [isChecking, setIsChecking] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { state } = useUser(); 
 
   useEffect(() => {
     const checkAdmin = async () => {
       try {
         const token = await getAccessTokenSilently();
-        const response = await fetch('http://localhost:5001/api/saunas/my-saunas', {
+        const userResponse = await fetch('http://localhost:5001/api/users/me', {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
-        const saunas = await response.json();
-        setIsAdmin(saunas.length > 0);
+        const userData = await userResponse.json();
+        
+        if (userData.role !== 'admin') {
+          throw new Error('Not an admin');
+        }
       } catch (error) {
         console.error('Error:', error);
-        setIsAdmin(false);
+        Navigate('/booking');
       } finally {
         setIsChecking(false);
       }
@@ -33,5 +36,9 @@ export const AdminRoute = () => {
     return <div>Loading...</div>;
   }
 
-  return isAdmin ? <Outlet /> : <Navigate to="/booking" />;
+  if (state.adminSaunas.length === 0 && window.location.pathname === '/my-saunas') {
+    return <Navigate to="/register-sauna" />;
+  }
+
+  return <Outlet />;
 };
