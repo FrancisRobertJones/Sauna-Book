@@ -1,6 +1,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { LoadingAnimation } from "./Loading/Loading";
 
 export const Auth0Callback = () => {
   const { isAuthenticated, isLoading } = useAuth0();
@@ -19,5 +20,9 @@ export const Auth0Callback = () => {
     }
   }, [isAuthenticated, isLoading]);
 
-  return <div>Loading...</div>;
+  return (
+    <LoadingAnimation
+    isLoading = {isLoading}
+    text='Loading..' />
+  );;
 };

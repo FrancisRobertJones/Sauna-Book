@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { LoadingAnimation } from '@/components/Loading/Loading';
 
 interface Sauna {
     _id: string;
@@ -41,7 +42,11 @@ export default function MySaunas() {
     }, [getAccessTokenSilently]);
 
     if (loading) {
-        return <div>Loading...</div>;
+        return (
+            <LoadingAnimation
+            isLoading = {loading}
+            text='Loading..' />
+          );
     }
 
     return (

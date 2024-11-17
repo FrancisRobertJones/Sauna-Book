@@ -2,9 +2,11 @@ import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Toaster } from './components/ui/toaster';
 import { useEffect, useReducer, useState } from 'react';
-import { UserActionType, userReducer, UserState } from './components/reducers/userReducer';
+import { UserActionType, userReducer, UserState } from './reducers/userReducer';
 import { toast } from './hooks/use-toast';
-import { UserContext } from './components/state/userContext';
+import { UserContext } from './state/userContext';
+import Navbar from './components/Navbar';
+import { LoadingAnimation } from './components/Loading/Loading';
 
 const Layout = () => {
   const navigate = useNavigate();
@@ -62,12 +64,12 @@ const Layout = () => {
 
   const handleLogout = async () => {
     try {
-      await logout({ logoutParams: { returnTo: window.location.origin } });
-      dispatchUser({ type: UserActionType.LOGOUT });
-      toast({
-        title: "You have been logged out!",
-        description: "See you next time"
+      await logout({ 
+        logoutParams: { 
+          returnTo: window.location.origin 
+        }
       });
+      dispatchUser({ type: UserActionType.LOGOUT });
       navigate('/');
     } catch (error) {
       toast({
@@ -79,41 +81,27 @@ const Layout = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl">Loading...</div>
-      </div>
+      <LoadingAnimation
+      isLoading = {isLoading}
+      text='Loading..' />
     );
   }
 
   return (
     <UserContext.Provider value={{ state: userState, dispatch: dispatchUser }}>
-      <div className="min-h-screen">
-        <header className="p-4 flex justify-between items-center">
-          {isAuthenticated && (
-            <div className="flex items-center gap-4">
-              <span>Welcome, {userState.user?.name}</span>
-              {userState.isAdmin && (
-                <div className="flex items-center gap-4">
-                  <Link
-                    to="/my-saunas"
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                  >
-                    My Saunas ({userState.adminSaunas.length})
-                  </Link>
-                </div>
-              )}
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-              >
-                Log Out
-              </button>
+      <div className="min-h-screen flex flex-col">
+        <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8">
+          <Navbar 
+            userState={userState}
+            isAuthenticated={isAuthenticated}
+            handleLogout={handleLogout}
+          />
+          <main className='w-full py-8 sm:py-12 lg:py-16'>
+            <div className="max-w-7xl mx-auto">
+              <Outlet />
             </div>
-          )}
-        </header>
-        <main className='max-w-screen-xl w-full p-16 my-0 mx-auto'>
-          <Outlet />
-        </main>
+          </main>
+        </div>
         <Toaster />
       </div>
     </UserContext.Provider>
