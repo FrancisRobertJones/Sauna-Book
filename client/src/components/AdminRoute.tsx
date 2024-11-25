@@ -1,6 +1,7 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
+import { LoadingAnimation } from './Loading/Loading';
 
 export const AdminRoute = () => {
   const { getAccessTokenSilently } = useAuth0();
@@ -52,7 +53,10 @@ export const AdminRoute = () => {
   }, [getAccessTokenSilently, navigate]);
 
   if (isChecking) {
-    return <div>Checking permissions...</div>;
+    return <LoadingAnimation 
+            text={'Checking for saunas'}
+            isLoading={isChecking}
+            />
   }
 
   return <Outlet />;

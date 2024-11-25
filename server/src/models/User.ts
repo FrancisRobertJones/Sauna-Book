@@ -11,7 +11,7 @@ export const UserSchema = z.object({
 
 export type UserDTO = z.infer<typeof UserSchema>;
 
-export interface IUser extends Document {
+export interface IUser extends Document<mongoose.Types.ObjectId> {
     auth0Id: string;
     email: string;
     name: string;

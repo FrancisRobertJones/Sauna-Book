@@ -27,8 +27,8 @@ export class UserRepository {
         return user.save();
     }
 
-    async update(id: string, userData: Partial<UserDTO>): Promise<IUser | null> {
-        return User.findByIdAndUpdate(id, userData, { new: true });
+    async update(id: string, updateData: Partial<IUser>): Promise<IUser | null> {
+        return User.findByIdAndUpdate(id, updateData, { new: true });
     }
 
     async delete(id: string): Promise<IUser | null> {

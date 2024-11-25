@@ -37,7 +37,7 @@ export const router = createBrowserRouter([
                       element: <MySaunas />
                     },
                     {
-                      path: "/admin/sauna/:id",
+                      path: "/admin/sauna/:saunaId",
                       element: <SaunaAdminDashboard />
                     }
                   ]

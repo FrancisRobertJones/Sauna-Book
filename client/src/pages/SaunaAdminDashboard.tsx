@@ -1,10 +1,11 @@
 import { useParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import CreateInviteForm from '@/components/InviteTest';
 
 
 const SaunaAdminDashboard = () => {
-    const { saunaId } = useParams();
+    const { saunaId } = useParams<{ saunaId: string }>();
 
     return (
         <div className="container mx-auto py-6">
@@ -23,6 +24,9 @@ const SaunaAdminDashboard = () => {
                         <CardHeader>
                             <CardTitle>Sauna Overview</CardTitle>
                         </CardHeader>
+                        {saunaId &&
+                            <CreateInviteForm saunaId={saunaId} />
+                        }
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <Card>

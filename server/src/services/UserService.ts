@@ -9,7 +9,6 @@ export class UserService {
         private userRepository: UserRepository
     ) { }
 
-
     async findOrCreateUser(auth0Id: string, email: string, name: string): Promise<IUser> {
         let user = await this.userRepository.findByAuth0Id(auth0Id);
         
@@ -25,6 +24,10 @@ export class UserService {
         }
 
         return user;
+    }
+
+    async findByEmail(email: string): Promise<IUser | null> {
+        return this.userRepository.findByEmail(email);
     }
 
 
@@ -58,5 +61,18 @@ export class UserService {
         }
 
         await this.userRepository.updateRole(auth0Id, role);
+    }
+
+    async addSaunaAccess(userId: string, saunaId: string): Promise<IUser | null> {
+        const user = await this.userRepository.findByAuth0Id(userId);
+        if (!user) {
+            throw new ApplicationError('User not found', 404);
+        }
+        if (!user.saunaAccess.includes(saunaId)) {
+            user.saunaAccess.push(saunaId);
+            return this.userRepository.update(user._id.toString(), { saunaAccess: user.saunaAccess });
+        }
+
+        return user;
     }
 }

@@ -6,6 +6,9 @@ import mongoose from 'mongoose';
 import { config } from './config/config';
 import userRoutes from './routes/user.routes';
 import saunaRoutes from './routes/sauna.routes';
+import bookingRoutes from './routes/booking.routes';
+import inviteRoutes from './routes/invite.routes';
+
 
 
 const app = express();
@@ -40,6 +43,8 @@ app.listen(PORT, () => {
 
 app.use('/api/users', userRoutes);
 app.use('/api/saunas', saunaRoutes);
+app.use('/api/bookings', bookingRoutes)
+app.use('/api/invite', inviteRoutes)
 
 
 

@@ -10,23 +10,23 @@ export class SaunaController {
     constructor(
         private saunaService: SaunaService,
         private userService: UserService
-    ) {}
+    ) { }
 
     createSauna: RequestHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const authReq = req as AuthRequest;
             const adminId = authReq.auth?.payload.sub;
-    
+
             if (!adminId) {
                 res.status(401).json({ error: 'Unauthorized' });
                 return;
             }
-    
+
             const sauna = await this.saunaService.createSauna({
                 ...req.body,
                 adminId
             });
-    
+
             try {
                 await this.userService.updateRole(adminId, 'admin');
             } catch (error) {
@@ -51,7 +51,7 @@ export class SaunaController {
             next(error);
         }
     };
-    
+
 
     getAdminSaunas: RequestHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
@@ -61,7 +61,7 @@ export class SaunaController {
                 res.status(401).json({ error: 'Unauthorized' });
                 return;
             }
-    
+
             const saunas = await this.saunaService.findByAdminId(adminId);
             res.json(saunas || []);
         } catch (error) {
