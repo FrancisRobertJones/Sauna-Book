@@ -10,7 +10,7 @@ export class EmailService {
         console.log('Email Config:', {
             hasUser: !!process.env.GMAIL_USER,
             hasPassword: !!process.env.GMAIL_APP_PASSWORD,
-            user: process.env.GMAIL_USER 
+            user: process.env.GMAIL_USER
         });
 
         if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
@@ -45,6 +45,30 @@ export class EmailService {
                     </a>
                 `
             });
+            console.log('Email sent:', result);
+        } catch (error) {
+            console.error('Detailed email error:', error);
+            throw error;
+        }
+    }
+
+    async sendInviteWithdrawEmail(email: string, invite: IInvite): Promise<void> {
+        if (!this.transporter) {
+            throw new Error('Email service not initialized');
+        }
+
+        try {
+            const result = await this.transporter.sendMail({
+                from: `"Sauna Booking" <${process.env.GMAIL_USER}>`,
+                to: email,
+                subject: 'You\'re Invite Has Been Withdrawn!',
+                html: `
+                    <h1>Sauna Invite Has Been Withdrawn!</h1>
+                    <p>The admin for ${invite._id} has withdrawn your invitation.</p>
+                    <p>Please contact your BRF to get a new invitation.</p>
+                `
+            });
+            //TODO add sauna name to invite model. 
             console.log('Email sent:', result);
         } catch (error) {
             console.error('Detailed email error:', error);

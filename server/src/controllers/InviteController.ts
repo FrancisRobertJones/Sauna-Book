@@ -76,6 +76,8 @@ export class InviteController {
             const adminId = authReq.auth?.payload.sub;
             const { inviteId } = req.params;
 
+            console.log("hello withdraw")
+
             if (!adminId) {
                 res.status(401).json({ error: 'Unauthorized' });
                 return;

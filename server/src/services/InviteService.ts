@@ -20,7 +20,6 @@ export class InviteService {
 
     async createInvite(saunaId: string, email: string, invitedBy: string): Promise<IInvite> {
         const sauna = await this.saunaService.findById(saunaId);
-        console.log(sauna, "this is the sauna >>>>>>>")
         if (!sauna) {
             throw new ApplicationError('Sauna not found', 404);
         }
@@ -84,7 +83,6 @@ export class InviteService {
 
    async getInvitesBySauna(saunaId: string, adminId: string): Promise<IInvite[]> {
        const sauna = await this.saunaService.findById(saunaId);
-       console.log("WE ARE I NGET INVITES BY SAUNA >>>>>>>>>", sauna)
        if (!sauna || sauna.adminId !== adminId) {
            throw new ApplicationError('Not authorized to view invites', 403);
        }
@@ -116,7 +114,7 @@ export class InviteService {
            throw new ApplicationError('Failed to cancel invite', 500);
        }
 
-       await this.emailService.sendInviteEmail(invite.email, invite);
+       await this.emailService.sendInviteWithdrawEmail(invite.email, invite);
 
        return updatedInvite;
    }

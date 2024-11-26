@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useSaunaInvites, Invite } from '../../hooks/use-sauna-invites'
+import { useSaunaInvites, Invite } from '../../hooks/use-fetch-sauna-invites'
 import {
   Pagination,
   PaginationContent,
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/pagination"
 import { Button } from '../ui/button'
 import { Link } from 'react-router-dom'
+import { useWithdrawInvite } from '@/hooks/use-withdraw-invite'
 
 interface SaunaUsersProps {
   saunaId: string;
@@ -21,6 +22,9 @@ export function SaunaUserInvites({ saunaId }: SaunaUsersProps) {
   const { invites, isLoading, error } = useSaunaInvites(saunaId)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
+  const { withdrawInvite, isWithdrawing, error: withdrawError } = useWithdrawInvite(() => {
+    window.location.reload();
+  });
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -56,22 +60,31 @@ export function SaunaUserInvites({ saunaId }: SaunaUsersProps) {
                 <TableCell>{invite.email}</TableCell>
                 <TableCell>{invite.status}</TableCell>
                 <TableCell>{new Date(invite.expiresAt).toLocaleDateString()}</TableCell>
-                <TableCell>{invite.status !== "accepted" && <Button variant={"link"}> Cancel </Button>}</TableCell>
-              </TableRow>
+                <TableCell>
+                  {invite.status === 'pending' && (
+                    <button
+                      onClick={() => withdrawInvite(invite._id)}
+                      disabled={isWithdrawing}
+                      className="text-red-500 hover:text-red-700 disabled:opacity-50"
+                    >
+                      {isWithdrawing ? 'Withdrawing...' : 'Withdraw'}
+                    </button>
+                  )}
+                </TableCell>              </TableRow>
             ))}
           </TableBody>
         </Table>
         <Pagination className="mt-4">
           <PaginationContent>
             <PaginationItem>
-              <PaginationPrevious 
+              <PaginationPrevious
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
               />
             </PaginationItem>
             {[...Array(totalPages)].map((_, index) => (
               <PaginationItem key={index}>
-                <PaginationLink 
+                <PaginationLink
                   onClick={() => setCurrentPage(index + 1)}
                   isActive={currentPage === index + 1}
                 >
@@ -80,7 +93,7 @@ export function SaunaUserInvites({ saunaId }: SaunaUsersProps) {
               </PaginationItem>
             ))}
             <PaginationItem>
-              <PaginationNext 
+              <PaginationNext
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
               />
