@@ -31,6 +31,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Sauna } from '@/pages/Booking'
+import { NavButtons } from './NavButtons'
 
 
 
@@ -117,6 +118,7 @@ export default function Navbar({
                   </NavigationMenuLink>
                 </NavigationMenuItem>
               ))}
+              {!isAuthenticated && <NavButtons />}
             </NavigationMenuList>
           </NavigationMenu>
         </div>

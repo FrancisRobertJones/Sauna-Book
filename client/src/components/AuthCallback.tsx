@@ -10,11 +10,15 @@ export const Auth0Callback = () => {
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
       const isRegistering = localStorage.getItem('register_intent') === 'true';
+      const isManaging = localStorage.getItem('register_intent-manage') === 'true';
       localStorage.removeItem('register_intent');
-      
+      localStorage.removeItem('register_intent-manage');
+
       if (isRegistering) {
         navigate('/register-sauna');
-      } else {
+      } if(isManaging) {
+        navigate('/my-saunas');
+      }else {
         navigate('/booking');
       }
     }

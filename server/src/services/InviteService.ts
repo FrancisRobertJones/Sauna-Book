@@ -84,6 +84,7 @@ export class InviteService {
 
    async getInvitesBySauna(saunaId: string, adminId: string): Promise<IInvite[]> {
        const sauna = await this.saunaService.findById(saunaId);
+       console.log("WE ARE I NGET INVITES BY SAUNA >>>>>>>>>", sauna)
        if (!sauna || sauna.adminId !== adminId) {
            throw new ApplicationError('Not authorized to view invites', 403);
        }
