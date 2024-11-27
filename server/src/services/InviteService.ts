@@ -107,7 +107,7 @@ export class InviteService {
     }
 
     async cancelInvite(inviteId: string, adminId: string): Promise<IInvite> {
-        const invite = await this.inviteRepository.findById(inviteId);
+        const invite = await this.inviteRepository.findByIdUnpopulated(inviteId);
         if (!invite) {
             throw new ApplicationError('Invite not found', 404);
         }
