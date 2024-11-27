@@ -1,5 +1,6 @@
 import { Service } from 'typedi';
 import { User, IUser, UserDTO } from '../models/User';
+import mongoose from 'mongoose';
 
 @Service()
 export class UserRepository {
@@ -33,5 +34,11 @@ export class UserRepository {
 
     async delete(id: string): Promise<IUser | null> {
         return User.findByIdAndDelete(id);
+    }
+
+    async findBySaunaAccess(saunaId: string): Promise<IUser[]> {
+        return User.find({
+            saunaAccess: new mongoose.Types.ObjectId(saunaId)
+        }).sort({ createdAt: -1 });
     }
 }

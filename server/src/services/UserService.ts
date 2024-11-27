@@ -3,11 +3,13 @@ import { UserRepository } from '../repositories/UserRepository';
 import { IUser, UserDTO, UserSchema } from '../models/User';
 import { ApplicationError } from '../utils/errors';
 import mongoose from 'mongoose';
+import { SaunaRepository } from '../repositories/SaunaRepository';
 
 @Service()
 export class UserService {
     constructor(
-        private userRepository: UserRepository
+        private userRepository: UserRepository,
+        private saunaRepository: SaunaRepository
     ) { }
 
     async findOrCreateUser(auth0Id: string, email: string, name: string): Promise<IUser> {
@@ -93,5 +95,31 @@ export class UserService {
 
         const userSaunaIds = user.saunaAccess.map(id => id.toString());
         return userSaunaIds.includes(saunaId);
+    }
+
+    async getUsersBySauna(saunaId: string, adminId: string): Promise<IUser[]> {
+        const sauna = await this.saunaRepository.findById(saunaId);
+        if (!sauna || sauna.adminId !== adminId) {
+            throw new ApplicationError('Sauna not found or unauthorized', 404);
+        }
+    
+        return this.userRepository.findBySaunaAccess(saunaId);
+    }
+
+    async removeSaunaAccess(userId: string, saunaId: string, adminId: string): Promise<IUser | null> {
+        const sauna = await this.saunaRepository.findById(saunaId);
+        if (!sauna || sauna.adminId !== adminId) {
+            throw new ApplicationError('Sauna not found or unauthorized', 404);
+        }
+    
+        const user = await this.userRepository.findByAuth0Id(userId);
+        if (!user) {
+            throw new ApplicationError('User not found', 404);
+        }
+            user.saunaAccess = user.saunaAccess.filter(
+            id => id.toString() !== saunaId
+        );
+
+        return this.userRepository.update(userId, { saunaAccess: user.saunaAccess });
     }
 }

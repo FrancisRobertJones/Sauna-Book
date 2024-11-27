@@ -10,7 +10,7 @@ export class SaunaController {
     constructor(
         private saunaService: SaunaService,
         private userService: UserService
-    ) { }
+    ) {}
 
     createSauna: RequestHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
@@ -67,5 +67,33 @@ export class SaunaController {
         } catch (error) {
             next(error);
         }
+    }
+
+    async getSaunaUsers(req: Request, res: Response) {
+        const authReq = req as AuthRequest;
+        const adminId = authReq.auth?.payload.sub;
+        const { id } = req.params;
+
+        if (!id || !adminId) {
+            res.status(400).json({ error: 'Missing required parameters' });
+            return;
+        }
+
+        const users = await this.userService.getUsersBySauna(id, adminId)
+        res.json(users);
+    }
+
+    async removeSaunaAccess(req: Request, res: Response) {
+        const authReq = req as AuthRequest;
+        const adminId = authReq.auth?.payload.sub;
+        const { saunaId, userId } = req.params;
+
+        if (!saunaId || !userId || !adminId) {
+            res.status(400).json({ error: 'Missing required parameters' });
+            return;
+        }
+
+        await this.userService.removeSaunaAccess(userId, saunaId, adminId);
+        res.status(200).json({ message: 'Access removed successfully' });
     }
 }

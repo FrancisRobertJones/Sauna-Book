@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import CreateInviteForm from '@/components/SaunaInvites/Invite';
 import { SaunaUserInvites } from '@/components/SaunaInvites/SaunaInvites';
+import { SaunaUserManagement } from '@/components/Admin/SaunaUserManagement';
 
 
 const SaunaAdminDashboard = () => {
@@ -66,7 +67,7 @@ const SaunaAdminDashboard = () => {
                             {saunaId &&
                                 <>
                                     <CreateInviteForm saunaId={saunaId} />
-                                    <SaunaUserInvites saunaId={saunaId}/>
+                                    <SaunaUserInvites saunaId={saunaId} />
                                 </>
                             }
                         </CardContent>
@@ -79,7 +80,7 @@ const SaunaAdminDashboard = () => {
                             <CardTitle>User Management</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p>User management coming soon...</p>
+                            <SaunaUserManagement />
                         </CardContent>
                     </Card>
                 </TabsContent>

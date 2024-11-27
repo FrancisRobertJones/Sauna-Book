@@ -13,6 +13,7 @@ router.use(linkUser as RequestHandler);
 router.post('/', saunaController.createSauna as RequestHandler);
 router.get('/my-saunas', saunaController.getAdminSaunas as RequestHandler);
 router.get('/:id', saunaController.getSauna as RequestHandler);
-
+router.get('/:id/users', ((req, res) => saunaController.getSaunaUsers(req, res)) as RequestHandler);
+router.delete('/:id/users/:userId', saunaController.removeSaunaAccess as RequestHandler);
 
 export default router;
