@@ -7,6 +7,7 @@ import { toast } from './hooks/use-toast';
 import { UserContext } from './state/userContext';
 import Navbar from './components/Navbar';
 import { LoadingAnimation } from './components/Loading/Loading';
+import { AnimatedBackground } from './components/ui/AnimatedBackground';
 
 const Layout = () => {
   const navigate = useNavigate();
@@ -97,6 +98,7 @@ const Layout = () => {
             handleLogout={handleLogout}
           />
           <main className='w-full py-8 sm:py-12 lg:py-16'>
+            <AnimatedBackground />
             <div className="max-w-7xl mx-auto">
               <Outlet />
             </div>
