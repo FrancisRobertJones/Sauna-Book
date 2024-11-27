@@ -8,6 +8,10 @@ export class UserRepository {
         return User.findOne({ auth0Id });
       }
 
+      async findById(id: string): Promise<IUser | null> {
+        return User.findById(id).exec();
+    }
+
       async updateRole(auth0Id: string, role: 'admin' | 'user'): Promise<void> {
         const result = await User.updateOne(
             { auth0Id },

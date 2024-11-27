@@ -33,7 +33,7 @@ import { useParams } from 'react-router-dom'
 export function SaunaUserManagement() {
   const { saunaId } = useParams<{ saunaId: string }>();
   const { users, setUsers, isLoading, error } = useFetchSaunaUsers(saunaId as string)
-  const { removeAccess, isRemoving, removeError } = useRemoveSaunaAccess(setUsers)
+  const { removeAccess, isRemoving, removeError } = useRemoveSaunaAccess(saunaId as string, setUsers)
   const [userToRemove, setUserToRemove] = useState<SaunaUser | null>(null)
 
   const columns: ColumnDef<SaunaUser>[] = [

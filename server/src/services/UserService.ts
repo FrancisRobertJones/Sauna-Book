@@ -4,12 +4,14 @@ import { IUser, UserDTO, UserSchema } from '../models/User';
 import { ApplicationError } from '../utils/errors';
 import mongoose from 'mongoose';
 import { SaunaRepository } from '../repositories/SaunaRepository';
+import { EmailService } from './EmailService';
 
 @Service()
 export class UserService {
     constructor(
         private userRepository: UserRepository,
-        private saunaRepository: SaunaRepository
+        private saunaRepository: SaunaRepository,
+        private emailService: EmailService
     ) { }
 
     async findOrCreateUser(auth0Id: string, email: string, name: string): Promise<IUser> {
@@ -112,7 +114,7 @@ export class UserService {
             throw new ApplicationError('Sauna not found or unauthorized', 404);
         }
     
-        const user = await this.userRepository.findByAuth0Id(userId);
+        const user = await this.userRepository.findById(userId);
         if (!user) {
             throw new ApplicationError('User not found', 404);
         }
@@ -120,6 +122,16 @@ export class UserService {
             id => id.toString() !== saunaId
         );
 
-        return this.userRepository.update(userId, { saunaAccess: user.saunaAccess });
+        const updatedUser = await this.userRepository.update(userId, { 
+            saunaAccess: user.saunaAccess 
+        });
+    
+        try {
+            await this.emailService.sendAccessRemovedEmail(user.email, sauna.name);
+        } catch (error) {
+            console.error('Failed to send access removed email:', error);
+        }
+    
+        return updatedUser;
     }
 }

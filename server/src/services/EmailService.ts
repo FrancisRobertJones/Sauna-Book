@@ -97,4 +97,26 @@ export class EmailService {
             throw error;
         }
     }
+
+    async sendAccessRemovedEmail(email: string, saunaName: string): Promise<void> {
+        if (!this.transporter) {
+            throw new Error('Email service not initialized');
+        }
+
+        try {
+            const result = await this.transporter.sendMail({
+                from: `"Sauna Membership Removal" <${process.env.GMAIL_USER}>`,
+                to: email,
+                subject: `You have been removed from ${saunaName}!`,
+                html: `
+                    <h1> ${saunaName}'s admin has removed you from ${saunaName}!</h1>
+                    <p>Contact the admin for more details.</p>
+                `
+            });
+            console.log('Email sent:', result);
+        } catch (error) {
+            console.error('Detailed email error:', error);
+            throw error;
+        }
+    }
 }

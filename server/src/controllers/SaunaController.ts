@@ -86,14 +86,14 @@ export class SaunaController {
     async removeSaunaAccess(req: Request, res: Response) {
         const authReq = req as AuthRequest;
         const adminId = authReq.auth?.payload.sub;
-        const { saunaId, userId } = req.params;
+        const { id, userId } = req.params;
 
-        if (!saunaId || !userId || !adminId) {
+        if (!id || !userId || !adminId) {
             res.status(400).json({ error: 'Missing required parameters' });
             return;
         }
 
-        await this.userService.removeSaunaAccess(userId, saunaId, adminId);
+        await this.userService.removeSaunaAccess(userId, id, adminId);
         res.status(200).json({ message: 'Access removed successfully' });
     }
 }
