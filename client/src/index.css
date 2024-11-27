@@ -102,3 +102,22 @@
   }
 }
 
+@media (max-width: 640px) {
+  .animate-spin-slow {
+    animation-duration: 90s;
+  }
+}
+
+@keyframes subtle-glow {
+  0%, 100% {
+    box-shadow: 0 0 2px rgba(255, 255, 255, 0.1), 0 0 4px rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 3px rgba(255, 255, 255, 0.2), 0 0 6px rgba(255, 255, 255, 0.2);
+  }
+}
+
+.animate-subtle-glow {
+  animation: subtle-glow 4s ease-in-out infinite;
+}
+

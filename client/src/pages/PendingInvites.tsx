@@ -3,6 +3,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PendingInvite } from '@/types/InviteTypes';
 import { Button } from '@/components/ui/button';
+import { GlowCard } from '@/components/ui/GlowCard';
 
 
 export function PendingInvites() {
@@ -51,7 +52,7 @@ export function PendingInvites() {
         <h1 className="text-3xl font-bold text-center">Sauna Invitations</h1>
       </header>
       <main className="flex-grow flex items-start justify-center pt-12 px-4">
-        <Card className="w-full max-w-2xl bg-background/80 backdrop-blur-sm border-muted-foreground/20">
+        <GlowCard className="w-full max-w-2xl bg-background/80 backdrop-blur-sm border-muted-foreground/20">
           <CardHeader>
             <CardTitle className="text-2xl font-semibold text-center">Pending Invites</CardTitle>
           </CardHeader>
@@ -84,7 +85,7 @@ export function PendingInvites() {
               ))
             )}
           </CardContent>
-        </Card>
+        </GlowCard>
       </main>
     </div>
   )

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/accordion"
 import { FeatureCard, StepCard } from '@/components/Homepage/Cards';
 import { Testimonial } from '@/components/Homepage/Testimonials';
+import { GlowCard } from '@/components/ui/GlowCard';
 
 
 
@@ -228,7 +229,7 @@ export default function LandingPage() {
             </p>
           </div>
           <div className="mt-16 grid grid-cols-1 gap-16 lg:grid-cols-2">
-            <Card className="bg-background/50 backdrop-blur-lg border-border shadow-lg">
+            <GlowCard className="bg-background/50 backdrop-blur-lg border-border shadow-lg">
               <CardHeader>
                 <CardTitle>For Sauna Users</CardTitle>
               </CardHeader>
@@ -251,8 +252,8 @@ export default function LandingPage() {
               <CardFooter>
                 <p className="text-2xl font-bold">500+ Happy Users</p>
               </CardFooter>
-            </Card>
-            <Card className="bg-background/50 backdrop-blur-lg border-border shadow-lg">
+            </GlowCard>
+            <GlowCard className="bg-background/50 backdrop-blur-lg border-border shadow-lg">
               <CardHeader>
                 <CardTitle>For Sauna Owners</CardTitle>
               </CardHeader>
@@ -275,7 +276,7 @@ export default function LandingPage() {
               <CardFooter>
                 <p className="text-2xl font-bold">30% Increase in Bookings</p>
               </CardFooter>
-            </Card>
+            </GlowCard>
           </div>
         </div>
       </section>

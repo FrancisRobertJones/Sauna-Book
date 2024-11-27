@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { GlowCard } from "../ui/GlowCard";
 
 export const Testimonial = ({ 
     name, 
@@ -12,7 +13,7 @@ export const Testimonial = ({
     quote: string;
     avatar: string;
   }) => (
-    <Card className="bg-background/50 backdrop-blur-lg border-border shadow-lg">
+    <GlowCard className="bg-background/50 backdrop-blur-lg border-border shadow-lg">
       <CardHeader>
         <div className="flex items-center space-x-4">
           <Avatar>
@@ -28,5 +29,5 @@ export const Testimonial = ({
       <CardContent>
         <p className="text-muted-foreground italic">"{quote}"</p>
       </CardContent>
-    </Card>
+    </GlowCard>
   )
