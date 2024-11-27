@@ -11,6 +11,7 @@ import SaunaAdminDashboard from "./pages/SaunaAdminDashboard";
 import MySaunas from "./pages/MySaunas";
 import { AdminRoute } from "./components/AdminRoute";
 import { Auth0Callback } from "./components/AuthCallback";
+import { PendingInvites } from "./pages/PendingInvites";
 
 export const router = createBrowserRouter([
     {
@@ -45,6 +46,10 @@ export const router = createBrowserRouter([
                 {
                   path: "/booking",
                   element: <Booking />
+                },
+                {
+                  path: "/check-invites",
+                  element: <PendingInvites />
                 },
               {
                 path: "/booking",

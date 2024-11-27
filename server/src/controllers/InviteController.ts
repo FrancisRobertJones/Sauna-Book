@@ -66,6 +66,26 @@ export class InviteController {
         }
     };
 
+    getPendingInvites: RequestHandler = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        try {
+            const { email } = req.query;
+
+            if (!email || typeof email !== 'string') {
+                res.status(400).json({ error: 'Email is required' });
+                return;
+            }
+
+            const pendingInvites = await this.inviteService.findPendingByEmail(email);
+            res.json(pendingInvites);
+        } catch (error) {
+            next(error);
+        }
+    };
+
     cancelInvite: RequestHandler = async (
         req: Request,
         res: Response,
@@ -89,6 +109,33 @@ export class InviteController {
             );
 
             res.json(invite);
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    acceptInvite: RequestHandler = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        try {
+            const authReq = req as AuthRequest;
+            const userId = authReq.auth?.payload.sub;
+            const { inviteId } = req.params;
+ 
+            if (!userId) {
+                res.status(401).json({ error: 'Unauthorized' });
+                return;
+            }
+ 
+            if (!inviteId) {
+                res.status(400).json({ error: 'Invite ID is required' });
+                return;
+            }
+ 
+            await this.inviteService.acceptInvite(inviteId, userId);
+            res.status(200).json({ message: 'Invite accepted successfully' });
         } catch (error) {
             next(error);
         }

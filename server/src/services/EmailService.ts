@@ -75,4 +75,26 @@ export class EmailService {
             throw error;
         }
     }
+
+    async sendInviteAcceptedEmail(email: string, invite: IInvite): Promise<void> {
+        if (!this.transporter) {
+            throw new Error('Email service not initialized');
+        }
+
+        try {
+            const result = await this.transporter.sendMail({
+                from: `"Sauna Booking" <${process.env.GMAIL_USER}>`,
+                to: email,
+                subject: `Welcome to ${invite._id}!`,
+                html: `
+                    <h1>You've successfully accepted your invitation!</h1>
+                    <p>Find all details about booking under "My Saunas" after logging in.</p>
+                `
+            });
+            console.log('Email sent:', result);
+        } catch (error) {
+            console.error('Detailed email error:', error);
+            throw error;
+        }
+    }
 }

@@ -10,8 +10,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination"
-import { Button } from '../ui/button'
-import { Link } from 'react-router-dom'
 import { useWithdrawInvite } from '@/hooks/use-withdraw-invite'
 
 interface SaunaUsersProps {

@@ -15,50 +15,52 @@ export class InviteRepository {
         return invite.save();
     }
 
-   async findById(id: string): Promise<IInvite | null> {
-       return Invite.findById(id);
-   }
+    async findById(id: string): Promise<IInvite | null> {
+        return Invite.findById(id).populate('saunaId', 'name');
+    }
 
-   async updateStatus(
-       id: string, 
-       status: typeof InviteStatus[keyof typeof InviteStatus]
-   ): Promise<IInvite | null> {
-       return Invite.findByIdAndUpdate(
-           id,
-           { status },
-           { new: true }
-       );
-   }
+    async updateStatus(inviteId: string, status: InviteStatusType): Promise<IInvite | null> {
+        return Invite.findByIdAndUpdate(
+            inviteId,
+            { status },
+            { new: true }  
+        ).populate('saunaId', 'name');
+    }
 
-   async findBySauna(saunaId: string): Promise<IInvite[]> {
-       return Invite.find({
-           saunaId: new mongoose.Types.ObjectId(saunaId)
-       }).sort({ createdAt: -1 });
-   }
+    async findBySauna(saunaId: string): Promise<IInvite[]> {
+        return Invite.find({
+            saunaId: new mongoose.Types.ObjectId(saunaId)
+        }).sort({ createdAt: -1 });
+    }
 
-   async markExpired(): Promise<void> {
-       await Invite.updateMany(
-           {
-               status: InviteStatus.PENDING,
-               expiresAt: { $lt: new Date() }
-           },
-           {
-               status: InviteStatus.EXPIRED
-           }
-       );
-   }
+    async markExpired(): Promise<void> {
+        await Invite.updateMany(
+            {
+                status: InviteStatus.PENDING,
+                expiresAt: { $lt: new Date() }
+            },
+            {
+                status: InviteStatus.EXPIRED
+            }
+        );
+    }
 
-   async findByInviter(invitedBy: string): Promise<IInvite[]> {
-       return Invite.find({ invitedBy })
-           .sort({ createdAt: -1 })
-           .populate('saunaId', 'name'); 
-   }
+    async findByIdUnpopulated(inviteId: string): Promise<IInvite | null> {
+        return Invite.findById(inviteId).exec();
+    }
 
-   async findPendingByEmail(email: string): Promise<IInvite[]> {
-    return Invite.find({
-        email,
-        status: InviteStatus.PENDING,
-        expiresAt: { $gt: new Date() } 
-    });
-}
+    async findByInviter(invitedBy: string): Promise<IInvite[]> {
+        return Invite.find({ invitedBy })
+            .sort({ createdAt: -1 })
+            .populate('saunaId', 'name');
+    }
+    
+
+    async findPendingByEmail(email: string): Promise<IInvite[]> {
+        return Invite.find({
+            email,
+            status: InviteStatus.PENDING,
+            expiresAt: { $gt: new Date() }
+        }).populate('saunaId', 'name');
+    }
 }

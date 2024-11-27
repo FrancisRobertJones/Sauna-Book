@@ -18,8 +18,8 @@ export const Auth0Callback = () => {
         navigate('/register-sauna');
       } if(isManaging) {
         navigate('/my-saunas');
-      }else {
-        navigate('/booking');
+      } else {
+          navigate('/check-invites'); 
       }
     }
   }, [isAuthenticated, isLoading]);

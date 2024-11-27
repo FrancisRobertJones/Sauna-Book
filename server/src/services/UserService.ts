@@ -2,6 +2,7 @@ import { Service } from 'typedi';
 import { UserRepository } from '../repositories/UserRepository';
 import { IUser, UserDTO, UserSchema } from '../models/User';
 import { ApplicationError } from '../utils/errors';
+import mongoose from 'mongoose';
 
 @Service()
 export class UserService {
@@ -11,7 +12,7 @@ export class UserService {
 
     async findOrCreateUser(auth0Id: string, email: string, name: string): Promise<IUser> {
         let user = await this.userRepository.findByAuth0Id(auth0Id);
-        
+
         if (!user) {
             user = await this.userRepository.create({
                 auth0Id,
@@ -45,17 +46,24 @@ export class UserService {
 
     async updateUser(id: string, userData: Partial<UserDTO>) {
         const validatedData = UserSchema.partial().parse(userData);
+        
+        const userDataToUpdate = {
+            ...validatedData,
+            saunaAccess: validatedData.saunaAccess?.map(id => 
+                new mongoose.Types.ObjectId(id)
+            )
+        };
 
-        const updatedUser = await this.userRepository.update(id, validatedData);
+        const updatedUser = await this.userRepository.update(id, userDataToUpdate as Partial<IUser>);
         if (!updatedUser) {
             throw new ApplicationError('User not found', 404);
         }
         return updatedUser;
-    }
+    } 
 
     async updateRole(auth0Id: string, role: 'admin' | 'user'): Promise<void> {
         const user = await this.userRepository.findByAuth0Id(auth0Id);
-        
+
         if (!user) {
             throw new Error('User not found');
         }
@@ -68,11 +76,22 @@ export class UserService {
         if (!user) {
             throw new ApplicationError('User not found', 404);
         }
-        if (!user.saunaAccess.includes(saunaId)) {
-            user.saunaAccess.push(saunaId);
+
+
+        if (!user.saunaAccess.map(id => id.toString()).includes(saunaId)) {
+            user.saunaAccess.push(new mongoose.Types.ObjectId(saunaId));
             return this.userRepository.update(user._id.toString(), { saunaAccess: user.saunaAccess });
         }
 
+
         return user;
+    }
+
+    async hasAccessToSauna(userId: string, saunaId: string): Promise<boolean> {
+        const user = await this.userRepository.findByAuth0Id(userId);
+        if (!user) return false;
+
+        const userSaunaIds = user.saunaAccess.map(id => id.toString());
+        return userSaunaIds.includes(saunaId);
     }
 }

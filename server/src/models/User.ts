@@ -15,8 +15,8 @@ export interface IUser extends Document<mongoose.Types.ObjectId> {
     auth0Id: string;
     email: string;
     name: string;
-    saunaAccess: string[];
-    role: 'admin' | 'user';
+    role:'admin' | 'user';
+    saunaAccess: mongoose.Types.ObjectId[]; 
     createdAt: Date;
     updatedAt: Date;
 }
