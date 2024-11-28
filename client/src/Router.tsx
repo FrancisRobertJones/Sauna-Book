@@ -14,6 +14,7 @@ import { PendingInvites } from "./pages/PendingInvites";
 import NoAccess from "./pages/No-access";
 import { PendingInvitesGuard } from "./components/PendingInvitesGuard";
 import RegisterNewUser from "./pages/RegisterNewUser";
+import { UnauthedProtected } from "./components/UnAuthedProtectedRoute";
 
 export const router = createBrowserRouter([
   {
@@ -21,17 +22,22 @@ export const router = createBrowserRouter([
     element: <Layout />,
     children: [
       {
-        path: "/",
-        element: <Homepage />,
-        index: true,
-      },
-      {
-        path: "/register-user",
-        element: <RegisterNewUser />
-      },
-      {
-        path: "/callback",
-        element: <Auth0Callback />
+        element: <UnauthedProtected />,
+        children: [
+          {
+            path: "/",
+            element: <Homepage />,
+            index: true,
+          },
+          {
+            path: "/register-user",
+            element: <RegisterNewUser />
+          },
+          {
+            path: "/callback",
+            element: <Auth0Callback />
+          },
+        ]
       },
       {
         element: <ProtectedRoute />,
