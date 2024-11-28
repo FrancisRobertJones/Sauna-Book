@@ -8,22 +8,22 @@ export default function AuthSection() {
   const { loginWithRedirect } = useAuth0()
 
   const handleUserLogin = () => {
-    localStorage.removeItem('register_intent')
+    localStorage.setItem('register_intent', 'user');
     loginWithRedirect({
       authorizationParams: {
-        redirect_uri: `${window.location.origin}/callback`
-      }
-    })
-  }
-
+        redirect_uri: `${window.location.origin}/callback`,
+      },
+    });
+  };
+  
   const handleAdminLogin = () => {
-    localStorage.setItem('register_intent', 'true')
+    localStorage.setItem('register_intent', 'admin');
     loginWithRedirect({
       authorizationParams: {
-        redirect_uri: `${window.location.origin}/callback`
-      }
-    })
-  }
+        redirect_uri: `${window.location.origin}/callback`,
+      },
+    });
+  };
 
   return (
     <section className="relative overflow-hidden py-20 sm:py-32 lg:pb-32 xl:pb-36">

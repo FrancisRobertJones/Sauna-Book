@@ -15,8 +15,15 @@ export const Auth0Callback = () => {
       if (!isAuth0Loading && isAuthenticated) {
         try {
           const token = await getAccessTokenSilently();
+          const registerIntent = localStorage.getItem('register_intent');
+          const url = new URL('http://localhost:5001/api/users/me');
           
-          const userResponse = await fetch('http://localhost:5001/api/users/me', {
+          if (registerIntent) {
+            url.searchParams.append('register_intent', registerIntent);
+            localStorage.removeItem('register_intent');
+          }
+  
+          const userResponse = await fetch(url.toString(), {
             headers: { Authorization: `Bearer ${token}` }
           });
 
@@ -53,7 +60,7 @@ export const Auth0Callback = () => {
           }
         } catch (error) {
           console.error('Error in Auth0Callback:', error);
-          navigate('/');
+          navigate('/register-user');
         }
       }
     };

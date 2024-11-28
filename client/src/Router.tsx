@@ -1,11 +1,11 @@
 import {
-    createBrowserRouter,
-  } from "react-router-dom";
+  createBrowserRouter,
+} from "react-router-dom";
 import Homepage from "./pages/Homepage";
 import Layout from "./Layout";
 import Booking from "./pages/Booking";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-  import Register from "./pages/Register";
+import Register from "./pages/Register";
 import SaunaAdminDashboard from "./pages/SaunaAdminDashboard";
 import MySaunas from "./pages/MySaunas";
 import { AdminRoute } from "./components/AdminRoute";
@@ -13,6 +13,7 @@ import { Auth0Callback } from "./components/AuthCallback";
 import { PendingInvites } from "./pages/PendingInvites";
 import NoAccess from "./pages/No-access";
 import { PendingInvitesGuard } from "./components/PendingInvitesGuard";
+import RegisterNewUser from "./pages/RegisterNewUser";
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +24,10 @@ export const router = createBrowserRouter([
         path: "/",
         element: <Homepage />,
         index: true,
+      },
+      {
+        path: "/register-user",
+        element: <RegisterNewUser />
       },
       {
         path: "/callback",

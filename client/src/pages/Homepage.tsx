@@ -52,7 +52,7 @@ export default function LandingPage() {
 
   const { loginWithRedirect } = useAuth0();
 
-  const handleLogIn = () => {
+  const handleLogin = () => {
     localStorage.removeItem('register_intent');
     loginWithRedirect({
       authorizationParams: {
@@ -75,7 +75,7 @@ export default function LandingPage() {
                 Discover a new way to manage and enjoy saunas. Whether you're a sauna enthusiast or a business owner, we've got you covered.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
-                <Button onClick={handleLogIn} size="lg">
+                <Button onClick={handleLogin} size="lg">
                   Existing users
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>

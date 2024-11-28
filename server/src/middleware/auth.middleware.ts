@@ -38,7 +38,6 @@ const createMiddleware = (
 
 export const linkUser: RequestHandler = createMiddleware(async (req: AuthRequest, res: Response, next: NextFunction) => {
   const userService = Container.get(UserService);
-  
   const auth0Id = req.auth?.payload.sub as string;
   const email = req.auth?.payload['https://api.frj-sauna-booking.com/email'] as string;
   const name = req.auth?.payload['https://api.frj-sauna-booking.com/name'] as string;
@@ -48,8 +47,28 @@ export const linkUser: RequestHandler = createMiddleware(async (req: AuthRequest
     return;
   }
 
-  const user = await userService.findOrCreateUser(auth0Id, email, name);
-  req.user = user as { id: string; auth0Id: string; email: string; name: string };
+  let user = await userService.findUserByAuth0Id(auth0Id);
+
+  if (!user) {
+    const registerIntent = req.query.register_intent as string;
+
+    if (registerIntent === 'admin') {
+      user = await userService.createUser(auth0Id, email, name, 'admin');
+    } else if (registerIntent === 'user') {
+      user = await userService.createUser(auth0Id, email, name, 'user');
+    } else {
+      res.status(400).json({ error: 'Invalid registration intent' });
+      return;
+    }
+  }
+
+  req.user = {
+    id: user._id.toString(),
+    auth0Id: user.auth0Id,
+    email: user.email,
+    name: user.name
+  };
+
   next();
 });
 

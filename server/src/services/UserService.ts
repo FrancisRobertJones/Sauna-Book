@@ -14,22 +14,21 @@ export class UserService {
         private emailService: EmailService
     ) { }
 
-    async findOrCreateUser(auth0Id: string, email: string, name: string): Promise<IUser> {
-        let user = await this.userRepository.findByAuth0Id(auth0Id);
-
-        if (!user) {
-            user = await this.userRepository.create({
-                auth0Id,
-                email,
-                name,
-                role: 'user',
-                saunaAccess: []
-            });
-            console.log('Created new user:', user);
-        }
-
+    async findUserByAuth0Id(auth0Id: string): Promise<IUser | null> {
+        return this.userRepository.findByAuth0Id(auth0Id);
+      }
+    
+      async createUser(auth0Id: string, email: string, name: string, role: 'admin' | 'user'): Promise<IUser> {
+        const user = await this.userRepository.create({
+          auth0Id,
+          email,
+          name,
+          role,
+          saunaAccess: []
+        });
+        console.log('Created new user:', user);
         return user;
-    }
+      }
 
     async findByEmail(email: string): Promise<IUser | null> {
         return this.userRepository.findByEmail(email);
