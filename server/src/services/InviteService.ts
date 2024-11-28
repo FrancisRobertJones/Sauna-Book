@@ -63,7 +63,7 @@ export class InviteService {
 
     async findPendingByEmail(email: string): Promise<IInvite[]> {
         try {
-            const pendingInvites = await this.inviteRepository.findPendingByEmail(email);
+            const pendingInvites = await this.inviteRepository.findPendingInvitesByEmail(email);
             return pendingInvites;
         } catch (error) {
             console.error('Error finding pending invites:', error);
@@ -71,11 +71,18 @@ export class InviteService {
         }
     }
 
+    async hasPendingInvites(userId: string): Promise<boolean> {
+        const user = await this.userService.findBySub(userId);
+        if (!user) return false;
+
+        const count = await this.inviteRepository.countPendingInvites(user.email);
+        return count > 0;
+    }
 
 
     async processUserInvites(email: string, userId: string): Promise<void> {
         try {
-            const pendingInvites = await this.inviteRepository.findPendingByEmail(email);
+            const pendingInvites = await this.inviteRepository.findPendingInvitesByEmail(email);
 
             for (const invite of pendingInvites) {
                 try {
@@ -96,6 +103,7 @@ export class InviteService {
             throw new ApplicationError('Failed to process invites', 500);
         }
     }
+
 
     async getInvitesBySauna(saunaId: string, adminId: string): Promise<IInvite[]> {
         const sauna = await this.saunaService.findById(saunaId);

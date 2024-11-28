@@ -1,43 +1,140 @@
-// src/middleware/auth.middleware.ts
-import { Request, Response, NextFunction } from 'express';
-import { auth } from 'express-oauth2-jwt-bearer';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
+import { auth, AuthResult } from 'express-oauth2-jwt-bearer';
 import { Container } from 'typedi';
 import { UserService } from '../services/UserService';
+import { InviteService } from '../services/InviteService';
 
-type AuthRequest = Request & { auth?: { payload: { sub: string; [key: string]: any } } };
-
-export const linkUser = (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  const userService = Container.get(UserService);
-
-  Promise.resolve().then(async () => {
-    try {
-        console.log('Auth payload:', req.auth?.payload); 
-
-      const auth0Id = req.auth?.payload.sub;
-      
-      const email = req.auth?.payload['https://api.frj-sauna-booking.com/email'];
-      const name = req.auth?.payload['https://api.frj-sauna-booking.com/name'];
-
-      console.log('Extracted data:', { auth0Id, email, name }); 
-
-      if (!auth0Id) {
-        return res.status(401).json({ error: 'No user ID in token' });
-      }
-
-      await userService.findOrCreateUser(auth0Id, email, name);
-
-      next();
-    } catch (error) {
-      next(error);
-    }
-  });
-};
+export interface AuthRequest extends Request {
+  auth?: AuthResult;
+  user?: {
+    id: string;
+    auth0Id: string;
+    email: string;
+    name: string;
+  };
+  userStatus?: {
+    role: 'admin' | 'user';
+    hasPendingInvites: boolean;
+    isSaunaMember: boolean;
+  };
+}
 
 export const checkJwt = auth({
   audience: process.env.AUTH0_AUDIENCE,
   issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}`,
+});
+
+const createMiddleware = (
+  handler: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void | Response>
+): RequestHandler => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await handler(req as AuthRequest, res, next);
+    } catch (error) {
+      next(error);
+    }
+  };
+};
+
+export const linkUser: RequestHandler = createMiddleware(async (req: AuthRequest, res: Response, next: NextFunction) => {
+  const userService = Container.get(UserService);
+  const auth0Id = req.auth?.payload.sub as string;
+  const email = req.auth?.payload['https://api.frj-sauna-booking.com/email'] as string;
+  const name = req.auth?.payload['https://api.frj-sauna-booking.com/name'] as string;
+
+  if (!auth0Id) {
+    res.status(401).json({ error: 'No user ID in token' });
+    return;
+  }
+
+  let user = await userService.findUserByAuth0Id(auth0Id);
+
+  if (!user) {
+    const registerIntent = req.query.register_intent as string;
+
+    if (registerIntent === 'admin') {
+      user = await userService.createUser(auth0Id, email, name, 'admin');
+    } else if (registerIntent === 'user') {
+      user = await userService.createUser(auth0Id, email, name, 'user');
+    } else {
+      res.status(400).json({ error: 'Invalid registration intent' });
+      return;
+    }
+  }
+
+  req.user = {
+    id: user._id.toString(),
+    auth0Id: user.auth0Id,
+    email: user.email,
+    name: user.name
+  };
+
+  next();
+});
+
+export const attachUserStatus: RequestHandler = createMiddleware(async (req: AuthRequest, res: Response, next: NextFunction) => {
+  const userService = Container.get(UserService);
+  const inviteService = Container.get(InviteService);
+
+  if (!req.user) {
+    res.status(401).json({ error: 'User not found' });
+    return;
+  }
+
+  const [hasPendingInvites, isSaunaMember] = await Promise.all([
+    inviteService.hasPendingInvites(req.user.auth0Id),
+    userService.isSaunaMember(req.user.auth0Id)
+  ]);
+
+  req.userStatus = {
+    role: await userService.isAdmin(req.user.auth0Id) ? 'admin' : 'user',
+    hasPendingInvites,
+    isSaunaMember
+  };
+
+  next();
+});
+
+export const requireAdmin: RequestHandler = createMiddleware(async (req: AuthRequest, res: Response, next: NextFunction) => {
+  if (req.userStatus?.role !== 'admin') {
+    res.status(403).json({ 
+      error: 'Admin access required',
+      userStatus: req.userStatus
+    });
+    return;
+  }
+  next();
+});
+
+export const requireUser: RequestHandler = createMiddleware(async (req: AuthRequest, res: Response, next: NextFunction) => {
+  if (req.userStatus?.role !== 'user') {
+    res.status(403).json({ 
+      error: 'User access required',
+      userStatus: req.userStatus
+    });
+    return;
+  }
+  next();
+});
+
+export const requireNoPendingInvites: RequestHandler = createMiddleware(async (req: AuthRequest, res: Response, next: NextFunction) => {
+  if (req.userStatus?.hasPendingInvites) {
+    res.status(403).json({ 
+      error: 'Please handle pending invites first',
+      redirectTo: '/check-invites'
+    });
+    return;
+  }
+  next();
+});
+
+export const requireSaunaMembership: RequestHandler = createMiddleware(async (req: AuthRequest, res: Response, next: NextFunction) => {
+  if (!req.userStatus?.isSaunaMember) {
+    res.status(403).json({ 
+      error: 'Sauna membership required',
+      redirectTo: '/no-access'
+    });
+    return;
+  }
+  next();
 });

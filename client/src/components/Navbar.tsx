@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { Bell, ChevronDown, LogOut, Menu, Moon, Settings, Sun, User } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Bell, ChevronDown, LogOut, Menu, Moon, Settings, Sun, User } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@/components/ui/dropdown-menu';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -18,8 +18,8 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-} from '@/components/ui/navigation-menu'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+} from '@/components/ui/navigation-menu';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,70 +29,61 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { Sauna } from '@/pages/Booking'
-import { NavButtons } from './NavButtons'
-
-
-
-interface UserState {
-  user: {
-    name: string
-  } | null
-  isAdmin: boolean
-  adminSaunas: Sauna[]
-}
+} from '@/components/ui/alert-dialog';
+import { Sauna } from '@/pages/Booking';
+import { NavButtons } from './NavButtons';
+import { UserState } from '@/reducers/userReducer';
 
 interface NavbarProps {
-  userState: UserState
-  isAuthenticated: boolean
-  handleLogout: () => void
+  userState: UserState;
+  isAuthenticated: boolean;
+  handleLogout: () => void;
 }
 
 export default function Navbar({
-  userState = { user: null, isAdmin: false, adminSaunas: [] },
+  userState = new UserState(),
   isAuthenticated = false,
   handleLogout = () => {},
 }: NavbarProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false)
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
     if (savedTheme) {
-      setTheme(savedTheme)
-      document.documentElement.classList.toggle('dark', savedTheme === 'dark')
+      setTheme(savedTheme);
+      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
     } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark')
-      document.documentElement.classList.add('dark')
+      setTheme('dark');
+      document.documentElement.classList.add('dark');
     }
-  }, [])
+  }, []);
 
   const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark'
-    setTheme(newTheme)
-    localStorage.setItem('theme', newTheme)
-    document.documentElement.classList.toggle('dark', newTheme === 'dark')
-  }
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.classList.toggle('dark', newTheme === 'dark');
+  };
 
-  const closeMenu = () => setIsMenuOpen(false)
+  const closeMenu = () => setIsMenuOpen(false);
 
   const handleLogoutClick = () => {
-    setIsLogoutDialogOpen(true)
-  }
+    setIsLogoutDialogOpen(true);
+  };
 
   const confirmLogout = () => {
-    handleLogout()
-    setIsLogoutDialogOpen(false)
-  }
+    handleLogout();
+    setIsLogoutDialogOpen(false);
+  };
 
   const navItems = [
     { name: 'Home', href: '/' },
-    ...(isAuthenticated ? [{ name: 'Book a Sauna', href: '/book' }] : []),
-    ...(userState.isAdmin ? [{ name: 'My Saunas', href: '/my-saunas' }] : []),
-    ...(isAuthenticated ? [{ name: 'Register New Sauna', href: '/register-sauna' }] : []),
-  ]
+    ...(isAuthenticated ? [{ name: 'Book a Sauna', href: '/booking' }] : []),
+    ...(userState.role === 'admin' ? [{ name: 'My Saunas', href: '/my-saunas' }] : []),
+    ...(userState.role === 'admin' ? [{ name: 'Register New Sauna', href: '/register-sauna' }] : []),
+  ];
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -124,7 +115,10 @@ export default function Navbar({
         </div>
         <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" className="mr-2 px-0 text-base hover:bg-transparent focus:ring-0 md:hidden">
+            <Button
+              variant="ghost"
+              className="mr-2 px-0 text-base hover:bg-transparent focus:ring-0 md:hidden"
+            >
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle Menu</span>
             </Button>
@@ -157,7 +151,7 @@ export default function Navbar({
             {isAuthenticated && userState.user && (
               <p className="text-sm">
                 Welcome, {userState.user.name}
-                {userState.isAdmin && (
+                {userState.role === 'admin' && (
                   <Badge variant="outline" className="ml-2">
                     Admin
                   </Badge>
@@ -177,7 +171,10 @@ export default function Navbar({
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src="/placeholder-avatar.jpg" alt={userState.user?.name || 'User avatar'} />
+                        <AvatarImage 
+                          src="/placeholder-avatar.jpg" 
+                          alt={userState.user?.name || 'User avatar'} 
+                        />
                         <AvatarFallback>{userState.user?.name?.[0] || 'U'}</AvatarFallback>
                       </Avatar>
                     </Button>
@@ -223,5 +220,5 @@ export default function Navbar({
         </AlertDialogContent>
       </AlertDialog>
     </nav>
-  )
+  );
 }

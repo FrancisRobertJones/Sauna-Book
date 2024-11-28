@@ -15,6 +15,7 @@ import {
 import { FeatureCard, StepCard } from '@/components/Homepage/Cards';
 import { Testimonial } from '@/components/Homepage/Testimonials';
 import { GlowCard } from '@/components/ui/GlowCard';
+import AuthSection from '@/components/Homepage/RegisterAuth';
 
 
 
@@ -51,17 +52,8 @@ export default function LandingPage() {
 
   const { loginWithRedirect } = useAuth0();
 
-  const handleNormalLogin = () => {
+  const handleLogin = () => {
     localStorage.removeItem('register_intent');
-    loginWithRedirect({
-      authorizationParams: {
-        redirect_uri: `${window.location.origin}/callback`
-      }
-    });
-  };
-
-  const handleRegisterSauna = () => {
-    localStorage.setItem('register_intent', 'true');
     loginWithRedirect({
       authorizationParams: {
         redirect_uri: `${window.location.origin}/callback`
@@ -75,26 +67,27 @@ export default function LandingPage() {
       <section className="relative overflow-hidden py-20 sm:py-32 lg:pb-32 xl:pb-36">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="lg:grid lg:grid-cols-12 lg:gap-x-8 lg:gap-y-20">
-            <div className="relative z-10 mx-auto max-w-2xl lg:col-span-7 lg:max-w-none lg:pt-6 xl:col-span-6">
-              <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-                Revolutionize Your Sauna Management
+            <div className="relative z-10 mx-auto tracking-tight max-w-2xl lg:col-span-7 lg:max-w-none lg:pt-6 xl:col-span-6">
+              <h1 className="text-4xl font-bold sm:text-6xl">
+                Welcome to Book a Bastu
               </h1>
               <p className="mt-6 text-lg text-muted-foreground">
-                Modernize your sauna bookings with our cutting-edge digital platform. Streamline operations, enhance user experience, and boost your business.
+                Discover a new way to manage and enjoy saunas. Whether you're a sauna enthusiast or a business owner, we've got you covered.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
-                <Button onClick={handleNormalLogin} size="lg">
-                  Book a Sauna
+                <Button onClick={handleLogin} size="lg">
+                  Existing users
                   <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-                <Button onClick={handleRegisterSauna} size="lg" variant="outline">
-                  Register Your Sauna
                 </Button>
               </div>
             </div>
           </div>
         </div>
       </section>
+
+
+      <AuthSection />
+
 
       <section className="py-20 sm:py-32">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

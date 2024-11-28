@@ -56,11 +56,21 @@ export class InviteRepository {
     }
     
 
-    async findPendingByEmail(email: string): Promise<IInvite[]> {
+    async findPendingInvitesByEmail(email: string): Promise<IInvite[]> {
         return Invite.find({
             email,
             status: InviteStatus.PENDING,
             expiresAt: { $gt: new Date() }
-        }).populate('saunaId', 'name');
+        })
+        .populate('saunaId', 'name')  
+        .sort({ createdAt: -1 });
+    }
+    
+    async countPendingInvites(email: string): Promise<number> {
+        return Invite.countDocuments({
+            email,
+            status: InviteStatus.PENDING,
+            expiresAt: { $gt: new Date() }
+        });
     }
 }
