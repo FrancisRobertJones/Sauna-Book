@@ -8,6 +8,8 @@ import { UserContext } from './state/userContext';
 import Navbar from './components/Navbar';
 import { LoadingAnimation } from './components/Loading/Loading';
 import { AnimatedBackground } from './components/ui/AnimatedBackground';
+import { IUserAction, UserResponse } from './types/UserTypes';
+import { Sauna } from './pages/Booking';
 
 const Layout = () => {
   const navigate = useNavigate();
@@ -20,38 +22,69 @@ const Layout = () => {
       if (isAuthenticated && user) {
         try {
           const token = await getAccessTokenSilently();
-          const adminResponse = await fetch('http://localhost:5001/api/saunas/my-saunas', {
+          const userResponse = await fetch('http://localhost:5001/api/users/me', {
             headers: { Authorization: `Bearer ${token}` }
           });
-          
-          if (!adminResponse.ok) {
-            throw new Error('Failed to fetch admin saunas');
+  
+          if (!userResponse.ok) {
+            throw new Error('Failed to fetch user data');
           }
-          
-          const adminSaunas = await adminResponse.json();
-          
-          dispatchUser({
+  
+          const userData = await userResponse.json() as UserResponse;
+          console.log('Layout - User Data:', userData);
+  
+          const role = userData.role;
+          let adminSaunas: Sauna[] = [];
+  
+          if (role === 'admin') {
+            const adminResponse = await fetch('http://localhost:5001/api/saunas/my-saunas', {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            if (adminResponse.ok) {
+              adminSaunas = await adminResponse.json();
+            }
+          }
+  
+          const dispatchPayload: IUserAction = {
             type: UserActionType.LOGIN,
             payload: {
               auth0User: user,
-              adminSaunas,
-              accessibleSaunas: []
+              role: userData.role,
+              adminSaunas: adminSaunas,
+              accessibleSaunas: [],
+              status: {
+                hasPendingInvites: userData.status.hasPendingInvites,
+                isSaunaMember: userData.status.isSaunaMember
+              }
             }
-          });
+          };
+          
+          dispatchUser(dispatchPayload);
+  
+          console.log('Layout - Dispatching payload:', dispatchPayload);
+          dispatchUser(dispatchPayload);
         } catch (error) {
-          dispatchUser({
-            type: UserActionType.LOGIN,
-            payload: {
-              auth0User: user,
-              adminSaunas: [],
-              accessibleSaunas: []
-            }
-          });
+          console.error('Layout - Error:', error);
           toast({
             title: "Warning",
-            description: "Could not fetch saunas. Some features may be limited.",
+            description: "Could not fetch user data. Some features may be limited.",
             variant: "default"
           });
+  
+          const fallbackPayload: IUserAction = {
+            type: UserActionType.LOGIN,
+            payload: {
+              auth0User: user,
+              role: 'user',
+              adminSaunas: [],
+              accessibleSaunas: [],
+              status: {
+                hasPendingInvites: false,
+                isSaunaMember: false
+              }
+            }
+          };
+          dispatchUser(fallbackPayload);
         } finally {
           setIsLoading(false);
         }
@@ -59,7 +92,7 @@ const Layout = () => {
         setIsLoading(false);
       }
     };
-
+  
     initializeUser();
   }, [isAuthenticated, user, getAccessTokenSilently]);
 

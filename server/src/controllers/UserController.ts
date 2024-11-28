@@ -1,15 +1,15 @@
 import { Service } from 'typedi';
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { UserService } from '../services/UserService';
+import { InviteService } from '../services/InviteService';
 import { UserDTO } from '../models/User';
 import { AuthRequest } from '../types/auth.types';
-
-
 
 @Service()
 export class UserController {
     constructor(
-        private userService: UserService
+        private userService: UserService,
+        private inviteService: InviteService
     ) { }
 
     getCurrentUser: RequestHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -25,7 +25,19 @@ export class UserController {
             }
 
             const user = await this.userService.findOrCreateUser(auth0Id, email, name);
-            res.json(user);
+            
+            const [hasPendingInvites, isSaunaMember] = await Promise.all([
+                this.inviteService.hasPendingInvites(auth0Id),
+                this.userService.isSaunaMember(auth0Id)
+            ]);
+
+            res.json({
+                ...user.toJSON(),
+                status: {
+                    hasPendingInvites,
+                    isSaunaMember
+                }
+            });
         } catch (error) {
             next(error);
         }

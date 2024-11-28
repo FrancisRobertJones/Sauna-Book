@@ -8,10 +8,20 @@ import userRoutes from './routes/user.routes';
 import saunaRoutes from './routes/sauna.routes';
 import bookingRoutes from './routes/booking.routes';
 import inviteRoutes from './routes/invite.routes';
-
+import { 
+  checkJwt, 
+  linkUser, 
+  attachUserStatus,
+  requireAdmin,
+  requireUser,
+  requireNoPendingInvites,
+  requireSaunaMembership
+} from './middleware/auth.middleware';
 
 
 const app = express();
+const baseAuth = [checkJwt, linkUser, attachUserStatus];
+
 
 app.use(cors());
 app.use(helmet());
@@ -41,10 +51,16 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-app.use('/api/users', userRoutes);
-app.use('/api/saunas', saunaRoutes);
-app.use('/api/bookings', bookingRoutes)
-app.use('/api/invite', inviteRoutes)
+app.use('/api/users', baseAuth, userRoutes);
+app.use('/api/saunas', [...baseAuth, requireAdmin], saunaRoutes);
+app.use('/api/bookings', [
+  ...baseAuth, 
+  requireUser,
+  requireNoPendingInvites,
+  requireSaunaMembership
+], bookingRoutes);
+
+app.use('/api/invite', baseAuth, inviteRoutes);
 
 
 

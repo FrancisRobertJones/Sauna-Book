@@ -99,6 +99,22 @@ export class UserService {
         return userSaunaIds.includes(saunaId);
     }
 
+    async isSaunaMember(userId: string): Promise<boolean> {
+        const user = await this.userRepository.findByAuth0Id(userId);
+        if (!user) return false;
+
+        return user.saunaAccess.length > 0;
+    }
+
+    async isAdmin(userId: string): Promise<boolean> {
+        const user = await this.userRepository.findByAuth0Id(userId);
+        return user?.role === 'admin' || false;
+    }
+
+    async findBySub(sub: string) {
+        return this.userRepository.findByAuth0Id(sub);
+    }
+
     async getUsersBySauna(saunaId: string, adminId: string): Promise<IUser[]> {
         const sauna = await this.saunaRepository.findById(saunaId);
         if (!sauna || sauna.adminId !== adminId) {
