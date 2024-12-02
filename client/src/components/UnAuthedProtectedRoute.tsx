@@ -2,18 +2,40 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { LoadingAnimation } from "./Loading/Loading";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useUser } from "@/state/userContext";
+import { useEffect, useState } from "react";
 
 export const UnauthedProtected = () => {
     const { isAuthenticated, isLoading } = useAuth0();
     const { state } = useUser();
     const location = useLocation();
+    const [isStateInitialized, setIsStateInitialized] = useState(false);
+
+
+    useEffect(() => {
+      if (state.user || !isAuthenticated) {
+        setIsStateInitialized(true);
+      }
+    }, [state, isAuthenticated]);
   
+    console.log("UnauthedProtected - Current state:", state);
+    console.log("UnauthedProtected - Auth status:", { isAuthenticated, isLoading });
+  
+    if (isLoading || (!isStateInitialized && isAuthenticated)) {
+      return <LoadingAnimation isLoading={true} text="Loading.." />;
+    }
+
+  
+    console.log(state, "this is the user state")
     if (isLoading) {
       return <LoadingAnimation isLoading={isLoading} text="Loading.." />;
     }
   
     if (!isAuthenticated) {
       return <Outlet />;
+    }
+    
+    if (!state.role) {
+      return <LoadingAnimation isLoading={true} text="Loading user data.." />;
     }
   
     if (state.role === 'admin') {

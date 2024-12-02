@@ -9,7 +9,7 @@ import Navbar from './components/Navbar';
 import { LoadingAnimation } from './components/Loading/Loading';
 import { AnimatedBackground } from './components/ui/AnimatedBackground';
 import { IUserAction, UserResponse } from './types/UserTypes';
-import { Sauna } from './pages/Booking';
+import { ISauna } from './types/SaunaTypes';
 
 const Layout = () => {
   const navigate = useNavigate();
@@ -22,47 +22,56 @@ const Layout = () => {
       if (isAuthenticated && user) {
         try {
           const token = await getAccessTokenSilently();
+    
           const userResponse = await fetch('http://localhost:5001/api/users/me', {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
           });
-  
+    
           if (!userResponse.ok) {
             throw new Error('Failed to fetch user data');
           }
-  
-          const userData = await userResponse.json() as UserResponse;
-          console.log('Layout - User Data:', userData);
-  
+    
+          const userData = await userResponse.json();
           const role = userData.role;
-          let adminSaunas: Sauna[] = [];
-  
+    
+          let saunas: ISauna[] = [];
           if (role === 'admin') {
-            const adminResponse = await fetch('http://localhost:5001/api/saunas/my-saunas', {
-              headers: { Authorization: `Bearer ${token}` }
+            const adminSaunasResponse = await fetch('http://localhost:5001/api/saunas/admin-saunas', {
+              headers: { Authorization: `Bearer ${token}` },
             });
-            if (adminResponse.ok) {
-              adminSaunas = await adminResponse.json();
+    
+            if (adminSaunasResponse.ok) {
+              saunas = await adminSaunasResponse.json();            
             }
+
+          } else if (role === 'user') {
+            const saunaAccessIds: string[] = userData.saunaAccess;
+            const saunaDetailsPromises = saunaAccessIds.map((saunaId) =>
+              fetch(`http://localhost:5001/api/saunas/${saunaId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              }).then((res) => (res.ok ? res.json() : null))
+            );
+    
+            const saunaDetails = await Promise.all(saunaDetailsPromises);
+            saunas = saunaDetails.filter((sauna) => sauna !== null); 
           }
-  
+
           const dispatchPayload: IUserAction = {
             type: UserActionType.LOGIN,
             payload: {
               auth0User: user,
               role: userData.role,
-              adminSaunas: adminSaunas,
-              accessibleSaunas: [],
+              adminSaunas: role === 'admin' ? saunas : [],
+              accessibleSaunas: role === 'user' ? saunas : [],
               status: {
                 hasPendingInvites: userData.status.hasPendingInvites,
                 isSaunaMember: userData.status.isSaunaMember
               }
             }
           };
-          
+
           dispatchUser(dispatchPayload);
-  
-          console.log('Layout - Dispatching payload:', dispatchPayload);
-          dispatchUser(dispatchPayload);
+
         } catch (error) {
           console.error('Layout - Error:', error);
           toast({
@@ -70,7 +79,7 @@ const Layout = () => {
             description: "Could not fetch user data. Some features may be limited.",
             variant: "default"
           });
-  
+
           const fallbackPayload: IUserAction = {
             type: UserActionType.LOGIN,
             payload: {
@@ -92,15 +101,15 @@ const Layout = () => {
         setIsLoading(false);
       }
     };
-  
+
     initializeUser();
   }, [isAuthenticated, user, getAccessTokenSilently]);
 
   const handleLogout = async () => {
     try {
-      await logout({ 
-        logoutParams: { 
-          returnTo: window.location.origin 
+      await logout({
+        logoutParams: {
+          returnTo: window.location.origin
         }
       });
       dispatchUser({ type: UserActionType.LOGOUT });
@@ -116,8 +125,8 @@ const Layout = () => {
   if (isLoading) {
     return (
       <LoadingAnimation
-      isLoading = {isLoading}
-      text='Loading..' />
+        isLoading={isLoading}
+        text='Loading..' />
     );
   }
 
@@ -125,7 +134,7 @@ const Layout = () => {
     <UserContext.Provider value={{ state: userState, dispatch: dispatchUser }}>
       <div className="min-h-screen flex flex-col">
         <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8">
-          <Navbar 
+          <Navbar
             userState={userState}
             isAuthenticated={isAuthenticated}
             handleLogout={handleLogout}

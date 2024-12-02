@@ -1,105 +1,118 @@
-// src/services/BookingService.ts
 import { Service } from 'typedi';
 import { BookingRepository } from '../repositories/BookingRepository';
 import { SaunaService } from './SaunaService';
-import { BookingDTO, IBooking, BookingStatus } from '../models/Booking';
+import { UserService } from './UserService';
 import { ApplicationError } from '../utils/errors';
+import { generateTimeSlots } from '../utils/booking-utils';
 
 @Service()
 export class BookingService {
-    constructor(
-        private bookingRepository: BookingRepository,
-        private saunaService: SaunaService
-    ) {}
+  constructor(
+    private bookingRepository: BookingRepository,
+    private saunaService: SaunaService,
+    private userService: UserService
+  ) {}
 
-    async createBooking(bookingData: BookingDTO): Promise<IBooking> {
-        const sauna = await this.saunaService.findById(bookingData.saunaId);
-        if (!sauna) {
-            throw new ApplicationError('Sauna not found', 404);
-        }
-
-        const slotAligns = this.validateTimeSlot(
-            bookingData.startTime,
-            bookingData.endTime,
-            sauna.slotDurationMinutes
-        );
-        if (!slotAligns) {
-            throw new ApplicationError('Invalid time slot', 400);
-        }
-
-        const overlappingBookings = await this.bookingRepository
-            .findOverlappingBookings(
-                bookingData.saunaId,
-                bookingData.startTime,
-                bookingData.endTime
-            );
-
-        if (overlappingBookings.length >= sauna.maxConcurrentBookings) {
-            throw new ApplicationError('Time slot is fully booked', 400);
-        }
-
-        const userBookings = await this.bookingRepository
-            .findUserActiveBookings(bookingData.userId);
-        
-        if (userBookings.length >= sauna.maxBookingsPerUser) {
-            throw new ApplicationError('Maximum booking limit reached', 400);
-        }
-
-        const booking = await this.bookingRepository.create(bookingData);
-
-        // TODOFJ: Send confirmation email
-        
-        return booking;
+  async getAvailableSlots(saunaId: string, date: Date) {
+    const sauna = await this.saunaService.findById(saunaId);
+    if (!sauna) {
+      throw new ApplicationError('Sauna not found', 404);
     }
 
-    async getBookingsForDate(saunaId: string, date: Date): Promise<IBooking[]> {
-        const startOfDay = new Date(date);
-        startOfDay.setHours(0, 0, 0, 0);
+    const existingBookings = await this.bookingRepository.findBySaunaAndDate(
+      saunaId,
+      date
+    );
 
-        const endOfDay = new Date(date);
-        endOfDay.setHours(23, 59, 59, 999);
+    const slots = generateTimeSlots(
+      date,
+      sauna.operatingHours,
+      sauna.slotDurationMinutes,
+      existingBookings,
+      sauna.maxConcurrentBookings
+    );
 
-        return this.bookingRepository.findByDateRange(
-            saunaId,
-            startOfDay,
-            endOfDay
-        );
+    return slots;
+  }
+
+  async createBooking(userId: string, saunaId: string, startTime: Date) {
+    const hasAccess = await this.userService.hasAccessToSauna(userId, saunaId);
+    if (!hasAccess) {
+      throw new ApplicationError('User does not have access to this sauna', 403);
     }
 
-    async updateBookingStatus(
-        bookingId: string,
-        userId: string,
-        status: string
-    ): Promise<IBooking> {
-        const booking = await this.bookingRepository.findById(bookingId);
-        
-        if (!booking) {
-            throw new ApplicationError('Booking not found', 404);
-        }
-
-        if (booking.userId !== userId) {
-            throw new ApplicationError('Unauthorized', 403);
-        }
-
-        const updatedBooking = await this.bookingRepository
-            .updateStatus(bookingId, status);
-        
-        if (!updatedBooking) {
-            throw new ApplicationError('Failed to update booking', 500);
-        }
-
-        // TODOFJ: If early completion, notify waiting list
-
-        return updatedBooking;
+    const sauna = await this.saunaService.findById(saunaId);
+    if (!sauna) {
+      throw new ApplicationError('Sauna not found', 404);
     }
 
-    private validateTimeSlot(
-        startTime: Date,
-        endTime: Date,
-        slotDuration: number
-    ): boolean {
-        const durationMinutes = 
-            (endTime.getTime() - startTime.getTime()) / (1000 * 60);
-        return durationMinutes === slotDuration;
+    const endTime = new Date(startTime);
+    endTime.setMinutes(endTime.getMinutes() + sauna.slotDurationMinutes);
+
+    const concurrentBookings = await this.bookingRepository.countConcurrentBookings(
+      saunaId,
+      startTime,
+      endTime
+    );
+
+    if (concurrentBookings >= sauna.maxConcurrentBookings) {
+      throw new ApplicationError('This time slot is fully booked', 400);
     }
+
+    const userBookings = await this.bookingRepository.countUserActiveBookings(userId);
+    if (sauna.maxBookingsPerUser && userBookings >= sauna.maxBookingsPerUser) {
+      throw new ApplicationError('User has reached maximum booking limit', 400);
+    }
+
+    return this.bookingRepository.create({
+      userId,
+      saunaId,
+      startTime,
+      endTime,
+      status: 'active'
+    });
+  }
+
+  async cancelBooking(bookingId: string, userId: string) {
+    const booking = await this.bookingRepository.findById(bookingId);
+    if (!booking) {
+      throw new ApplicationError('Booking not found', 404);
+    }
+
+    if (booking.userId !== userId) {
+      throw new ApplicationError('Not authorized to cancel this booking', 403);
+    }
+
+    if (booking.startTime <= new Date()) {
+      throw new ApplicationError('Cannot cancel past or ongoing bookings', 400);
+    }
+
+    return this.bookingRepository.updateStatus(bookingId, 'cancelled');
+  }
+
+  async getUserBookings(userId: string) {
+    return this.bookingRepository.findByUser(userId);
+  }
+
+  async getBooking(bookingId: string, userId: string) {
+    const booking = await this.bookingRepository.findById(bookingId);
+    if (!booking) {
+      throw new ApplicationError('Booking not found', 404);
+    }
+
+    if (booking.userId !== userId) {
+      throw new ApplicationError('Not authorized to view this booking', 403);
+    }
+
+    return booking;
+  }
+
+  async getSaunaBookings(saunaId: string, userId: string, date?: Date) {
+    const sauna = await this.saunaService.findById(saunaId);
+    if (!sauna || sauna.adminId !== userId) {
+      throw new ApplicationError('Not authorized to view these bookings', 403);
+    }
+
+    return this.bookingRepository.findBySaunaAndDate(saunaId, date);
+  }
 }

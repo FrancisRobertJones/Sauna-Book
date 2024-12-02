@@ -41,7 +41,10 @@ export class SaunaController {
 
     getSauna: RequestHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
+            console.log("WE ARE HITTING GET SAUNA NOW, " + req.params.id)
             const sauna = await this.saunaService.findById(req.params.id);
+            console.log("WE ARE HITTING GET SAUNA NOW, " + sauna)
+
             if (!sauna) {
                 res.status(404).json({ error: 'Sauna not found' });
                 return;

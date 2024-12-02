@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { LoadingAnimation } from '@/components/Loading/Loading';
+import { useUser } from '@/state/userContext';
 
 interface Sauna {
     _id: string;
@@ -16,37 +17,19 @@ interface Sauna {
 }
 
 export default function MySaunas() {
-    const { getAccessTokenSilently } = useAuth0();
-    const [saunas, setSaunas] = useState<Sauna[]>([]);
     const [loading, setLoading] = useState(true);
+    const { state } = useUser()
 
     useEffect(() => {
-        const fetchMySaunas = async () => {
-            try {
-                const token = await getAccessTokenSilently();
-                const response = await fetch('http://localhost:5001/api/saunas/my-saunas', {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-                const data = await response.json();
-                setSaunas(data);
-            } catch (error) {
-                console.error('Error fetching saunas:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchMySaunas();
-    }, [getAccessTokenSilently]);
+        setLoading(false)
+    }, [state.adminSaunas]);
 
     if (loading) {
         return (
             <LoadingAnimation
-            isLoading = {loading}
-            text='Loading..' />
-          );
+                isLoading={loading}
+                text='Loading..' />
+        );
     }
 
     return (
@@ -59,7 +42,7 @@ export default function MySaunas() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {saunas.map((sauna) => (
+                {state.adminSaunas.map((sauna) => (
                     <Link to={`/admin/sauna/${sauna._id}`} key={sauna._id}>
                         <Card className="hover:shadow-lg transition-shadow">
                             <CardHeader>
@@ -89,7 +72,7 @@ export default function MySaunas() {
                     </Link>
                 ))}
 
-                {saunas.length === 0 && (
+                {state.adminSaunas.length === 0 && (
                     <div className="col-span-full text-center py-12 bg-muted rounded-lg">
                         <h3 className="text-lg font-medium mb-2">No Saunas Yet</h3>
                         <p className="text-muted-foreground mb-4">
