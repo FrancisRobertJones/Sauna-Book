@@ -5,6 +5,9 @@ import { format, parseISO, addMinutes } from "date-fns"
 import { AlertCircle, Calendar as CalendarIcon, Clock, MapPin } from "lucide-react"
 import { TimeSlotSelection } from "@/types/BookingTypes"
 import { GlowCard } from "../ui/GlowCard"
+import { useAuth0 } from "@auth0/auth0-react"
+import { useState } from "react"
+import { toast } from "@/hooks/use-toast"
 
 interface BookingDetailsProps {
   sauna: ISauna;
@@ -17,12 +20,15 @@ export function BookingDetails({
   selectedDate,
   selectedSlots
 }: BookingDetailsProps) {
+  const [isBooking, setIsBooking] = useState(false);
   const canBook = selectedSlots !== null;
 
   const getTotalDuration = () => {
     if (!selectedSlots) return 0;
     return selectedSlots.numberOfSlots * sauna.slotDurationMinutes;
   };
+
+  const { getAccessTokenSilently } = useAuth0();
 
   const getEndTime = () => {
     if (!selectedSlots) return null;
@@ -31,8 +37,55 @@ export function BookingDetails({
   };
 
   const handleBooking = async () => {
-    // FJTODO: Implement booking logic
+    if (!selectedSlots) return;
+
+    try {
+      setIsBooking(true);
+      const token = await getAccessTokenSilently();
+      
+      const startTime = new Date(selectedSlots.startSlot);
+      const endTime = addMinutes(startTime, getTotalDuration());
+
+      const response = await fetch('http://localhost:5001/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          saunaId: sauna._id,
+          startTime: startTime.toISOString(),
+          endTime: endTime.toISOString()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create booking');
+      }
+
+      const booking = await response.json();
+      toast({
+        title: "Booking Confirmed!",
+        description: `Your booking for ${format(startTime, "h:mm a")} has been confirmed until ${format(endTime, "h:mm a")}.`,
+      });
+
+      console.log(booking);
+
+      // TODO: Add navigation to booking confirmation/management page
+      // TODO: Add callback to parent to refresh available slots
+
+    } catch (error) {
+      console.error('Booking error:', error);
+      toast({
+        title: "Booking Failed",
+        description: "Unable to confirm your booking. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsBooking(false);
+    }
   };
+
 
   return (
     <GlowCard>

@@ -21,7 +21,7 @@ export class BookingController {
         saunaId,
         new Date(date)
       );
-
+      
       res.json(availableSlots);
     } catch (error) {
       next(error);

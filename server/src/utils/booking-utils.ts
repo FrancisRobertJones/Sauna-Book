@@ -20,45 +20,54 @@ export function generateTimeSlots(
   existingBookings: Booking[],
   maxConcurrentBookings: number
 ): TimeSlot[] {
+  console.log('Existing bookings:', existingBookings);
   const slots: TimeSlot[] = [];
   const isWeekend = date.getDay() === 0 || date.getDay() === 6;
   const hours = isWeekend ? operatingHours.weekend : operatingHours.weekday;
 
   const dayStart = new Date(date);
   dayStart.setHours(0, 0, 0, 0);
-
   const [startHour, startMinute] = hours.start.split(':').map(Number);
   const [endHour, endMinute] = hours.end.split(':').map(Number);
 
   let slotStart = new Date(dayStart);
   slotStart.setHours(startHour, startMinute, 0, 0);
-
   const dayEnd = new Date(dayStart);
   dayEnd.setHours(endHour, endMinute, 0, 0);
 
   while (slotStart < dayEnd) {
-    const slotEnd = new Date(slotStart);
-    slotEnd.setMinutes(slotStart.getMinutes() + slotDurationMinutes);
+      const slotEnd = new Date(slotStart);
+      slotEnd.setMinutes(slotStart.getMinutes() + slotDurationMinutes);
 
-    const overlappingBookings = existingBookings.filter(booking => 
-      booking.status === 'active' &&
-      booking.startTime < slotEnd &&
-      booking.endTime > slotStart
-    );
+      const overlappingBookings = existingBookings.filter(booking => {
+          const overlap = booking.status === 'active' &&
+              booking.startTime < slotEnd &&
+              booking.endTime > slotStart;
+          
+          console.log('Checking overlap:', {
+              slotTime: slotStart.toISOString(),
+              overlap,
+              bookingTime: booking.startTime.toISOString()
+          });
+          
+          return overlap;
+      });
 
-    slots.push({
-      startTime: new Date(slotStart),
-      endTime: new Date(slotEnd),
-      isAvailable: overlappingBookings.length < maxConcurrentBookings,
-      currentBookings: overlappingBookings.length
-    });
+      const isAvailable = overlappingBookings.length === 0;
 
-    slotStart = new Date(slotEnd);
+      slots.push({
+          startTime: new Date(slotStart),
+          endTime: new Date(slotEnd),
+          isAvailable,
+          currentBookings: overlappingBookings.length
+      });
+
+      slotStart = new Date(slotEnd);
   }
 
   const now = new Date();
   if (date.toDateString() === now.toDateString()) {
-    return slots.filter(slot => slot.startTime > now);
+      return slots.filter(slot => slot.startTime > now);
   }
 
   return slots;

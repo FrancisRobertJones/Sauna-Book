@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { TimeSlot, TimeSlotPickerProps, TimeSlotSelection } from "@/types/BookingTypes";
+import { TimeSlot, TimeSlotPickerProps } from "@/types/BookingTypes";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useState } from "react";
 import { LoadingAnimation } from "../Loading/Loading";
@@ -37,7 +37,6 @@ export function TimeSlotPicker({
                 if (!response.ok) throw new Error('Failed to fetch time slots');
 
                 const slots = await response.json();
-                console.log(slots)
                 setTimeSlots(slots);
             } catch (error) {
                 console.error('Error fetching time slots:', error);
