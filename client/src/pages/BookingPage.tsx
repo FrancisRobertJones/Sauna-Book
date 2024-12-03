@@ -8,6 +8,8 @@ import { ISauna } from "@/types/SaunaTypes"
 import { LoadingAnimation } from "@/components/Loading/Loading"
 import { Card } from "@/components/ui/card"
 import { toast } from "@/hooks/use-toast"
+import { TimeSlotSelection } from "@/types/BookingTypes"
+import { GlowCard } from "@/components/ui/GlowCard"
 
 export default function BookingPage() {
   const { saunaId } = useParams();
@@ -15,7 +17,7 @@ export default function BookingPage() {
   const [sauna, setSauna] = useState<ISauna | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [date, setDate] = useState<Date>(new Date());
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
+  const [selectedSlots, setSelectedSlots] = useState<TimeSlotSelection | null>(null);
 
   useEffect(() => {
     const fetchSauna = async () => {
@@ -48,9 +50,6 @@ export default function BookingPage() {
     fetchSauna();
   }, [saunaId, getAccessTokenSilently]);
 
-  useEffect(() => {
-    setSelectedTimeSlot(null);
-  }, [date]);
 
   if (isLoading) {
     return <LoadingAnimation isLoading={isLoading} text="Loading sauna details..." />;
@@ -69,41 +68,35 @@ export default function BookingPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Book {sauna.name}</h1>
-        {sauna.location && (
-          <p className="text-muted-foreground mt-2">{sauna.location}</p>
-        )}
+    <div className="grid lg:grid-cols-3 gap-8">
+      <div className="lg:col-span-2 space-y-8">
+        <GlowCard className="p-6">
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={(date) => {
+              if (date) {
+                setDate(date);
+                setSelectedSlots(null); 
+              }
+            }}
+            className="rounded-md border"
+            disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+          />
+        </GlowCard>
+        <TimeSlotPicker
+          sauna={sauna}
+          selectedDate={date}
+          selectedSlots={selectedSlots}
+          onSlotsSelect={setSelectedSlots}
+        />
       </div>
-
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          <Card className="p-6">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={(date) => date && setDate(date)}
-              className="rounded-md border"
-              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-            />
-          </Card>
-
-          <TimeSlotPicker
-            sauna={sauna}
-            selectedDate={date}
-            selectedTimeSlot={selectedTimeSlot}
-            onTimeSlotSelect={setSelectedTimeSlot}
-          />
-        </div>
-
-        <div className="lg:col-span-1">
-          <BookingDetails
-            sauna={sauna}
-            selectedDate={date}
-            selectedTimeSlot={selectedTimeSlot}
-          />
-        </div>
+      <div className="lg:col-span-1">
+        <BookingDetails
+          sauna={sauna}
+          selectedDate={date}
+          selectedSlots={selectedSlots}
+        />
       </div>
     </div>
   );

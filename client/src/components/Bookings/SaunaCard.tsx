@@ -10,6 +10,7 @@ import {
 import { ISauna } from "@/types/SaunaTypes"
 import { Clock, MapPin, Users } from 'lucide-react'
 import { Link } from "react-router-dom"
+import { GlowCard } from "../ui/GlowCard"
 
 
 interface SaunaCardProps {
@@ -18,7 +19,7 @@ interface SaunaCardProps {
 
 export function SaunaCard({ sauna }: SaunaCardProps) {
     return (
-      <Card className="overflow-hidden transition-all hover:shadow-lg">
+      <GlowCard className="overflow-hidden transition-all hover:shadow-lg">
         <div className="relative h-[200px] w-full bg-muted">
           <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
             <span className="text-4xl font-bold">{sauna.name[0]}</span>
@@ -70,7 +71,7 @@ export function SaunaCard({ sauna }: SaunaCardProps) {
             <Button className="w-full">Book Now</Button>
           </Link>
         </CardFooter>
-      </Card>
+      </GlowCard>
     )
   }
 

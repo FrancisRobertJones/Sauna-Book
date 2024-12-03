@@ -15,6 +15,7 @@ import { PendingInvitesGuard } from "./components/PendingInvitesGuard";
 import RegisterNewUser from "./pages/RegisterNewUser";
 import { UnauthedProtected } from "./components/UnAuthedProtectedRoute";
 import SaunasList from "./pages/SaunasList";
+import BookingPage from "./pages/BookingPage";
 
 export const router = createBrowserRouter([
   {
@@ -65,6 +66,10 @@ export const router = createBrowserRouter([
               {
                 path: "/booking",
                 element: <SaunasList />
+              },
+              {
+                path: "/booking/:saunaId",  
+                element: <BookingPage />  
               },
               {
                 path: "/no-access",

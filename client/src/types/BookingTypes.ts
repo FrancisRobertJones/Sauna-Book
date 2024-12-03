@@ -1,20 +1,28 @@
 import { ISauna } from "./SaunaTypes";
 
 export interface TimeSlot {
-    time: string;
-    isAvailable: boolean;
-  }
-  
-export interface TimeSlotPickerProps {
-    sauna: ISauna;
-    selectedDate: Date;
-    selectedTimeSlot: string | null;
-    onTimeSlotSelect: (timeSlot: string) => void;
-  } 
+  startTime: string | Date;
+  endTime: string | Date;
+  isAvailable: boolean;
+  currentBookings: number;
+}
 
-  export interface Sauna {
-    _id: string;
-    name: string;
-    adminId: string;
-  }
-  
+export interface TimeSlotSelection {
+  startSlot: string;
+  numberOfSlots: number;
+}
+
+
+export interface TimeSlotPickerProps {
+  sauna: ISauna;
+  selectedDate: Date;
+  selectedSlots: TimeSlotSelection | null;
+  onSlotsSelect: (slots: TimeSlotSelection | null) => void;
+}
+
+
+export interface Sauna {
+  _id: string;
+  name: string;
+  adminId: string;
+}
