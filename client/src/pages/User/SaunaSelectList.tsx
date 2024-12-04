@@ -1,11 +1,11 @@
 import { Suspense, useEffect, useState } from "react"
-import { SaunaCard } from "../components/Bookings/SaunaCard"
+import { SaunaCard } from "../../components/Bookings/SaunaCard"
 import { Skeleton } from "@/components/ui/skeleton"
 
 import { useUser } from "@/state/userContext"
 import { GlowCard } from "@/components/ui/GlowCard"
 
-export default function SaunasList() {
+export default function SaunaSelectBooking() {
   const [isLoading, setIsLoading] = useState(true);
   const { state } = useUser()
 

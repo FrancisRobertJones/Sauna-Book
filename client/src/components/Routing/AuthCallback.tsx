@@ -1,9 +1,9 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LoadingAnimation } from './Loading/Loading';
-import { useUser } from '../state/userContext';
+import { useUser } from '@/state/userContext';
 import { UserActionType } from '@/reducers/userReducer';
+import { LoadingAnimation } from '../Loading/Loading';
 
 export const Auth0Callback = () => {
   const { isAuthenticated, isLoading: isAuth0Loading, getAccessTokenSilently } = useAuth0();

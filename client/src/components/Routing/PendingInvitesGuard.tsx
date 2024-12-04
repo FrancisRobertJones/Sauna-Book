@@ -1,5 +1,5 @@
+import { useUser } from '@/state/userContext';
 import { Navigate, Outlet } from 'react-router-dom';
-import { useUser } from '../state/userContext';
 
 export const PendingInvitesGuard = () => {
   const { state } = useUser();

@@ -1,21 +1,21 @@
 import {
   createBrowserRouter,
 } from "react-router-dom";
-import Homepage from "./pages/Homepage";
+import Homepage from "./pages/Home/Homepage";
 import Layout from "./Layout";
-import { ProtectedRoute } from "./components/ProtectedRoute";
-import Register from "./pages/Register";
-import SaunaAdminDashboard from "./pages/SaunaAdminDashboard";
-import MySaunas from "./pages/MySaunas";
-import { AdminRoute } from "./components/AdminRoute";
-import { Auth0Callback } from "./components/AuthCallback";
-import { PendingInvites } from "./pages/PendingInvites";
-import NoAccess from "./pages/No-access";
-import { PendingInvitesGuard } from "./components/PendingInvitesGuard";
-import RegisterNewUser from "./pages/RegisterNewUser";
-import { UnauthedProtected } from "./components/UnAuthedProtectedRoute";
-import SaunasList from "./pages/SaunasList";
-import BookingPage from "./pages/BookingPage";
+import { ProtectedRoute } from "./components/Routing/ProtectedRoute";
+import Register from "./components/Admin/Register";
+import SaunaAdminDashboard from "./components/Admin/SaunaAdminDashboard";
+import { AdminRoute } from "./components/Routing/AdminRoute";
+import { Auth0Callback } from "./components/Routing/AuthCallback";
+import NoAccess from "./pages/Error/No-access";
+import RegisterNewUser from "./components/Admin/RegisterNewUser";
+import { UnauthedProtected } from "./components/Routing/UnAuthedProtectedRoute";
+import BookingPage from "./pages/User/BookingPage";
+import SaunaSelectBooking from "./pages/User/SaunaSelectList";
+import { PendingInvites } from "./components/Admin/PendingInvites";
+import { PendingInvitesGuard } from "./components/Routing/PendingInvitesGuard";
+import MyAdminSaunas from "./pages/Admin/MyAdminSaunas";
 
 export const router = createBrowserRouter([
   {
@@ -51,7 +51,7 @@ export const router = createBrowserRouter([
                 children: [
                   {
                     path: "/my-saunas",
-                    element: <MySaunas />
+                    element: <MyAdminSaunas />
                   },
                   {
                     path: "/admin/sauna/:saunaId",
@@ -65,7 +65,7 @@ export const router = createBrowserRouter([
               },
               {
                 path: "/booking",
-                element: <SaunasList />
+                element: <SaunaSelectBooking />
               },
               {
                 path: "/booking/:saunaId",  

@@ -8,9 +8,11 @@ import userRoutes from './routes/user.routes';
 import saunaRoutes from './routes/sauna.routes';
 import bookingRoutes from './routes/booking.routes';
 import inviteRoutes from './routes/invite.routes';
-import { 
-  checkJwt, 
-  linkUser, 
+import adminBookingRoutes from './routes/admin.booking.routes';
+
+import {
+  checkJwt,
+  linkUser,
   attachUserStatus,
   requireAdmin,
   requireUser,
@@ -37,13 +39,14 @@ mongoose
   });
 
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error(err.stack);
-    res.status(500).json({ error: 'Something broke!' });
-  });
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something broke!' });
+});
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
+
 
 
 const PORT = config.port;
@@ -53,8 +56,9 @@ app.listen(PORT, () => {
 
 app.use('/api/users', baseAuth, userRoutes);
 app.use('/api/saunas', baseAuth, saunaRoutes);
+app.use('/api/adminbooking', [...baseAuth, requireAdmin], adminBookingRoutes)
 app.use('/api/bookings', [
-  ...baseAuth, 
+  ...baseAuth,
   requireUser,
   requireNoPendingInvites,
   requireSaunaMembership

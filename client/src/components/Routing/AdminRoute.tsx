@@ -1,9 +1,9 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useReducer, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { LoadingAnimation } from './Loading/Loading';
 import { useUser } from '@/state/userContext';
 import { UserActionType } from '@/reducers/userReducer';
+import { LoadingAnimation } from '../Loading/Loading';
 
 export const AdminRoute = () => {
   const { getAccessTokenSilently } = useAuth0();

@@ -11,7 +11,7 @@ export class BookingService {
     private bookingRepository: BookingRepository,
     private saunaService: SaunaService,
     private userService: UserService
-  ) {}
+  ) { }
 
   async getAvailableSlots(saunaId: string, date: Date) {
     const sauna = await this.saunaService.findById(saunaId);
@@ -114,5 +114,14 @@ export class BookingService {
     }
 
     return this.bookingRepository.findBySaunaAndDate(saunaId, date);
+  }
+
+  async getAllSaunaBookings(saunaId: string, userId: string) {
+    const sauna = await this.saunaService.findById(saunaId);
+        if (!sauna || sauna.adminId !== userId) {
+      throw new ApplicationError('Not authorized to view these bookings', 403);
+    }
+    return this.bookingRepository.findBySauna(saunaId);
+
   }
 }

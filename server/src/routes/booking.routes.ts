@@ -10,6 +10,8 @@ const bookingController = Container.get(BookingController);
 router.use(checkJwt);
 router.use(linkUser as RequestHandler);
 
+
+
 router.get(
   '/available-slots/:saunaId',
   bookingController.getAvailableSlots as RequestHandler
@@ -34,6 +36,7 @@ router.get(
   '/:bookingId',
   bookingController.getBooking as RequestHandler
 );
+
 
 router.get(
   '/sauna/:saunaId',

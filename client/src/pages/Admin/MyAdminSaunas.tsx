@@ -1,4 +1,3 @@
-import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,22 +5,14 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { LoadingAnimation } from '@/components/Loading/Loading';
 import { useUser } from '@/state/userContext';
 
-interface Sauna {
-    _id: string;
-    name: string;
-    location: string;
-    description?: string;
-    slotDurationMinutes: number;
-    maxConcurrentBookings: number;
-    maxTotalBookings: number;
-}
 
-export default function MySaunas() {
+export default function MyAdminSaunas() {
     const [loading, setLoading] = useState(true);
     const { state } = useUser()
 
     useEffect(() => {
         setLoading(false)
+        console.log(state.adminSaunas)
     }, [state.adminSaunas]);
 
     if (loading) {
@@ -31,6 +22,7 @@ export default function MySaunas() {
                 text='Loading..' />
         );
     }
+
 
     return (
         <div className="container mx-auto py-6">

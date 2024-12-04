@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import CreateInviteForm from '@/components/SaunaInvites/Invite';
 import { SaunaUserInvites } from '@/components/SaunaInvites/SaunaInvites';
 import { SaunaUserManagement } from '@/components/Admin/SaunaUserManagement';
+import { SaunaStatsCard } from './SaunaStats';
 
 
 const SaunaAdminDashboard = () => {
@@ -28,33 +29,9 @@ const SaunaAdminDashboard = () => {
                             <CardTitle>Sauna Overview</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Total Bookings</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <p className="text-2xl font-bold">0</p>
-                                    </CardContent>
-                                </Card>
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Active Users</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <p className="text-2xl font-bold">0</p>
-                                    </CardContent>
-                                </Card>
-
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Today's Bookings</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <p className="text-2xl font-bold">0</p>
-                                    </CardContent>
-                                </Card>
-                            </div>
+                            {saunaId &&
+                                <SaunaStatsCard saunaId={saunaId} />
+                            }
                         </CardContent>
                     </Card>
                 </TabsContent>

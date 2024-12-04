@@ -2,16 +2,17 @@ import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { useAuth0 } from "@auth0/auth0-react"
 import { Calendar } from "@/components/ui/calendar"
-import { TimeSlotPicker } from "../components/Bookings/TimeSlotPicker"
-import { BookingDetails } from "../components/Bookings/BookingDetails"
+import { TimeSlotPicker } from "../../components/Bookings/TimeSlotPicker"
+import { BookingDetails } from "../../components/Bookings/BookingDetails"
 import { ISauna } from "@/types/SaunaTypes"
 import { LoadingAnimation } from "@/components/Loading/Loading"
 import { Card } from "@/components/ui/card"
 import { toast } from "@/hooks/use-toast"
 import { Booking, TimeSlotSelection } from "@/types/BookingTypes"
 import { GlowCard } from "@/components/ui/GlowCard"
-import { BookingCard } from "@/components/UserBookingsCard"
+
 import { BookingSaunaTitle } from "@/components/Bookings/BookingSaunaTitle"
+import { BookingCard } from "@/components/Bookings/UserBookingsCard"
 
 export default function BookingPage() {
   const { saunaId } = useParams();

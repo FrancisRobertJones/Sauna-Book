@@ -1,5 +1,5 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import { LoadingAnimation } from "./Loading/Loading";
+import { LoadingAnimation } from "../Loading/Loading";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useUser } from "@/state/userContext";
 import { useEffect, useState } from "react";

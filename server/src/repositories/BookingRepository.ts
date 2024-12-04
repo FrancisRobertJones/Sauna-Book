@@ -44,6 +44,16 @@ export class BookingRepository {
       .exec();
   }
 
+  async findBySauna(saunaId: string) {
+    console.log("here is the saunaid for bookings " + saunaId)
+    return Booking.find({
+        saunaId: new mongoose.Types.ObjectId(saunaId)
+    })
+    .sort({ startTime: 1 })
+    .lean()  
+    .exec();
+}
+
   async countConcurrentBookings(saunaId: string, startTime: Date, endTime: Date) {
     return Booking.countDocuments({
       saunaId: new mongoose.Types.ObjectId(saunaId),

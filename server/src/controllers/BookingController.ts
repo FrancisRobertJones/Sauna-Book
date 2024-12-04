@@ -6,7 +6,7 @@ import { ApplicationError } from '../utils/errors';
 
 @Service()
 export class BookingController {
-  constructor(private bookingService: BookingService) {}
+  constructor(private bookingService: BookingService) { }
 
   getAvailableSlots = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -21,7 +21,7 @@ export class BookingController {
         saunaId,
         new Date(date)
       );
-      
+
       res.json(availableSlots);
     } catch (error) {
       next(error);
@@ -121,6 +121,26 @@ export class BookingController {
         userId,
         date ? new Date(date as string) : undefined
       );
+
+      res.json(bookings);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getAllSaunaBookings = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const authReq = req as AuthRequest;
+      const userId = authReq.auth?.payload.sub;
+      const { saunaId } = req.params;
+
+
+      if (!userId) {
+        throw new ApplicationError('Unauthorized', 401);
+      }
+
+      const bookings = await this.bookingService.getAllSaunaBookings(saunaId, userId);
+      console.log("here are the bookings " + bookings)
 
       res.json(bookings);
     } catch (error) {

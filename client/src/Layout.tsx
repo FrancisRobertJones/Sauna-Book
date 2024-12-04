@@ -5,11 +5,11 @@ import { useEffect, useReducer, useState } from 'react';
 import { UserActionType, userReducer, UserState } from './reducers/userReducer';
 import { toast } from './hooks/use-toast';
 import { UserContext } from './state/userContext';
-import Navbar from './components/Navbar';
 import { LoadingAnimation } from './components/Loading/Loading';
 import { AnimatedBackground } from './components/ui/AnimatedBackground';
 import { IUserAction, UserResponse } from './types/UserTypes';
 import { ISauna } from './types/SaunaTypes';
+import Navbar from './components/Navbar/Navbar';
 
 const Layout = () => {
   const navigate = useNavigate();
