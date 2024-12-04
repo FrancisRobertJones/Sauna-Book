@@ -64,40 +64,61 @@ export function TimeSlotPicker({
         const selectedIndex = timeSlots.findIndex(slot =>
             new Date(slot.startTime).toISOString() === slotTime
         );
-
+    
         if (!timeSlots[selectedIndex].isAvailable) return;
         if (hasReachedLimit) return;
-
+    
+        const checkConsecutiveAvailability = (startIndex: number, count: number) => {
+            for (let i = startIndex; i < startIndex + count; i++) {
+                if (!timeSlots[i] || !timeSlots[i].isAvailable) {
+                    return false;
+                }
+            }
+            return true;
+        };
+    
         if (!selectedSlots) {
             onSlotsSelect({
                 startSlot: slotTime,
                 numberOfSlots: 1
             });
+            
             if (sauna.maxConcurrentBookings === 1) {
                 setHasReachedLimit(true);
             }
             return;
         }
-
+    
         const currentIndex = timeSlots.findIndex(slot =>
             new Date(slot.startTime).toISOString() === selectedSlots.startSlot
         );
-
-        if (selectedIndex === currentIndex + selectedSlots.numberOfSlots &&
-            selectedSlots.numberOfSlots < sauna.maxConcurrentBookings) {
-
-            const newNumberOfSlots = selectedSlots.numberOfSlots + 1;
+    
+        const isConsecutive = selectedIndex === currentIndex + selectedSlots.numberOfSlots;
+        const isWithinLimit = selectedSlots.numberOfSlots < sauna.maxConcurrentBookings;
+        
+        if (isConsecutive && isWithinLimit) {
+            if (checkConsecutiveAvailability(currentIndex, selectedSlots.numberOfSlots + 1)) {
+                const newNumberOfSlots = selectedSlots.numberOfSlots + 1;
+                onSlotsSelect({
+                    startSlot: selectedSlots.startSlot, 
+                    numberOfSlots: newNumberOfSlots
+                });
+    
+                if (newNumberOfSlots === sauna.maxConcurrentBookings) {
+                    setHasReachedLimit(true);
+                }
+            }
+        } else {
             onSlotsSelect({
-                ...selectedSlots,
-                numberOfSlots: newNumberOfSlots
+                startSlot: slotTime,
+                numberOfSlots: 1
             });
-
-            if (newNumberOfSlots === sauna.maxConcurrentBookings) {
+            
+            if (sauna.maxConcurrentBookings === 1) {
                 setHasReachedLimit(true);
             }
         }
     };
-
     const isSlotSelectable = (slot: TimeSlot) => {
         if (!slot.isAvailable) return false;
         if (hasReachedLimit) return false;

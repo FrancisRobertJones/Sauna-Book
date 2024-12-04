@@ -3,22 +3,18 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { ISauna } from "@/types/SaunaTypes"
 import { format, parseISO, addMinutes } from "date-fns"
 import { AlertCircle, Calendar as CalendarIcon, Clock, MapPin } from "lucide-react"
-import { TimeSlotSelection } from "@/types/BookingTypes"
+import { BookingDetailsProps, TimeSlotSelection } from "@/types/BookingTypes"
 import { GlowCard } from "../ui/GlowCard"
 import { useAuth0 } from "@auth0/auth0-react"
 import { useState } from "react"
 import { toast } from "@/hooks/use-toast"
-
-interface BookingDetailsProps {
-  sauna: ISauna;
-  selectedDate: Date;
-  selectedSlots: TimeSlotSelection | null;
-}
+import { useNavigate } from "react-router-dom"
 
 export function BookingDetails({
   sauna,
   selectedDate,
-  selectedSlots
+  selectedSlots,
+  handleRefresh,
 }: BookingDetailsProps) {
   const [isBooking, setIsBooking] = useState(false);
   const canBook = selectedSlots !== null;
@@ -42,47 +38,43 @@ export function BookingDetails({
     try {
       setIsBooking(true);
       const token = await getAccessTokenSilently();
-      
-      const startTime = new Date(selectedSlots.startSlot);
-      const endTime = addMinutes(startTime, getTotalDuration());
 
-      const response = await fetch('http://localhost:5001/api/bookings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          saunaId: sauna._id,
-          startTime: startTime.toISOString(),
-          endTime: endTime.toISOString()
+      const bookingTimes = Array.from({ length: selectedSlots.numberOfSlots }, (_, index) => {
+        const startTime = addMinutes(new Date(selectedSlots.startSlot), index * sauna.slotDurationMinutes);
+        const endTime = addMinutes(startTime, sauna.slotDurationMinutes);
+        return { startTime, endTime };
+      });
+
+      const bookingPromises = bookingTimes.map(({ startTime, endTime }) =>
+        fetch('http://localhost:5001/api/bookings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            saunaId: sauna._id,
+            startTime: startTime.toISOString(),
+            endTime: endTime.toISOString()
+          })
         })
-      });
+      );
 
-      if (!response.ok) {
-        throw new Error('Failed to create booking');
-      }
-
-      const booking = await response.json();
+      await Promise.all(bookingPromises);
       toast({
-        title: "Booking Confirmed!",
-        description: `Your booking for ${format(startTime, "h:mm a")} has been confirmed until ${format(endTime, "h:mm a")}.`,
+        title: "Bookings Confirmed!",
+        description: `Your ${selectedSlots.numberOfSlots} slot(s) have been booked.`,
       });
 
-      console.log(booking);
-
-      // TODO: Add navigation to booking confirmation/management page
-      // TODO: Add callback to parent to refresh available slots
+      handleRefresh();
 
     } catch (error) {
       console.error('Booking error:', error);
       toast({
         title: "Booking Failed",
-        description: "Unable to confirm your booking. Please try again.",
+        description: "Unable to confirm your bookings. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsBooking(false);
     }
   };
 

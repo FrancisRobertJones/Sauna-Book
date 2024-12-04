@@ -26,3 +26,20 @@ export interface Sauna {
   name: string;
   adminId: string;
 }
+
+export interface Booking {
+    _id: string;
+    saunaId: string;
+    userId: string;
+    startTime: string;
+    endTime: string;
+    status: 'active' | 'completed' | 'cancelled' | 'early_completion';
+}
+
+
+export interface BookingDetailsProps {
+  sauna: ISauna;
+  selectedDate: Date;
+  selectedSlots: TimeSlotSelection | null;
+  handleRefresh: () => void;
+}
