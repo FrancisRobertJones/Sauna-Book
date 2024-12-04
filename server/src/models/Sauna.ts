@@ -1,12 +1,12 @@
 import mongoose, { Document } from 'mongoose';
 import { z } from 'zod';
 
-interface TimeSlot {
+export interface TimeSlot {
   start: string; 
   end: string;
 }
 
-interface OperatingHours {
+export interface OperatingHours {
   weekday: TimeSlot;
   weekend: TimeSlot;
 }

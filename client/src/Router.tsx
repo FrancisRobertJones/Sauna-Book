@@ -3,7 +3,6 @@ import {
 } from "react-router-dom";
 import Homepage from "./pages/Homepage";
 import Layout from "./Layout";
-import Booking from "./pages/Booking";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Register from "./pages/Register";
 import SaunaAdminDashboard from "./pages/SaunaAdminDashboard";
@@ -15,6 +14,8 @@ import NoAccess from "./pages/No-access";
 import { PendingInvitesGuard } from "./components/PendingInvitesGuard";
 import RegisterNewUser from "./pages/RegisterNewUser";
 import { UnauthedProtected } from "./components/UnAuthedProtectedRoute";
+import SaunasList from "./pages/SaunasList";
+import BookingPage from "./pages/BookingPage";
 
 export const router = createBrowserRouter([
   {
@@ -64,7 +65,11 @@ export const router = createBrowserRouter([
               },
               {
                 path: "/booking",
-                element: <Booking />
+                element: <SaunasList />
+              },
+              {
+                path: "/booking/:saunaId",  
+                element: <BookingPage />  
               },
               {
                 path: "/no-access",

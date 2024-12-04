@@ -52,7 +52,7 @@ app.listen(PORT, () => {
 });
 
 app.use('/api/users', baseAuth, userRoutes);
-app.use('/api/saunas', [...baseAuth, requireAdmin], saunaRoutes);
+app.use('/api/saunas', baseAuth, saunaRoutes);
 app.use('/api/bookings', [
   ...baseAuth, 
   requireUser,

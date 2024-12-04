@@ -1,18 +1,21 @@
 import { useAuth0 } from '@auth0/auth0-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { LoadingAnimation } from './Loading/Loading';
+import { useUser } from '@/state/userContext';
+import { UserActionType } from '@/reducers/userReducer';
 
 export const AdminRoute = () => {
   const { getAccessTokenSilently } = useAuth0();
   const [isChecking, setIsChecking] = useState(true);
   const navigate = useNavigate();
+  const { dispatch, state } = useUser();
 
   useEffect(() => {
     const checkAdmin = async () => {
       try {
         const token = await getAccessTokenSilently();
-        
+
         const userResponse = await fetch('http://localhost:5001/api/users/me', {
           headers: {
             Authorization: `Bearer ${token}`
@@ -20,21 +23,32 @@ export const AdminRoute = () => {
         });
 
         const userData = await userResponse.json();
-        console.log('User data:', userData);
-
         if (userData.role !== 'admin') {
           navigate('/booking');
           return;
         }
 
-        const saunasResponse = await fetch('http://localhost:5001/api/saunas/my-saunas', {
+        const saunasResponse = await fetch('http://localhost:5001/api/saunas/admin-saunas', {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
 
         const adminSaunas = await saunasResponse.json();
-        console.log('Admin saunas:', adminSaunas);
+        dispatch({
+          type: UserActionType.UPDATE_ADMIN_SAUNAS,
+          payload: {
+            adminSaunas: adminSaunas,
+            role: state.role || 'admin',
+            status: state.status,
+            auth0User: state.user?.auth0Id ? {
+              sub: state.user.auth0Id,
+              email: state.user.email,
+              name: state.user.name
+            } : undefined,
+            accessibleSaunas: state.accessibleSaunas
+          }
+        });
 
         if (window.location.pathname === '/my-saunas' && adminSaunas.length === 0) {
           navigate('/register-sauna');
@@ -53,10 +67,10 @@ export const AdminRoute = () => {
   }, [getAccessTokenSilently, navigate]);
 
   if (isChecking) {
-    return <LoadingAnimation 
-            text={'Checking for saunas'}
-            isLoading={isChecking}
-            />
+    return <LoadingAnimation
+      text={'Checking for saunas'}
+      isLoading={isChecking}
+    />
   }
 
   return <Outlet />;

@@ -1,92 +1,130 @@
-// src/controllers/BookingController.ts
-import { Request, Response, NextFunction } from 'express';
 import { Service } from 'typedi';
+import { Request, Response, NextFunction } from 'express';
 import { BookingService } from '../services/BookingService';
 import { AuthRequest } from '../types/auth.types';
-import { RequestHandler } from 'express';
-import { BookingSchema } from '../models/Booking';
+import { ApplicationError } from '../utils/errors';
 
 @Service()
 export class BookingController {
-    constructor(private bookingService: BookingService) { }
+  constructor(private bookingService: BookingService) {}
 
-    createBooking: RequestHandler = async (
-        req: Request,
-        res: Response,
-        next: NextFunction
-    ): Promise<void> => {
-        try {
-            const authReq = req as AuthRequest;
-            const userId = authReq.auth?.payload.sub;
+  getAvailableSlots = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { saunaId } = req.params;
+      const date = req.query.date as string;
 
-            if (!userId) {
-                res.status(401).json({ error: 'Unauthorized' });
-                return;
-            }
+      if (!date) {
+        throw new ApplicationError('Date is required', 400);
+      }
 
-            const bookingData = BookingSchema.parse({
-                ...req.body,
-                userId,
-                startTime: new Date(req.body.startTime),
-                endTime: new Date(req.body.endTime)
-            });
+      const availableSlots = await this.bookingService.getAvailableSlots(
+        saunaId,
+        new Date(date)
+      );
+      
+      res.json(availableSlots);
+    } catch (error) {
+      next(error);
+    }
+  };
 
-            const booking = await this.bookingService
-                .createBooking(bookingData);
+  createBooking = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const authReq = req as AuthRequest;
+      const userId = authReq.auth?.payload.sub;
 
-            res.status(201).json(booking);
-        } catch (error) {
-            next(error);
-        }
-    };
+      if (!userId) {
+        throw new ApplicationError('Unauthorized', 401);
+      }
 
-    getBookings: RequestHandler = async (
-        req: Request,
-        res: Response,
-        next: NextFunction
-    ): Promise<void> => {
-        try {
-            const { saunaId, date } = req.query;
+      const { saunaId, startTime } = req.body;
 
-            if (!saunaId || !date) {
-                res.status(400).json({ error: 'Missing required parameters' });
-                return;
-            }
+      if (!saunaId || !startTime) {
+        throw new ApplicationError('Missing required booking information', 400);
+      }
 
-            const bookings = await this.bookingService
-                .getBookingsForDate(
-                    saunaId as string,
-                    new Date(date as string)
-                );
+      const booking = await this.bookingService.createBooking(
+        userId,
+        saunaId,
+        new Date(startTime)
+      );
 
-            res.json(bookings);
-        } catch (error) {
-            next(error);
-        }
-    };
+      res.status(201).json(booking);
+    } catch (error) {
+      next(error);
+    }
+  };
 
-    updateBookingStatus: RequestHandler = async (
-        req: Request,
-        res: Response,
-        next: NextFunction
-    ): Promise<void> => {
-        try {
-            const authReq = req as AuthRequest;
-            const userId = authReq.auth?.payload.sub;
-            const { bookingId } = req.params;
-            const { status } = req.body;
+  cancelBooking = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const authReq = req as AuthRequest;
+      const userId = authReq.auth?.payload.sub;
+      const { bookingId } = req.params;
 
-            if (!userId) {
-                res.status(401).json({ error: 'Unauthorized' });
-                return;
-            }
+      if (!userId) {
+        throw new ApplicationError('Unauthorized', 401);
+      }
 
-            const booking = await this.bookingService
-                .updateBookingStatus(bookingId, userId, status);
+      await this.bookingService.cancelBooking(bookingId, userId);
+      res.json({ message: 'Booking cancelled successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
 
-            res.json(booking);
-        } catch (error) {
-            next(error);
-        }
-    };
+  getUserBookings = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const authReq = req as AuthRequest;
+      const userId = authReq.auth?.payload.sub;
+
+      if (!userId) {
+        throw new ApplicationError('Unauthorized', 401);
+      }
+
+      const bookings = await this.bookingService.getUserBookings(userId);
+      res.json(bookings);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getBooking = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const authReq = req as AuthRequest;
+      const userId = authReq.auth?.payload.sub;
+      const { bookingId } = req.params;
+
+      if (!userId) {
+        throw new ApplicationError('Unauthorized', 401);
+      }
+
+      const booking = await this.bookingService.getBooking(bookingId, userId);
+      res.json(booking);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getSaunaBookings = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const authReq = req as AuthRequest;
+      const userId = authReq.auth?.payload.sub;
+      const { saunaId } = req.params;
+      const { date } = req.query;
+
+      if (!userId) {
+        throw new ApplicationError('Unauthorized', 401);
+      }
+
+      const bookings = await this.bookingService.getSaunaBookings(
+        saunaId,
+        userId,
+        date ? new Date(date as string) : undefined
+      );
+
+      res.json(bookings);
+    } catch (error) {
+      next(error);
+    }
+  };
 }

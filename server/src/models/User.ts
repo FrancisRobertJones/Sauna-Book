@@ -1,5 +1,6 @@
 import mongoose, { Document } from 'mongoose';
 import { z } from 'zod';
+import { ISauna } from './Sauna';
 
 export const UserSchema = z.object({
     auth0Id: z.string(),

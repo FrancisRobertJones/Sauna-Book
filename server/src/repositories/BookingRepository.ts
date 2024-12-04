@@ -1,69 +1,98 @@
-// src/repositories/BookingRepository.ts
 import { Service } from 'typedi';
-import { Booking, IBooking, BookingDTO } from '../models/Booking';
+import { Booking } from '../models/Booking';
 import mongoose from 'mongoose';
 
 @Service()
 export class BookingRepository {
-    async create(bookingData: BookingDTO): Promise<IBooking> {
-        const booking = new Booking(bookingData);
-        return booking.save();
+  async findById(id: string) {
+    return Booking.findById(id).populate('saunaId').exec();
+  }
+
+  async findByUser(userId: string) {
+    return Booking.find({
+      userId,
+      status: 'active',
+      startTime: { $gte: new Date() }
+    })
+      .populate('saunaId')
+      .sort({ startTime: 1 })
+      .exec();
+  }
+
+  async findBySaunaAndDate(saunaId: string, date?: Date) {
+    const query: any = {
+      saunaId: new mongoose.Types.ObjectId(saunaId),
+      status: 'active'
+    };
+
+    if (date) {
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      query.startTime = {
+        $gte: startOfDay,
+        $lte: endOfDay
+      };
     }
 
-    async findById(id: string): Promise<IBooking | null> {
-        return Booking.findById(id);
-    }
+    return Booking.find(query)
+      .populate('saunaId')
+      .sort({ startTime: 1 })
+      .exec();
+  }
 
-    async findByDateRange(
-        saunaId: string,
-        startDate: Date,
-        endDate: Date
-    ): Promise<IBooking[]> {
-        return Booking.find({
-            saunaId: new mongoose.Types.ObjectId(saunaId),
-            startTime: { $gte: startDate },
-            endTime: { $lte: endDate },
-            status: { $ne: 'cancelled' }
-        }).sort({ startTime: 1 });
-    }
+  async countConcurrentBookings(saunaId: string, startTime: Date, endTime: Date) {
+    return Booking.countDocuments({
+      saunaId: new mongoose.Types.ObjectId(saunaId),
+      status: 'active',
+      startTime: { $lt: endTime },
+      endTime: { $gt: startTime }
+    });
+  }
 
-    async findOverlappingBookings(
-        saunaId: string,
-        startTime: Date,
-        endTime: Date
-    ): Promise<IBooking[]> {
-        return Booking.find({
-            saunaId: new mongoose.Types.ObjectId(saunaId),
-            status: 'active',
-            $or: [
-                {
-                    startTime: { $lt: endTime },
-                    endTime: { $gt: startTime }
-                },
-                {
-                    startTime: { $lte: startTime },
-                    endTime: { $gte: endTime }
-                }
-            ]
-        });
-    }
+  async countUserActiveBookings(userId: string) {
+    return Booking.countDocuments({
+      userId,
+      status: 'active',
+      startTime: { $gte: new Date() }
+    });
+  }
 
-    async updateStatus(
-        bookingId: string,
-        status: string
-    ): Promise<IBooking | null> {
-        return Booking.findByIdAndUpdate(
-            bookingId,
-            { $set: { status } },
-            { new: true }
-        );
-    }
+  async create(bookingData: {
+    userId: string;
+    saunaId: string;
+    startTime: Date;
+    endTime: Date;
+    status: 'active' | 'cancelled' | 'completed';
+  }) {
+    const booking = new Booking(bookingData);
+    return booking.save();
+  }
 
-    async findUserActiveBookings(userId: string): Promise<IBooking[]> {
-        return Booking.find({
-            userId,
-            status: 'active',
-            startTime: { $gte: new Date() }
-        }).sort({ startTime: 1 });
-    }
+  async updateStatus(
+    bookingId: string,
+    status: 'active' | 'cancelled' | 'completed'
+  ) {
+    return Booking.findByIdAndUpdate(
+      bookingId,
+      { status },
+      { new: true }
+    ).populate('saunaId');
+  }
+
+  async markCompletedBookings() {
+    const now = new Date();
+    return Booking.updateMany(
+      {
+        status: 'active',
+        endTime: { $lt: now }
+      },
+      {
+        status: 'completed'
+      }
+    );
+  }
 }

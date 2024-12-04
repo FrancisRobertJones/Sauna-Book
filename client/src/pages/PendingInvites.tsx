@@ -5,12 +5,18 @@ import { PendingInvite } from '@/types/InviteTypes';
 import { Button } from '@/components/ui/button';
 import { GlowCard } from '@/components/ui/GlowCard';
 import { LoadingAnimation } from '@/components/Loading/Loading';
+import { toast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '@/state/userContext';
+import { UserActionType } from '@/reducers/userReducer';
 
 export function PendingInvites() {
   const { user, getAccessTokenSilently } = useAuth0();
   const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate()
+  const { dispatch, state } = useUser();
 
   useEffect(() => {
     const checkInvites = async () => {
@@ -53,6 +59,28 @@ export function PendingInvites() {
       if (!response.ok) {
         throw new Error('Failed to accept invite');
       }
+
+      dispatch({
+        type: UserActionType.UPDATE_STATUS,
+        payload: {
+          status: {
+            ...state.status,
+            hasPendingInvites: false,
+            isSaunaMember: true
+          },
+          role: state.role || "user"
+        }
+      });
+
+      toast({
+        title: "Success!",
+        description: "You have successfully accepted the invite.",
+        variant: "default",
+      });
+  
+      setTimeout(() => {
+        navigate('/booking');
+      }, 100);
 
       setPendingInvites(current =>
         current.filter(invite => invite._id !== inviteId)
