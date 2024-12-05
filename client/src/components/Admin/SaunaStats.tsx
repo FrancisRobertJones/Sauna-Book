@@ -31,24 +31,24 @@ export function SaunaStatsCard({ saunaId }: { saunaId: string }) {
                 );
                 if (!response.ok) throw new Error('Failed to fetch bookings');
                 const bookings: Booking[] = await response.json();
-                console.log(bookings)
-
-                const totalBookings = bookings.length;
-
+        
+                const activeBookings = bookings.filter(booking => booking.status === 'active');
+                
+                console.log(activeBookings)
+                const totalBookings = activeBookings.length;
+        
                 const activeUsers = new Set(
-                    bookings
-                        .filter(booking => booking.status === 'active')
-                        .map(booking => booking.userId)
+                    activeBookings.map(booking => booking.userId)
                 ).size;
-
+        
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
-                const todayBookings = bookings.filter(booking => {
+                const todayBookings = activeBookings.filter(booking => {
                     const bookingDate = new Date(booking.startTime);
                     bookingDate.setHours(0, 0, 0, 0);
                     return bookingDate.getTime() === today.getTime();
                 }).length;
-
+        
                 setStats({
                     totalBookings,
                     activeUsers,

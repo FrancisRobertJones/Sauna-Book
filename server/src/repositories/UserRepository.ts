@@ -6,13 +6,13 @@ import mongoose from 'mongoose';
 export class UserRepository {
     async findByAuth0Id(auth0Id: string): Promise<IUser | null> {
         return User.findOne({ auth0Id });
-      }
+    }
 
-      async findById(id: string): Promise<IUser | null> {
+    async findById(id: string): Promise<IUser | null> {
         return User.findById(id).exec();
     }
 
-      async updateRole(auth0Id: string, role: 'admin' | 'user'): Promise<void> {
+    async updateRole(auth0Id: string, role: 'admin' | 'user'): Promise<void> {
         const result = await User.updateOne(
             { auth0Id },
             { $set: { role } }

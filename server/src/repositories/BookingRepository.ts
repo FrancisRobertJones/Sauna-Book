@@ -28,7 +28,7 @@ export class BookingRepository {
     if (date) {
       const startOfDay = new Date(date);
       startOfDay.setHours(0, 0, 0, 0);
-      
+
       const endOfDay = new Date(date);
       endOfDay.setHours(23, 59, 59, 999);
 
@@ -47,12 +47,12 @@ export class BookingRepository {
   async findBySauna(saunaId: string) {
     console.log("here is the saunaid for bookings " + saunaId)
     return Booking.find({
-        saunaId: new mongoose.Types.ObjectId(saunaId)
+      saunaId: new mongoose.Types.ObjectId(saunaId)
     })
-    .sort({ startTime: 1 })
-    .lean()  
-    .exec();
-}
+      .sort({ startTime: 1 })
+      .lean()
+      .exec();
+  }
 
   async countConcurrentBookings(saunaId: string, startTime: Date, endTime: Date) {
     return Booking.countDocuments({
@@ -104,5 +104,29 @@ export class BookingRepository {
         status: 'completed'
       }
     );
+  }
+
+  async updateMany(filter: any, update: any) {
+    return Booking.updateMany(filter, update);
+  }
+
+  async findBySaunaAndUsers(saunaId: string, userIds: string[]) {
+    return Booking.find({
+      saunaId: new mongoose.Types.ObjectId(saunaId),
+      userId: { $in: userIds }
+    })
+      .sort({ startTime: 1 })
+      .exec();
+  }
+
+  async deleteFutureBookings(saunaId: string, userId: string) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return Booking.deleteMany({
+      saunaId: new mongoose.Types.ObjectId(saunaId),
+      userId,
+      startTime: { $gte: today }
+    });
   }
 }

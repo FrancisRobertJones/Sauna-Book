@@ -4,13 +4,17 @@ import { SaunaService } from './SaunaService';
 import { UserService } from './UserService';
 import { ApplicationError } from '../utils/errors';
 import { generateTimeSlots } from '../utils/booking-utils';
+import { UserStats } from '../types/admin.types';
+import { UserRepository } from '../repositories/UserRepository';
+import { BookingDTO } from '../models/Booking';
 
 @Service()
 export class BookingService {
   constructor(
     private bookingRepository: BookingRepository,
     private saunaService: SaunaService,
-    private userService: UserService
+    private userService: UserService,
+    private userRepository: UserRepository
   ) { }
 
   async getAvailableSlots(saunaId: string, date: Date) {
@@ -118,10 +122,38 @@ export class BookingService {
 
   async getAllSaunaBookings(saunaId: string, userId: string) {
     const sauna = await this.saunaService.findById(saunaId);
-        if (!sauna || sauna.adminId !== userId) {
+    if (!sauna || sauna.adminId !== userId) {
       throw new ApplicationError('Not authorized to view these bookings', 403);
     }
     return this.bookingRepository.findBySauna(saunaId);
 
   }
+
+  async getSaunaUsers(saunaId: string, adminId: string): Promise<UserStats[]> {
+    const sauna = await this.saunaService.findById(saunaId);
+    if (!sauna || sauna.adminId !== adminId) {
+      throw new ApplicationError('Not authorized to view these users', 403);
+    }
+
+    const usersWithAccess = await this.userRepository.findBySaunaAccess(saunaId);
+
+    const userIds = usersWithAccess.map(user => user.auth0Id);
+    const bookings: BookingDTO[] = await this.bookingRepository.findBySaunaAndUsers(saunaId, userIds);
+
+    return usersWithAccess.map(user => {
+      const userBookings = bookings.filter(booking => booking.userId === user.auth0Id);
+      const upcomingBookings = userBookings.filter(
+        booking => new Date(booking.startTime) > new Date() && booking.status === 'active'
+      ).length;
+
+      return {
+        userId: user.auth0Id,
+        name: user.name,
+        email: user.email,
+        upcomingBookings,
+        totalBookings: userBookings.length
+      };
+    });
+  }
+  
 }

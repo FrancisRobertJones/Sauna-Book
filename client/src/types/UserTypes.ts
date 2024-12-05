@@ -1,6 +1,6 @@
 import { User as Auth0User } from '@auth0/auth0-react';
-import { Sauna } from "@/pages/Booking";
 import { UserActionType } from "@/reducers/userReducer";
+import { Sauna } from './BookingTypes';
 
 export interface UserResponse {
   _id: string;
@@ -47,4 +47,12 @@ export interface UserActionPayload {
 export interface IUserAction {
   type: UserActionType;
   payload?: UserActionPayload;
+}
+
+export interface SaunaUserStats {
+  userId: string;
+  name: string;
+  email: string;
+  upcomingBookings: number;
+  totalBookings: number;
 }

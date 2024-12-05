@@ -5,30 +5,33 @@ import { ApplicationError } from '../utils/errors';
 import mongoose from 'mongoose';
 import { SaunaRepository } from '../repositories/SaunaRepository';
 import { EmailService } from './EmailService';
+import { BookingRepository } from '../repositories/BookingRepository';
+import { Booking } from '../models/Booking';
 
 @Service()
 export class UserService {
     constructor(
         private userRepository: UserRepository,
         private saunaRepository: SaunaRepository,
-        private emailService: EmailService
+        private emailService: EmailService,
+        private bookingRepository: BookingRepository,
     ) { }
 
     async findUserByAuth0Id(auth0Id: string): Promise<IUser | null> {
         return this.userRepository.findByAuth0Id(auth0Id);
-      }
-    
-      async createUser(auth0Id: string, email: string, name: string, role: 'admin' | 'user'): Promise<IUser> {
+    }
+
+    async createUser(auth0Id: string, email: string, name: string, role: 'admin' | 'user'): Promise<IUser> {
         const user = await this.userRepository.create({
-          auth0Id,
-          email,
-          name,
-          role,
-          saunaAccess: []
+            auth0Id,
+            email,
+            name,
+            role,
+            saunaAccess: []
         });
         console.log('Created new user:', user);
         return user;
-      }
+    }
 
     async findByEmail(email: string): Promise<IUser | null> {
         return this.userRepository.findByEmail(email);
@@ -49,10 +52,10 @@ export class UserService {
 
     async updateUser(id: string, userData: Partial<UserDTO>) {
         const validatedData = UserSchema.partial().parse(userData);
-        
+
         const userDataToUpdate = {
             ...validatedData,
-            saunaAccess: validatedData.saunaAccess?.map(id => 
+            saunaAccess: validatedData.saunaAccess?.map(id =>
                 new mongoose.Types.ObjectId(id)
             )
         };
@@ -62,7 +65,7 @@ export class UserService {
             throw new ApplicationError('User not found', 404);
         }
         return updatedUser;
-    } 
+    }
 
     async updateRole(auth0Id: string, role: 'admin' | 'user'): Promise<void> {
         const user = await this.userRepository.findByAuth0Id(auth0Id);
@@ -119,7 +122,7 @@ export class UserService {
         if (!sauna || sauna.adminId !== adminId) {
             throw new ApplicationError('Sauna not found or unauthorized', 404);
         }
-    
+
         return this.userRepository.findBySaunaAccess(saunaId);
     }
 
@@ -129,24 +132,16 @@ export class UserService {
             throw new ApplicationError('Sauna not found or unauthorized', 404);
         }
     
-        const user = await this.userRepository.findById(userId);
+        const user = await this.userRepository.findByAuth0Id(userId);
         if (!user) {
             throw new ApplicationError('User not found', 404);
         }
-            user.saunaAccess = user.saunaAccess.filter(
+    
+        user.saunaAccess = user.saunaAccess.filter(
             id => id.toString() !== saunaId
         );
-
-        const updatedUser = await this.userRepository.update(userId, { 
-            saunaAccess: user.saunaAccess 
-        });
     
-        try {
-            await this.emailService.sendAccessRemovedEmail(user.email, sauna.name);
-        } catch (error) {
-            console.error('Failed to send access removed email:', error);
-        }
-    
-        return updatedUser;
+        await this.bookingRepository.deleteFutureBookings(saunaId, userId);
+        return user.save(); 
     }
 }

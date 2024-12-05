@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import {
@@ -26,17 +24,18 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { SaunaUser, useFetchSaunaUsers } from '@/hooks/use-fetch-sauna-users'
+import { useFetchSaunaUsers } from '@/hooks/use-fetch-sauna-users'
 import { useRemoveSaunaAccess } from '@/hooks/use-remove-sauna-access'
 import { useParams } from 'react-router-dom'
+import { SaunaUserStats } from '@/types/UserTypes'
 
 export function SaunaUserManagement() {
   const { saunaId } = useParams<{ saunaId: string }>();
-  const { users, setUsers, isLoading, error } = useFetchSaunaUsers(saunaId as string)
+  const { users, setUsers, isLoading } = useFetchSaunaUsers(saunaId as string)
   const { removeAccess, isRemoving, removeError } = useRemoveSaunaAccess(saunaId as string, setUsers)
-  const [userToRemove, setUserToRemove] = useState<SaunaUser | null>(null)
+  const [userToRemove, setUserToRemove] = useState<SaunaUserStats | null>(null)
 
-  const columns: ColumnDef<SaunaUser>[] = [
+  const columns: ColumnDef<SaunaUserStats>[] = [
     {
       accessorKey: "name",
       header: "Name",
@@ -70,9 +69,6 @@ export function SaunaUserManagement() {
     return <div className="flex justify-center items-center h-64">Loading...</div>
   }
 
-  if (error) {
-    return <div className="text-red-500 text-center">{error}</div>
-  }
 
   return (
     <div className="space-y-4">
@@ -132,7 +128,7 @@ export function SaunaUserManagement() {
             <AlertDialogAction
               onClick={() => {
                 if (userToRemove) {
-                  removeAccess(userToRemove._id)
+                  removeAccess(userToRemove.userId)
                   setUserToRemove(null)
                 }
               }}

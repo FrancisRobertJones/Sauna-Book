@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
-import { SaunaUser } from './use-fetch-sauna-users'
+import { SaunaUserStats } from '@/types/UserTypes'
 
 export function useRemoveSaunaAccess(
   saunaId: string,
-  setUsers: React.Dispatch<React.SetStateAction<SaunaUser[]>>
+  setUsers: React.Dispatch<React.SetStateAction<SaunaUserStats[]>>
 ) {
   const [isRemoving, setIsRemoving] = useState(false)
   const [removeError, setRemoveError] = useState<string | null>(null)
@@ -13,12 +13,13 @@ export function useRemoveSaunaAccess(
   const removeAccess = async (userId: string) => {
     setIsRemoving(true)
     setRemoveError(null)
-    
+
     try {
       const token = await getAccessTokenSilently()
-      
+      const encodedUserId = encodeURIComponent(userId)
+
       const response = await fetch(
-        `http://localhost:5001/api/saunas/${saunaId}/users/${userId}`,
+        `http://localhost:5001/api/adminbooking/sauna/${saunaId}/users/${encodedUserId}`,
         {
           method: 'DELETE',
           headers: {
@@ -29,19 +30,27 @@ export function useRemoveSaunaAccess(
       )
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to remove user access')
+        throw new Error('Failed to remove user access')
       }
 
-      setUsers(prevUsers => prevUsers.filter(user => user._id !== userId))
+      const refreshResponse = await fetch(
+        `http://localhost:5001/api/adminbooking/sauna/${saunaId}/users`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (!refreshResponse.ok) throw new Error('Failed to refresh users');
+      const freshUsers = await refreshResponse.json();
+      setUsers(freshUsers);
+
     } catch (err) {
       console.error('Error removing user access:', err)
       setRemoveError('Failed to remove user access')
-      throw err 
+      throw err
     } finally {
       setIsRemoving(false)
     }
   }
-
   return { removeAccess, isRemoving, removeError }
 }

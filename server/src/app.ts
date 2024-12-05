@@ -8,7 +8,7 @@ import userRoutes from './routes/user.routes';
 import saunaRoutes from './routes/sauna.routes';
 import bookingRoutes from './routes/booking.routes';
 import inviteRoutes from './routes/invite.routes';
-import adminBookingRoutes from './routes/admin.booking.routes';
+import adminRoutes from './routes/admin.routes';
 
 import {
   checkJwt,
@@ -56,7 +56,7 @@ app.listen(PORT, () => {
 
 app.use('/api/users', baseAuth, userRoutes);
 app.use('/api/saunas', baseAuth, saunaRoutes);
-app.use('/api/adminbooking', [...baseAuth, requireAdmin], adminBookingRoutes)
+app.use('/api/adminbooking', [...baseAuth, requireAdmin], adminRoutes)
 app.use('/api/bookings', [
   ...baseAuth,
   requireUser,

@@ -147,4 +147,21 @@ export class BookingController {
       next(error);
     }
   };
+
+  getSaunaUsers = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const authReq = req as AuthRequest;
+        const adminId = authReq.auth?.payload.sub;
+        const { saunaId } = req.params;
+
+        if (!adminId) {
+            throw new ApplicationError('Unauthorized', 401);
+        }
+
+        const users = await this.bookingService.getSaunaUsers(saunaId, adminId);
+        res.json(users);
+    } catch (error) {
+        next(error);
+    }
+};
 }
