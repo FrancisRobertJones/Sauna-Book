@@ -150,18 +150,37 @@ export class BookingController {
 
   getSaunaUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const authReq = req as AuthRequest;
-        const adminId = authReq.auth?.payload.sub;
-        const { saunaId } = req.params;
+      const authReq = req as AuthRequest;
+      const adminId = authReq.auth?.payload.sub;
+      const { saunaId } = req.params;
 
-        if (!adminId) {
-            throw new ApplicationError('Unauthorized', 401);
-        }
+      if (!adminId) {
+        throw new ApplicationError('Unauthorized', 401);
+      }
 
-        const users = await this.bookingService.getSaunaUsers(saunaId, adminId);
-        res.json(users);
+      const users = await this.bookingService.getSaunaUsers(saunaId, adminId);
+      res.json(users);
     } catch (error) {
-        next(error);
+      next(error);
     }
-};
+  };
+
+  getSaunaUserFromBooking = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const authReq = req as AuthRequest;
+      const adminId = authReq.auth?.payload.sub;
+      const { bookingId } = req.params;
+
+      if (!adminId) {
+        throw new ApplicationError('Unauthorized', 401);
+      }
+
+      const user = await this.bookingService.getSaunaUserFromBooking(bookingId)
+      console.log("this is the user in controller : " + user)
+      return res.json(user); 
+      
+    } catch (error) {
+      next(error);
+    }
+  };
 }

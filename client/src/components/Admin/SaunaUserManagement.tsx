@@ -24,14 +24,14 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { useFetchSaunaUsers } from '@/hooks/use-fetch-sauna-users'
+import { useFetchSaunaUsersBySauna } from '@/hooks/use-fetch-sauna-users-by-sauna'
 import { useRemoveSaunaAccess } from '@/hooks/use-remove-sauna-access'
 import { useParams } from 'react-router-dom'
 import { SaunaUserStats } from '@/types/UserTypes'
 
 export function SaunaUserManagement() {
   const { saunaId } = useParams<{ saunaId: string }>();
-  const { users, setUsers, isLoading } = useFetchSaunaUsers(saunaId as string)
+  const { users, setUsers, isLoading } = useFetchSaunaUsersBySauna(saunaId as string)
   const { removeAccess, isRemoving, removeError } = useRemoveSaunaAccess(saunaId as string, setUsers)
   const [userToRemove, setUserToRemove] = useState<SaunaUserStats | null>(null)
 

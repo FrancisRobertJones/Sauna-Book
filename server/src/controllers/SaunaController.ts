@@ -4,6 +4,7 @@ import { SaunaService } from '../services/SaunaService';
 import { AuthRequest } from '../types/auth.types';
 import { RequestHandler } from 'express';
 import { UserService } from '../services/UserService';
+import { ApplicationError } from '../utils/errors';
 
 @Service()
 export class SaunaController {
@@ -98,5 +99,28 @@ export class SaunaController {
 
         await this.userService.removeSaunaAccess(userId, saunaId, adminId);
         res.status(200).json({ message: 'Access removed successfully' });
+    }
+
+    async updateSettings(req: Request, res: Response, next: NextFunction) {
+        try {
+            const authReq = req as AuthRequest;
+            const adminId = authReq.auth?.payload.sub;
+            const { saunaId } = req.params;
+            const updates = req.body;
+    
+            if (!adminId) {
+                throw new ApplicationError('Unauthorized', 401);
+            }
+    
+            const updatedSauna = await this.saunaService.updateSettings(
+                saunaId,
+                adminId,
+                updates
+            );
+    
+            res.json(updatedSauna);
+        } catch (error) {
+            next(error);
+        }
     }
 }

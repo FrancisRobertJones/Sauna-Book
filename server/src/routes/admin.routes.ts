@@ -20,6 +20,17 @@ router.get(
   bookingController.getSaunaUsers as RequestHandler
 );
 
+router.put(
+  '/sauna/:saunaId/settings', 
+  ((req, res, next) => saunaController.updateSettings(req, res, next)) as RequestHandler
+);
+
+router.get(
+  '/:bookingId/user',
+  bookingController.getSaunaUserFromBooking as RequestHandler
+);
+
+
 router.delete('/sauna/:saunaId/users/:userId', ((req, res) => saunaController.removeSaunaAccess(req, res)) as RequestHandler);
 
 export default router;

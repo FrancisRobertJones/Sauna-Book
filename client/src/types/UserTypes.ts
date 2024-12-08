@@ -15,6 +15,17 @@ export interface UserResponse {
   };
 }
 
+export interface UserDetailsResponse {
+  _id: string;
+  auth0Id: string;
+  email: string;
+  name: string;
+  role: 'admin' | 'user';
+  saunaAccess: string[];
+  createdAt: string;  
+  updatedAt: string;  
+}
+
 export interface AppUser {
   auth0Id: string;
   email: string;

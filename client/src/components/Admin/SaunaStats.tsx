@@ -1,6 +1,5 @@
 import { toast } from "@/hooks/use-toast";
 import { Booking } from "@/types/BookingTypes";
-import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useState } from "react";
 import { LoadingAnimation } from "../Loading/Loading";
 import { GlowCard } from "../ui/GlowCard";
@@ -12,35 +11,22 @@ interface SaunaStats {
     todayBookings: number;
 }
 
-export function SaunaStatsCard({ saunaId }: { saunaId: string }) {
+export function SaunaStatsCard({ allBookings }: {allBookings: Booking[]}) {
     const [stats, setStats] = useState<SaunaStats>({ totalBookings: 0, activeUsers: 0, todayBookings: 0 });
     const [isLoading, setIsLoading] = useState(true);
-    const { getAccessTokenSilently } = useAuth0();
 
     useEffect(() => {
-        const fetchAndProcessStats = async () => {
+        const processStats = async () => {
+            if (!allBookings) return;
             try {
-                const token = await getAccessTokenSilently();
-                console.log('Token received and starts with:', token.substring(0, 20) + '...');
-                console.log('Fetching stats for saunaId:', saunaId);
-                const response = await fetch(
-                    `http://localhost:5001/api/adminbooking/sauna/${saunaId}/all-bookings`,
-                    {
-                        headers: { Authorization: `Bearer ${token}` }
-                    }
-                );
-                if (!response.ok) throw new Error('Failed to fetch bookings');
-                const bookings: Booking[] = await response.json();
-        
-                const activeBookings = bookings.filter(booking => booking.status === 'active');
-                
-                console.log(activeBookings)
+                const activeBookings: Booking[] = allBookings.filter(booking => booking.status === 'active');
+
                 const totalBookings = activeBookings.length;
-        
+
                 const activeUsers = new Set(
                     activeBookings.map(booking => booking.userId)
                 ).size;
-        
+
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 const todayBookings = activeBookings.filter(booking => {
@@ -48,7 +34,7 @@ export function SaunaStatsCard({ saunaId }: { saunaId: string }) {
                     bookingDate.setHours(0, 0, 0, 0);
                     return bookingDate.getTime() === today.getTime();
                 }).length;
-        
+
                 setStats({
                     totalBookings,
                     activeUsers,
@@ -66,8 +52,8 @@ export function SaunaStatsCard({ saunaId }: { saunaId: string }) {
             }
         };
 
-        fetchAndProcessStats();
-    }, [saunaId, getAccessTokenSilently]);
+        processStats();
+    }, [allBookings]);
 
     if (isLoading) {
         return <LoadingAnimation isLoading={isLoading} text="Loading sauna statistics..." />;

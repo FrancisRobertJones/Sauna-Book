@@ -7,6 +7,7 @@ import { generateTimeSlots } from '../utils/booking-utils';
 import { UserStats } from '../types/admin.types';
 import { UserRepository } from '../repositories/UserRepository';
 import { BookingDTO } from '../models/Booking';
+import { IUser, UserDTO } from '../models/User';
 
 @Service()
 export class BookingService {
@@ -155,5 +156,20 @@ export class BookingService {
       };
     });
   }
-  
+
+  async getSaunaUserFromBooking(bookingId: string): Promise<IUser> {
+    const booking = await this.bookingRepository.findById(bookingId);
+    if (!booking) {
+      throw new ApplicationError(`Booking with ID ${bookingId} not found`, 404);
+    }
+
+    const user = await this.userRepository.findByAuth0Id(booking.userId)
+    if (!user) {
+      throw new Error(`User associated with booking ${bookingId} not found`);
+    }
+
+    return user;
+
+  }
+
 }

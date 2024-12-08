@@ -1,5 +1,6 @@
 import { Service } from 'typedi';
 import { Sauna, ISauna } from '../models/Sauna';
+import { ApplicationError } from '../utils/errors';
 
 @Service()
 export class SaunaRepository {
@@ -14,5 +15,19 @@ export class SaunaRepository {
 
     async findByAdminId(adminId: string): Promise<ISauna[]> {
         return Sauna.find({ adminId });
+    }
+
+    async update(id: string, updates: Partial<ISauna>): Promise<ISauna> {
+        const updated = await Sauna.findByIdAndUpdate(
+            id,
+            { $set: updates },
+            { new: true }
+        ).exec();
+        
+        if (!updated) {
+            throw new ApplicationError('Sauna not found', 404);
+        }
+        
+        return updated;
     }
 }

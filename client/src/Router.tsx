@@ -5,7 +5,7 @@ import Homepage from "./pages/Home/Homepage";
 import Layout from "./Layout";
 import { ProtectedRoute } from "./components/Routing/ProtectedRoute";
 import Register from "./components/Admin/Register";
-import SaunaAdminDashboard from "./components/Admin/SaunaAdminDashboard";
+import SaunaAdminDashboard from "./pages/Admin/SaunaAdminDashboard";
 import { AdminRoute } from "./components/Routing/AdminRoute";
 import { Auth0Callback } from "./components/Routing/AuthCallback";
 import NoAccess from "./pages/Error/No-access";

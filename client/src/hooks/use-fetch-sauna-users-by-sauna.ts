@@ -3,7 +3,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { SaunaUserStats } from '@/types/UserTypes'
 import { toast } from './use-toast'
 
-export function useFetchSaunaUsers(saunaId: string) {
+export function useFetchSaunaUsersBySauna(saunaId: string) {
     const [users, setUsers] = useState<SaunaUserStats[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const { getAccessTokenSilently } = useAuth0();
