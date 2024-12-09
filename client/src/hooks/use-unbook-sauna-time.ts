@@ -6,12 +6,18 @@ export const useUnbook = (onUnbookSuccess?: () => void) => {
     const [isUnbooking, setIsUnbooking] = useState<string | null>(null);
     const { getAccessTokenSilently } = useAuth0();
 
-    const unbook = async (bookingId: string) => {
+    const unbook = async (bookingId: string, role: string, userId?:string) => {
+        let URI = "";
+        if (role == "admin") {
+            URI = `/adminbooking/${bookingId}/cancel/${userId}`
+        } else if(role= "user") {
+            URI = `/bookings/${bookingId}/cancel`
+        }
         try {
             setIsUnbooking(bookingId);
             const token = await getAccessTokenSilently();
-            
-            const response = await fetch(`http://localhost:5001/api/bookings/${bookingId}/cancel`, {
+            console.log("THIS IS THE USER URI " + URI)
+            const response = await fetch(`http://localhost:5001/api${URI}`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -21,6 +27,8 @@ export const useUnbook = (onUnbookSuccess?: () => void) => {
             if (!response.ok) {
                 throw new Error('Failed to cancel booking');
             }
+
+            console.log(response)
 
             toast({
                 title: "Booking Cancelled",

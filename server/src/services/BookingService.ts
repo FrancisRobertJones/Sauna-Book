@@ -80,6 +80,7 @@ export class BookingService {
 
   async cancelBooking(bookingId: string, userId: string) {
     const booking = await this.bookingRepository.findById(bookingId);
+
     if (!booking) {
       throw new ApplicationError('Booking not found', 404);
     }
@@ -94,6 +95,21 @@ export class BookingService {
 
     return this.bookingRepository.updateStatus(bookingId, 'cancelled');
   }
+
+  async cancelBookingAdmin(bookingId: string, userId: string) {
+    const booking = await this.bookingRepository.findById(bookingId);
+
+    if (!booking) {
+      throw new ApplicationError('Booking not found', 404);
+    }
+    
+    if (booking.startTime <= new Date()) {
+      throw new ApplicationError('Cannot cancel past or ongoing bookings', 400);
+    }
+
+    return this.bookingRepository.updateStatus(bookingId, 'cancelled');
+  }
+  
 
   async getUserBookings(userId: string) {
     return this.bookingRepository.findByUser(userId);

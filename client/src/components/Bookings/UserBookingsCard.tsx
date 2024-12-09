@@ -21,10 +21,11 @@ interface BookingCardProps {
 export function BookingCard({ userBookings: initialBookings, currentSaunaId, onRefresh, refreshTrigger, name }: BookingCardProps) {
   const [bookings, setBookings] = useState(initialBookings);
   const { getAccessTokenSilently } = useAuth0();
-
   const { unbook, isUnbooking } = useUnbook(() => {
     onRefresh();
   });
+
+  const ROLE = "user";
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -90,7 +91,7 @@ export function BookingCard({ userBookings: initialBookings, currentSaunaId, onR
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => unbook(booking._id)}
+                  onClick={() => unbook(booking._id, ROLE)}
                   disabled={isUnbooking === booking._id}
                   className="mt-2 self-end"
                 >

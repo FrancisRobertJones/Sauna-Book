@@ -11,7 +11,7 @@ interface UserDetailsModalProps {
 }
 
 export function UserDetailsModal({ booking, isOpen, onClose }: UserDetailsModalProps) {
-    const { user, setUser, isLoading } = useFetchSaunaUsersByBooking(booking._id)
+    const { user, isLoading } = useFetchSaunaUsersByBooking(booking._id)
 
 
     const formatDate = (dateString: string) => {

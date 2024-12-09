@@ -30,6 +30,10 @@ router.get(
   bookingController.getSaunaUserFromBooking as RequestHandler
 );
 
+router.post(
+  '/:bookingId/cancel/:userId',
+  bookingController.adminCancelBooking as RequestHandler
+);
 
 router.delete('/sauna/:saunaId/users/:userId', ((req, res) => saunaController.removeSaunaAccess(req, res)) as RequestHandler);
 

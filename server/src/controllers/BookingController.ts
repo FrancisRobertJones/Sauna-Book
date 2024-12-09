@@ -72,6 +72,17 @@ export class BookingController {
     }
   };
 
+  adminCancelBooking = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { bookingId, userId } = req.params;
+    
+      await this.bookingService.cancelBookingAdmin(bookingId, userId);
+      res.json({ message: 'Booking cancelled successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   getUserBookings = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const authReq = req as AuthRequest;

@@ -10,14 +10,12 @@ import { useEffect, useState } from 'react';
 import { Booking } from '@/types/BookingTypes';
 import { useAuth0 } from '@auth0/auth0-react';
 import { AdminBookingsForm } from '@/components/Admin/AdminBookingsForm';
-import { useUnbook } from '@/hooks/use-unbook-sauna-time';
-
 
 const SaunaAdminDashboard = () => {
     const { saunaId } = useParams<{ saunaId: string }>();
     const [allBookings, setAllBookings] = useState<Booking[]>();
     const { getAccessTokenSilently } = useAuth0();
-    const { unbook } = useUnbook();
+
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -35,14 +33,6 @@ const SaunaAdminDashboard = () => {
         fetchBookings()
     }, [saunaId])
 
-    const onDeleteBooking = async (bookingId: string) => {
-        try {
-            await unbook(bookingId)
-            allBookings && setAllBookings(prevBookings => prevBookings?.filter(booking => booking._id !== bookingId))
-        } catch (error) {
-            console.error("Failed to delete booking:", error)
-        }
-    }
 
     return (
         <div className="container mx-auto py-6">
@@ -118,7 +108,7 @@ const SaunaAdminDashboard = () => {
                             {allBookings &&
                                 <AdminBookingsForm
                                     allBookings={allBookings}
-                                    onDeleteBooking={onDeleteBooking}
+                                    setAllBookings={setAllBookings}
                                 />
                             }
                         </CardContent>
