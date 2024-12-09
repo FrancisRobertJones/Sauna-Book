@@ -38,7 +38,14 @@ export function DataTable<TData extends Booking, TValue>({
   })
 
   const canDeleteBooking = (booking: Booking): boolean => {
-    return booking.status === 'active'
+    if (booking.status !== 'active') return false;
+
+    const now = new Date();
+    const bookingEndTime = new Date(booking.endTime);
+
+    if (bookingEndTime < now) return false;
+
+    return true;
   }
 
   return (
