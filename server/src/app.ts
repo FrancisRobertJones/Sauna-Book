@@ -20,8 +20,14 @@ import {
   requireSaunaMembership
 } from './middleware/auth.middleware';
 
-
 const app = express();
+
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok',
+    mongo: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
+});
 
 const allowedOrigins = [
   'http://localhost:5173', 
@@ -41,8 +47,6 @@ app.use(cors({
   credentials: true, 
 }));
 
-
-
 const baseAuth = [checkJwt, linkUser, attachUserStatus];
 
 app.use(helmet());
@@ -55,22 +59,8 @@ mongoose
   })
   .catch((error) => {
     console.error('MongoDB connection error:', error);
+    console.log('Server continuing without MongoDB connection');
   });
-
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something broke!' });
-});
-
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
-});
-
-
-const PORT = config.port;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
 
 app.use('/api/users', baseAuth, userRoutes);
 app.use('/api/saunas', baseAuth, saunaRoutes);
@@ -81,9 +71,30 @@ app.use('/api/bookings', [
   requireNoPendingInvites,
   requireSaunaMembership
 ], bookingRoutes);
-
 app.use('/api/invite', baseAuth, inviteRoutes);
 
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Error:', err.message);
+  console.error('Stack:', err.stack);
+  res.status(500).json({ error: 'Something broke!' });
+});
 
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  if (process.env.NODE_ENV === 'development') {
+    process.exit(1);
+  }
+});
+
+const PORT = process.env.PORT || config.port || 3000;
+const server = app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV}`);
+  console.log(`MongoDB URI exists: ${!!config.mongoUri}`);
+});
+
+server.on('error', (error) => {
+  console.error('Server error:', error);
+});
 
 export default app;
