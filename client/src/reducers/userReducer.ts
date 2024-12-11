@@ -6,7 +6,7 @@ export interface UserStatus {
 }
 
 export interface UserResponse {
-  auth0User?: Auth0User; 
+  auth0User?: Auth0User;
   role: 'admin' | 'user';
   adminSaunas?: ISauna[];
   accessibleSaunas?: ISauna[];
@@ -18,12 +18,21 @@ export enum UserActionType {
   LOGOUT = 'LOGOUT',
   REFRESH_SAUNAS = 'REFRESH_SAUNAS',
   UPDATE_STATUS = 'UPDATE_STATUS',
-  UPDATE_ADMIN_SAUNAS= 'UPDATE_ADMIN_SAUNAS'
+  UPDATE_ADMIN_SAUNAS = 'UPDATE_ADMIN_SAUNAS'
 }
 
 export interface IUserAction {
   type: UserActionType;
-  payload?: UserResponse;
+  payload?: {
+    auth0User?: Auth0User;
+    role?: 'admin' | 'user';
+    adminSaunas?: ISauna[];
+    accessibleSaunas?: ISauna[];
+    status?: {
+      hasPendingInvites: boolean;
+      isSaunaMember: boolean;
+    };
+  };
 }
 
 export class UserState {
@@ -33,13 +42,9 @@ export class UserState {
     public role: 'admin' | 'user' | null = null,
     public adminSaunas: ISauna[] = [],
     public accessibleSaunas: ISauna[] = [],
-    public status: UserStatus = {
-      hasPendingInvites: false,
-      isSaunaMember: false
-    }
-  ) {}
+    public status: UserStatus = { hasPendingInvites: false, isSaunaMember: false }
+  ) { }
 }
-
 export interface AppUser {
   auth0Id: string;
   email: string;
@@ -58,15 +63,18 @@ export const userReducer = (state: UserState, action: IUserAction): UserState =>
   switch (action.type) {
     case UserActionType.LOGIN:
       if (!action.payload) return state;
+      const role: 'admin' | 'user' = action.payload.role ?? 'user';
       return new UserState(
         true,
-        action.payload.auth0User ? mapAuth0UserToAppUser(action.payload.auth0User, action.payload.role) : null,
-        action.payload.role,
+        action.payload.auth0User ? mapAuth0UserToAppUser(action.payload.auth0User, role) : null,
+        role,
         action.payload.adminSaunas || [],
         action.payload.accessibleSaunas || [],
-        action.payload.status
+        {
+          hasPendingInvites: action.payload.status?.hasPendingInvites || false,
+          isSaunaMember: action.payload.status?.isSaunaMember || false
+        }
       );
-      
     case UserActionType.REFRESH_SAUNAS:
       if (!action.payload) return state;
       return new UserState(
@@ -89,16 +97,16 @@ export const userReducer = (state: UserState, action: IUserAction): UserState =>
         action.payload.status
       );
 
-      case UserActionType.UPDATE_ADMIN_SAUNAS:
-        if (!action.payload?.adminSaunas) return state;
-        return new UserState(
-          state.isAuthenticated,
-          state.user,
-          state.role,
-          action.payload.adminSaunas,
-          state.accessibleSaunas,
-          state.status,          
-        );
+    case UserActionType.UPDATE_ADMIN_SAUNAS:
+      if (!action.payload?.adminSaunas) return state;
+      return new UserState(
+        state.isAuthenticated,
+        state.user,
+        state.role,
+        action.payload.adminSaunas,
+        state.accessibleSaunas,
+        state.status,
+      );
 
     case UserActionType.LOGOUT:
       return new UserState();
