@@ -22,6 +22,15 @@ import {
 
 const app = express();
 
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok',
+    mongo: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    timestamp: new Date().toISOString()
+  });
+});
+
+
 app.get('/api/health', (req, res) => {
   res.status(200).json({ 
     status: 'ok',
@@ -86,11 +95,16 @@ process.on('uncaughtException', (error) => {
   }
 });
 
-const PORT = process.env.PORT || config.port || 3000;
-const server = app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV}`);
+const PORT = config.port;
+
+const server = app.listen(PORT as number, '0.0.0.0', () => {
+  console.log('=== Server Starting ===');
+  console.log(`Attempting to listen on PORT: ${PORT}`);
+  console.log(`PORT environment variable: ${process.env.PORT}`);
+  console.log(`config.port value: ${config.port}`);
+  console.log(`Environment: ${config.nodeEnv}`);
   console.log(`MongoDB URI exists: ${!!config.mongoUri}`);
+  console.log('=== Server Started ===');
 });
 
 server.on('error', (error) => {
