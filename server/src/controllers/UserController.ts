@@ -26,6 +26,7 @@ export class UserController {
 
             let user = await this.userService.findUserByAuth0Id(auth0Id);
 
+            console.log("attempting to create user")
             if (!user) {
                 if (registerIntent === 'admin') {
                     user = await this.userService.createUser(auth0Id, email, name, 'admin');
