@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { toast } from '@/hooks/use-toast';
+import { apiUrl } from '@/constants/api-url';
 
 export const useUnbook = (onUnbookSuccess?: () => void) => {
     const [isUnbooking, setIsUnbooking] = useState<string | null>(null);
@@ -17,7 +18,7 @@ export const useUnbook = (onUnbookSuccess?: () => void) => {
             setIsUnbooking(bookingId);
             const token = await getAccessTokenSilently();
             console.log("THIS IS THE USER URI " + URI)
-            const response = await fetch(`http://localhost:5001/api${URI}`, {
+            const response = await fetch(`${apiUrl}/api${URI}`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`

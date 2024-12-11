@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
+import { apiUrl } from '@/constants/api-url';
 
 export interface Invite {
   _id: string;
@@ -22,7 +23,7 @@ export function useSaunaInvites(saunaId: string) {
     async function fetchInvites() {
       try {
         const token = await getAccessTokenSilently()
-        const response = await fetch(`http://localhost:5001/api/invite/sauna/${saunaId}`, {
+        const response = await fetch(`${apiUrl}/api/invite/sauna/${saunaId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

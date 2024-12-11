@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/state/userContext';
 import { UserActionType } from '@/reducers/userReducer';
 import { LoadingAnimation } from '../Loading/Loading';
+import { apiUrl } from '@/constants/api-url';
 
 export const Auth0Callback = () => {
   const { isAuthenticated, isLoading: isAuth0Loading, getAccessTokenSilently } = useAuth0();
@@ -16,7 +17,7 @@ export const Auth0Callback = () => {
         try {
           const token = await getAccessTokenSilently();
           const registerIntent = localStorage.getItem('register_intent');
-          const url = new URL('http://localhost:5001/api/users/me');
+          const url = new URL(`${apiUrl}/api/users/me`);
           
           if (registerIntent) {
             url.searchParams.append('register_intent', registerIntent);

@@ -1,7 +1,8 @@
 import { useAuth0, User as Auth0User } from '@auth0/auth0-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useUser } from '../state/userContext';
 import { IUserAction, UserActionType } from '@/reducers/userReducer';
+import { apiUrl } from '@/constants/api-url';
 
 export const useUserStatus = () => {
     const { getAccessTokenSilently, user: auth0User } = useAuth0();
@@ -14,7 +15,7 @@ export const useUserStatus = () => {
         setIsLoading(true);
         const token = await getAccessTokenSilently();
         
-        const response = await fetch('http://localhost:5001/api/users/me', {
+        const response = await fetch(`${apiUrl}/api/users/me`, {
           headers: {
             Authorization: `Bearer ${token}`
           }

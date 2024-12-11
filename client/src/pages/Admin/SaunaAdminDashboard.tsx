@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import { Booking } from '@/types/BookingTypes';
 import { useAuth0 } from '@auth0/auth0-react';
 import { AdminBookingsForm } from '@/components/Admin/AdminBookingsForm';
+import { apiUrl } from '@/constants/api-url';
 
 const SaunaAdminDashboard = () => {
     const { saunaId } = useParams<{ saunaId: string }>();
@@ -21,7 +22,7 @@ const SaunaAdminDashboard = () => {
         const fetchBookings = async () => {
             const token = await getAccessTokenSilently();
             const response = await fetch(
-                `http://localhost:5001/api/adminbooking/sauna/${saunaId}/all-bookings`,
+                `${apiUrl}/api/adminbooking/sauna/${saunaId}/all-bookings`,
                 {
                     headers: { Authorization: `Bearer ${token}` }
                 }

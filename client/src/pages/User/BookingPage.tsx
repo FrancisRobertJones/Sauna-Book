@@ -13,6 +13,7 @@ import { GlowCard } from "@/components/ui/GlowCard"
 
 import { BookingSaunaTitle } from "@/components/Bookings/BookingSaunaTitle"
 import { BookingCard } from "@/components/Bookings/UserBookingsCard"
+import { apiUrl } from "@/constants/api-url"
 
 export default function BookingPage() {
   const { saunaId } = useParams();
@@ -35,7 +36,7 @@ export default function BookingPage() {
         setIsLoading(true);
         const token = await getAccessTokenSilently();
 
-        const saunaResponse = await fetch(`http://localhost:5001/api/saunas/${saunaId}`, {
+        const saunaResponse = await fetch(`${apiUrl}/api/saunas/${saunaId}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -73,7 +74,7 @@ export default function BookingPage() {
         await new Promise(resolve => setTimeout(resolve, 100));
         const token = await getAccessTokenSilently();
         const response = await fetch(
-          'http://localhost:5001/api/bookings/my-bookings',
+          `${apiUrl}/api/bookings/my-bookings`,
           {
             headers: { Authorization: `Bearer ${token}` }
           }

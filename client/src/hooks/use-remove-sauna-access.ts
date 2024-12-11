@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import { SaunaUserStats } from '@/types/UserTypes'
+import { apiUrl } from '@/constants/api-url'
 
 export function useRemoveSaunaAccess(
   saunaId: string,
@@ -19,7 +20,7 @@ export function useRemoveSaunaAccess(
       const encodedUserId = encodeURIComponent(userId)
 
       const response = await fetch(
-        `http://localhost:5001/api/adminbooking/sauna/${saunaId}/users/${encodedUserId}`,
+        `${apiUrl}/api/adminbooking/sauna/${saunaId}/users/${encodedUserId}`,
         {
           method: 'DELETE',
           headers: {
@@ -34,7 +35,7 @@ export function useRemoveSaunaAccess(
       }
 
       const refreshResponse = await fetch(
-        `http://localhost:5001/api/adminbooking/sauna/${saunaId}/users`,
+        `${apiUrl}/api/adminbooking/sauna/${saunaId}/users`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }

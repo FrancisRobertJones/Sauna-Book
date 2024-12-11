@@ -8,6 +8,7 @@ import { Button } from "../ui/button"
 import { useEffect, useState } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
 import { toast } from "@/hooks/use-toast"
+import { apiUrl } from "@/constants/api-url"
 
 
 interface BookingCardProps {
@@ -32,7 +33,7 @@ export function BookingCard({ userBookings: initialBookings, currentSaunaId, onR
       try {
         const token = await getAccessTokenSilently();
         const response = await fetch(
-          'http://localhost:5001/api/bookings/my-bookings',
+          `${apiUrl}/api/bookings/my-bookings`,
           {
             headers: { Authorization: `Bearer ${token}` }
           }

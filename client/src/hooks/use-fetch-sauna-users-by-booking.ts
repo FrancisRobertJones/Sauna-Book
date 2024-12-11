@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import { UserDetailsResponse } from '@/types/UserTypes'
 import { toast } from './use-toast'
+import { apiUrl } from '@/constants/api-url';
 
 export function useFetchSaunaUsersByBooking(bookingId: string) {
     const [user, setUser] = useState<UserDetailsResponse>();
@@ -22,7 +23,7 @@ export function useFetchSaunaUsersByBooking(bookingId: string) {
                 console.log('Got auth token, making request...');
                 
                 const response = await fetch(
-                    `http://localhost:5001/api/adminbooking/${bookingId}/user`,
+                    `${apiUrl}/api/adminbooking/${bookingId}/user`,
                     {
                         headers: { 
                             Authorization: `Bearer ${token}`,

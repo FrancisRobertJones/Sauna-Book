@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { ISauna } from "@/types/SaunaTypes"
+import { CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { format, parseISO, addMinutes } from "date-fns"
 import { AlertCircle, Calendar as CalendarIcon, Clock, MapPin } from "lucide-react"
 import { BookingDetailsProps, TimeSlotSelection } from "@/types/BookingTypes"
@@ -9,6 +8,7 @@ import { useAuth0 } from "@auth0/auth0-react"
 import { useState } from "react"
 import { toast } from "@/hooks/use-toast"
 import { useNavigate } from "react-router-dom"
+import { apiUrl } from "@/constants/api-url"
 
 export function BookingDetails({
   sauna,
@@ -46,7 +46,7 @@ export function BookingDetails({
       });
 
       const bookingPromises = bookingTimes.map(({ startTime, endTime }) =>
-        fetch('http://localhost:5001/api/bookings', {
+        fetch(`${apiUrl}/api/bookings`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

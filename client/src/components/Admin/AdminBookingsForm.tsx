@@ -7,6 +7,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { UserDetailsResponse } from '@/types/UserTypes'
 import { useUnbook } from '@/hooks/use-unbook-sauna-time'
 import { toast } from '@/hooks/use-toast'
+import { apiUrl } from '@/constants/api-url'
 
 interface AdminBookingsFormProps {
     allBookings: Booking[]
@@ -19,10 +20,10 @@ export function AdminBookingsForm({ allBookings, setAllBookings }: AdminBookings
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [userData, setUserData] = useState<UserDetailsResponse | null>(null)
-    
     const { getAccessTokenSilently } = useAuth0()
     const { unbook } = useUnbook()
     const ROLE = "admin"
+
 
     useEffect(() => {
         setFilteredBookings(allBookings)
@@ -33,7 +34,7 @@ export function AdminBookingsForm({ allBookings, setAllBookings }: AdminBookings
         try {
             const token = await getAccessTokenSilently()
             const response = await fetch(
-                `http://localhost:5001/api/adminbooking/${bookingId}/user`,
+                `${apiUrl}/api/adminbooking/${bookingId}/user`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,

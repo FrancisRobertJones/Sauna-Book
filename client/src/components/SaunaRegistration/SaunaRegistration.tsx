@@ -13,8 +13,9 @@ import { OperatingHoursStep } from './OperatingHoursStep'
 import { Progress } from '@/components/ui/progress'
 import { useToast } from '@/hooks/use-toast'
 import { saunaFormSchema, SaunaFormValues } from '@/types/FormValues'
-import { SaunaSummaryModal } from './FormSummary'
+import { SaunaSummaryModal } from '../Admin/SaunaSummaryModal'
 import { useNavigate } from 'react-router-dom'
+import { apiUrl } from '@/constants/api-url'
 
 export default function SaunaRegistrationForm() {
   const [showSummary, setShowSummary] = useState(false);
@@ -51,7 +52,7 @@ export default function SaunaRegistrationForm() {
     console.log(data)
     try {
       const token = await getAccessTokenSilently()
-      const response = await fetch('http://localhost:5001/api/saunas', {
+      const response = await fetch(`${apiUrl}/api/saunas`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

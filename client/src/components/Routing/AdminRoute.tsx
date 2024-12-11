@@ -4,6 +4,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { useUser } from '@/state/userContext';
 import { UserActionType } from '@/reducers/userReducer';
 import { LoadingAnimation } from '../Loading/Loading';
+import { apiUrl } from '@/constants/api-url';
 
 export const AdminRoute = () => {
   const { getAccessTokenSilently } = useAuth0();
@@ -16,7 +17,7 @@ export const AdminRoute = () => {
       try {
         const token = await getAccessTokenSilently();
 
-        const userResponse = await fetch('http://localhost:5001/api/users/me', {
+        const userResponse = await fetch(`${apiUrl}/api/users/me`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -28,7 +29,7 @@ export const AdminRoute = () => {
           return;
         }
 
-        const saunasResponse = await fetch('http://localhost:5001/api/saunas/admin-saunas', {
+        const saunasResponse = await fetch(`${apiUrl}/api/saunas/admin-saunas`, {
           headers: {
             Authorization: `Bearer ${token}`
           }

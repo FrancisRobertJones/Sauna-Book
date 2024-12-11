@@ -6,6 +6,7 @@ import { LoadingAnimation } from "../Loading/Loading";
 import { Button } from "../ui/button";
 import { format } from 'date-fns';
 import { GlowCard } from "../ui/GlowCard";
+import { apiUrl } from "@/constants/api-url";
 
 
 
@@ -28,7 +29,7 @@ export function TimeSlotPicker({
                 const token = await getAccessTokenSilently();
 
                 const response = await fetch(
-                    `http://localhost:5001/api/bookings/available-slots/${sauna._id}?date=${selectedDate.toISOString()}`,
+                    `${apiUrl}/api/bookings/available-slots/${sauna._id}?date=${selectedDate.toISOString()}`,
                     {
                         headers: { Authorization: `Bearer ${token}` }
                     }

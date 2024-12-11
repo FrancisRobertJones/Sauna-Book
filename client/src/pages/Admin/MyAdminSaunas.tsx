@@ -56,9 +56,6 @@ export default function MyAdminSaunas() {
                                 <Link to={`/admin/sauna/${sauna._id}`}>
                                     <Button variant="outline">Manage</Button>
                                 </Link>
-                                <Link to={`/booking/${sauna._id}`}>
-                                    <Button>Book</Button>
-                                </Link>
                             </CardFooter>
                         </Card>
                     </Link>

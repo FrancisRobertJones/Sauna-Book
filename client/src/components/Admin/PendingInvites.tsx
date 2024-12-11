@@ -9,6 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/state/userContext';
 import { UserActionType } from '@/reducers/userReducer';
+import { apiUrl } from '@/constants/api-url';
 
 export function PendingInvites() {
   const { user, getAccessTokenSilently } = useAuth0();
@@ -24,7 +25,7 @@ export function PendingInvites() {
       try {
         const token = await getAccessTokenSilently();
         const response = await fetch(
-          `http://localhost:5001/api/invite/pending?email=${user.email}`,
+          `${apiUrl}/api/invite/pending?email=${user.email}`,
           {
             headers: { Authorization: `Bearer ${token}` }
           }
@@ -51,7 +52,7 @@ export function PendingInvites() {
   const acceptInvite = async (inviteId: string) => {
     try {
       const token = await getAccessTokenSilently();
-      const response = await fetch(`http://localhost:5001/api/invite/${inviteId}/accept`, {
+      const response = await fetch(`${apiUrl}/api/invite/${inviteId}/accept`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });

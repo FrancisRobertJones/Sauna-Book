@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { useToast } from '@/hooks/use-toast'
+import { apiUrl } from '@/constants/api-url'
 
 interface CreateInviteFormProps {
   saunaId: string;
@@ -45,7 +46,7 @@ export default function CreateInviteForm({ saunaId }: CreateInviteFormProps) {
     setIsLoading(true)
     try {
       const token = await getAccessTokenSilently()
-      const response = await fetch('http://localhost:5001/api/invite', {
+      const response = await fetch(`${apiUrl}/api/invite`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

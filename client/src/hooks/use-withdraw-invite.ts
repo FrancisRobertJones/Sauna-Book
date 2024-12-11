@@ -1,3 +1,4 @@
+import { apiUrl } from '@/constants/api-url';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useState } from 'react';
 
@@ -19,7 +20,7 @@ export function useWithdrawInvite(onSuccess?: () => void): UseWithdrawInviteRetu
        try {
            const token = await getAccessTokenSilently();
            const response = await fetch(
-               `http://localhost:5001/api/invite/${inviteId}`, 
+               `${apiUrl}/api/invite/${inviteId}`, 
                {
                    method: 'DELETE',
                    headers: {

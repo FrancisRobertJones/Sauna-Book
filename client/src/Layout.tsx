@@ -1,4 +1,4 @@
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Toaster } from './components/ui/toaster';
 import { useEffect, useReducer, useState } from 'react';
@@ -7,9 +7,10 @@ import { toast } from './hooks/use-toast';
 import { UserContext } from './state/userContext';
 import { LoadingAnimation } from './components/Loading/Loading';
 import { AnimatedBackground } from './components/ui/AnimatedBackground';
-import { IUserAction, UserResponse } from './types/UserTypes';
+import { IUserAction } from './types/UserTypes';
 import { ISauna } from './types/SaunaTypes';
 import Navbar from './components/Navbar/Navbar';
+import { apiUrl } from './constants/api-url';
 
 const Layout = () => {
   const navigate = useNavigate();
@@ -17,13 +18,14 @@ const Layout = () => {
   const [userState, dispatchUser] = useReducer(userReducer, new UserState());
   const [isLoading, setIsLoading] = useState(true);
 
+
   useEffect(() => {
     const initializeUser = async () => {
       if (isAuthenticated && user) {
         try {
           const token = await getAccessTokenSilently();
     
-          const userResponse = await fetch('http://localhost:5001/api/users/me', {
+          const userResponse = await fetch(`${apiUrl}/api/users/me`, {
             headers: { Authorization: `Bearer ${token}` },
           });
     
@@ -36,7 +38,7 @@ const Layout = () => {
     
           let saunas: ISauna[] = [];
           if (role === 'admin') {
-            const adminSaunasResponse = await fetch('http://localhost:5001/api/saunas/admin-saunas', {
+            const adminSaunasResponse = await fetch(`${apiUrl}/api/saunas/admin-saunas`, {
               headers: { Authorization: `Bearer ${token}` },
             });
     
@@ -47,7 +49,7 @@ const Layout = () => {
           } else if (role === 'user') {
             const saunaAccessIds: string[] = userData.saunaAccess;
             const saunaDetailsPromises = saunaAccessIds.map((saunaId) =>
-              fetch(`http://localhost:5001/api/saunas/${saunaId}`, {
+              fetch(`${apiUrl}/api/saunas/${saunaId}`, {
                 headers: { Authorization: `Bearer ${token}` },
               }).then((res) => (res.ok ? res.json() : null))
             );
