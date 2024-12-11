@@ -2,7 +2,6 @@ import { Service } from 'typedi';
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { UserService } from '../services/UserService';
 import { InviteService } from '../services/InviteService';
-import { UserDTO } from '../models/User';
 import { AuthRequest } from '../types/auth.types';
 
 @Service()
