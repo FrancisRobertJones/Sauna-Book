@@ -40,7 +40,7 @@ app.get('/api/health', (req, res) => {
 
 const allowedOrigins = [
   'http://localhost:5173', 
-  'https://your-vercel-domain.vercel.app'
+  'https://boka-bastu.vercel.app'
 ];
 
 app.use(cors({
