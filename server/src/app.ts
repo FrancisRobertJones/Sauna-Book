@@ -39,8 +39,9 @@ app.get('/api/health', (req, res) => {
 });
 
 const allowedOrigins = [
-  'http://localhost:5173', 
-  'https://boka-bastu.vercel.app'
+  'http://localhost:5173',
+  'https://book-a-bastu-frontend.vercel.app',
+  'https://book-a-bastu-frontend-bhcs9z2cd-francis-projects-d395dbeb.vercel.app'
 ];
 
 app.use(cors({
