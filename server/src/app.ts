@@ -23,7 +23,7 @@ import {
 const app = express();
 
 app.get('/health', (req, res) => {
-  res.status(200).json({ 
+  res.status(200).json({
     status: 'ok',
     mongo: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     timestamp: new Date().toISOString()
@@ -32,7 +32,7 @@ app.get('/health', (req, res) => {
 
 
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ 
+  res.status(200).json({
     status: 'ok',
     mongo: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
@@ -40,21 +40,20 @@ app.get('/api/health', (req, res) => {
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://book-a-bastu-frontend.vercel.app',
-  'https://book-a-bastu-frontend-bhcs9z2cd-francis-projects-d395dbeb.vercel.app'
+  'https://boka-bastu.vercel.app'
 ];
 
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    
+
     if (allowedOrigins.indexOf(origin) === -1) {
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
       return callback(new Error(msg), false);
     }
     return callback(null, true);
   },
-  credentials: true, 
+  credentials: true,
 }));
 
 const baseAuth = [checkJwt, linkUser, attachUserStatus];
