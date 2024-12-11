@@ -2,7 +2,6 @@ import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessa
 import { Input } from '@/components/ui/input'
 import { Slider } from '@/components/ui/slider'
 import { SaunaFormValues } from '@/types/FormValues'
-import { Label } from '@radix-ui/react-label'
 import { UseFormReturn } from 'react-hook-form'
 
 

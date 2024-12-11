@@ -2,12 +2,11 @@ import { Button } from "@/components/ui/button"
 import { CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { format, parseISO, addMinutes } from "date-fns"
 import { AlertCircle, Calendar as CalendarIcon, Clock, MapPin } from "lucide-react"
-import { BookingDetailsProps, TimeSlotSelection } from "@/types/BookingTypes"
+import { BookingDetailsProps } from "@/types/BookingTypes"
 import { GlowCard } from "../ui/GlowCard"
 import { useAuth0 } from "@auth0/auth0-react"
 import { useState } from "react"
 import { toast } from "@/hooks/use-toast"
-import { useNavigate } from "react-router-dom"
 import { apiUrl } from "@/constants/api-url"
 
 export function BookingDetails({
@@ -39,12 +38,13 @@ export function BookingDetails({
       setIsBooking(true);
       const token = await getAccessTokenSilently();
 
+      
       const bookingTimes = Array.from({ length: selectedSlots.numberOfSlots }, (_, index) => {
         const startTime = addMinutes(new Date(selectedSlots.startSlot), index * sauna.slotDurationMinutes);
         const endTime = addMinutes(startTime, sauna.slotDurationMinutes);
         return { startTime, endTime };
       });
-
+      console.log(isBooking)
       const bookingPromises = bookingTimes.map(({ startTime, endTime }) =>
         fetch(`${apiUrl}/api/bookings`, {
           method: 'POST',

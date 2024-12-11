@@ -39,7 +39,7 @@ export default function SaunaRegistrationForm() {
     },
   })
 
-  const handleSubmit = (data: SaunaFormValues) => {
+  const handleSubmit = () => {
     setShowSummary(true);
   };
 

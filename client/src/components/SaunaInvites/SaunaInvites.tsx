@@ -20,7 +20,7 @@ export function SaunaUserInvites({ saunaId }: SaunaUsersProps) {
   const { invites, isLoading, error } = useSaunaInvites(saunaId)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
-  const { withdrawInvite, isWithdrawing, error: withdrawError } = useWithdrawInvite(() => {
+  const { withdrawInvite, isWithdrawing } = useWithdrawInvite(() => {
     window.location.reload();
   });
 

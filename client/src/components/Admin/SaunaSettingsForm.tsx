@@ -132,7 +132,7 @@ export default function SaunaSettingsForm({ saunaId }: { saunaId: string }) {
         );
     }
 
-    const handleSubmit = (data: SaunaFormValues) => {
+    const handleSubmit = () => {
         setShowSummary(true);
     };
 
