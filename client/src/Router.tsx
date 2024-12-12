@@ -17,6 +17,7 @@ import { PendingInvites } from "./components/Admin/PendingInvites";
 import { PendingInvitesGuard } from "./components/Routing/PendingInvitesGuard";
 import MyAdminSaunas from "./pages/Admin/MyAdminSaunas";
 import { AccountTypeSelection } from "./components/Routing/AccountTypeSelection";
+import AcceptInvitePage from "./pages/User/AcceptInvitePage";
 
 export const router = createBrowserRouter([
   {
@@ -42,6 +43,10 @@ export const router = createBrowserRouter([
           {
             path: "/select-account-type",
             element: <AccountTypeSelection />
+          },
+          {
+            path: "/accept-invite",
+            element: <AcceptInvitePage />
           }
         ]
       },
@@ -73,8 +78,8 @@ export const router = createBrowserRouter([
                 element: <SaunaSelectBooking />
               },
               {
-                path: "/booking/:saunaId",  
-                element: <BookingPage />  
+                path: "/booking/:saunaId",
+                element: <BookingPage />
               },
               {
                 path: "/no-access",
