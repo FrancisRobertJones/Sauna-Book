@@ -36,10 +36,8 @@ export function PendingInvites() {
         }
 
         const invites = await response.json();
-        console.log('Received invites:', invites); 
         setPendingInvites(invites);
       } catch (err) {
-        console.error('Error fetching invites:', err);
         setError(err instanceof Error ? err.message : 'Failed to load invites');
       } finally {
         setIsLoading(false);

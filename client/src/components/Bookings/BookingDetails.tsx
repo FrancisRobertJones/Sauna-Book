@@ -5,7 +5,6 @@ import { AlertCircle, Calendar as CalendarIcon, Clock, MapPin } from "lucide-rea
 import { BookingDetailsProps } from "@/types/BookingTypes"
 import { GlowCard } from "../ui/GlowCard"
 import { useAuth0 } from "@auth0/auth0-react"
-import { useState } from "react"
 import { toast } from "@/hooks/use-toast"
 import { apiUrl } from "@/constants/api-url"
 
@@ -15,7 +14,6 @@ export function BookingDetails({
   selectedSlots,
   handleRefresh,
 }: BookingDetailsProps) {
-  const [isBooking, setIsBooking] = useState(false);
   const canBook = selectedSlots !== null;
 
   const getTotalDuration = () => {
@@ -35,7 +33,6 @@ export function BookingDetails({
     if (!selectedSlots) return;
 
     try {
-      setIsBooking(true);
       const token = await getAccessTokenSilently();
 
       
@@ -44,7 +41,6 @@ export function BookingDetails({
         const endTime = addMinutes(startTime, sauna.slotDurationMinutes);
         return { startTime, endTime };
       });
-      console.log(isBooking)
       const bookingPromises = bookingTimes.map(({ startTime, endTime }) =>
         fetch(`${apiUrl}/api/bookings`, {
           method: 'POST',

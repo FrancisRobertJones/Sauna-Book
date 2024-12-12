@@ -23,11 +23,16 @@ const Layout = () => {
       if (isAuthenticated && user) {
         try {
           const token = await getAccessTokenSilently();
+          const registerIntent = localStorage.getItem('register_intent');          
+          const url = new URL(`${apiUrl}/api/users/me`);
+          if (registerIntent) {
+            url.searchParams.append('register_intent', registerIntent);
+          }
     
-          const userResponse = await fetch(`${apiUrl}/api/users/me`, {
+          const userResponse = await fetch(url.toString(), {
             headers: { Authorization: `Bearer ${token}` },
           });
-    
+
           if (!userResponse.ok) {
             throw new Error('Failed to fetch user data');
           }

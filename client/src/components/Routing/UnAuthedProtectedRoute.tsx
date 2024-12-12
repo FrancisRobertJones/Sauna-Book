@@ -17,15 +17,10 @@ export const UnauthedProtected = () => {
       }
     }, [state, isAuthenticated]);
   
-    console.log("UnauthedProtected - Current state:", state);
-    console.log("UnauthedProtected - Auth status:", { isAuthenticated, isLoading });
-  
     if (isLoading || (!isStateInitialized && isAuthenticated)) {
       return <LoadingAnimation isLoading={true} text="Loading.." />;
     }
 
-  
-    console.log(state, "this is the user state")
     if (isLoading) {
       return <LoadingAnimation isLoading={isLoading} text="Loading.." />;
     }

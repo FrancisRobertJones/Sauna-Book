@@ -13,6 +13,12 @@ export class UserController {
 
     getCurrentUser: RequestHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
+            console.log('GET /me endpoint hit with:');
+            console.log('Query params:', req.query);
+            console.log('Auth payload:', req.auth?.payload);
+            console.log('Register intent:', req.query.register_intent);
+
+            
             const authReq = req as AuthRequest;
             const auth0Id = authReq.auth?.payload.sub;
             const email = authReq.auth?.payload['https://api.frj-sauna-booking.com/email'] as string;
@@ -26,8 +32,13 @@ export class UserController {
 
             let user = await this.userService.findUserByAuth0Id(auth0Id);
 
-            console.log("attempting to create user")
-            if (!user) {
+            console.log('Backend received request with:', {
+                auth0Id: req.auth?.payload.sub,
+                registerIntent: req.query.register_intent,
+                headers: req.headers
+              });
+              
+              if (!user) {
                 if (registerIntent === 'admin') {
                     user = await this.userService.createUser(auth0Id, email, name, 'admin');
                 } else if (registerIntent === 'user') {

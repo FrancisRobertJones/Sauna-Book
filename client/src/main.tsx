@@ -5,8 +5,6 @@ import { RouterProvider } from 'react-router-dom'
 import { router } from './Router.tsx'
 import { Auth0Provider } from '@auth0/auth0-react'
 
-console.log('Redirect URI:', `${window.location.origin}/callback`);
-
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

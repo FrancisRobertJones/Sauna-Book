@@ -12,7 +12,6 @@ export default function MyAdminSaunas() {
 
     useEffect(() => {
         setLoading(false)
-        console.log(state.adminSaunas)
     }, [state.adminSaunas]);
 
     if (loading) {

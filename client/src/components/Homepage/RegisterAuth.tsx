@@ -9,6 +9,7 @@ export default function AuthSection() {
 
   const handleUserLogin = () => {
     localStorage.setItem('register_intent', 'user');
+
     loginWithRedirect({
       authorizationParams: {
         redirect_uri: `${window.location.origin}/callback`,

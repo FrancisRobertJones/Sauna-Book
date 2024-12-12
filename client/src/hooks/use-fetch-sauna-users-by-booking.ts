@@ -12,15 +12,12 @@ export function useFetchSaunaUsersByBooking(bookingId: string) {
     useEffect(() => {
         const fetchUsers = async () => {
             if (!bookingId) {
-                console.log('No bookingId provided, skipping fetch');
                 setIsLoading(false);
                 return;
             }
 
-            console.log('Fetching user for bookingId:', bookingId);
             try {
                 const token = await getAccessTokenSilently();
-                console.log('Got auth token, making request...');
                 
                 const response = await fetch(
                     `${apiUrl}/api/adminbooking/${bookingId}/user`,
@@ -31,9 +28,7 @@ export function useFetchSaunaUsersByBooking(bookingId: string) {
                         }
                     }
                 );
-    
-                console.log('Response status:', response.status);
-                
+                    
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error('Response not ok:', errorText);
@@ -41,7 +36,6 @@ export function useFetchSaunaUsersByBooking(bookingId: string) {
                 }
 
                 const data = await response.json();
-                console.log('Received user data:', data);
                 setUser(data);
             } catch (error) {
                 console.error('Error in fetchUsers:', error);

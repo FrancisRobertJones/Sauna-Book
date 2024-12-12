@@ -49,7 +49,6 @@ export default function SaunaRegistrationForm() {
   const handleConfirmSubmit = async () => {
     const data = form.getValues();
     setShowSummary(false);
-    console.log(data)
     try {
       const token = await getAccessTokenSilently()
       const response = await fetch(`${apiUrl}/api/saunas`, {
