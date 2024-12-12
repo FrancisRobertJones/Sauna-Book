@@ -118,12 +118,12 @@ export default function BookingPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-2 sm:px-4 py-8">
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
           <GlowCard className="p-8">
-            <div className="flex flex-col lg:flex-row items-center lg:items-start lg:justify-between gap-8"> 
-              <div className="w-full lg:w-auto px-4"> 
+            <div className="flex flex-col lg:flex-row items-center lg:items-start lg:justify-between gap-8">
+              <div className="w-full lg:w-auto">
                 <BookingSaunaTitle
                   title={sauna.name}
                 />
