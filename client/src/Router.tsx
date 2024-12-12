@@ -16,6 +16,7 @@ import SaunaSelectBooking from "./pages/User/SaunaSelectList";
 import { PendingInvites } from "./components/Admin/PendingInvites";
 import { PendingInvitesGuard } from "./components/Routing/PendingInvitesGuard";
 import MyAdminSaunas from "./pages/Admin/MyAdminSaunas";
+import { AccountTypeSelection } from "./components/Routing/AccountTypeSelection";
 
 export const router = createBrowserRouter([
   {
@@ -38,6 +39,10 @@ export const router = createBrowserRouter([
             path: "/callback",
             element: <Auth0Callback />
           },
+          {
+            path: "/select-account-type",
+            element: <AccountTypeSelection />
+          }
         ]
       },
       {

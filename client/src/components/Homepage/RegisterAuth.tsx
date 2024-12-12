@@ -2,7 +2,8 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { motion } from 'framer-motion'
 import { ChevronRight, Users, Building2 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { GlowCard } from '../ui/GlowCard'
 
 export default function AuthSection() {
   const { loginWithRedirect } = useAuth0()
@@ -27,16 +28,8 @@ export default function AuthSection() {
   };
 
   return (
-    <section className="relative overflow-hidden py-20 sm:py-32 lg:pb-32 xl:pb-36">
+    <section className="relative overflow-hidden py-12 sm:py-12 lg:pb-12 xl:pb-36">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-6xl mb-6">
-            Revolutionize Your Sauna Management
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Modernize your sauna bookings with our cutting-edge digital platform. Streamline operations, enhance user experience, and boost your business.
-          </p>
-        </div>
 
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           <motion.div
@@ -44,7 +37,7 @@ export default function AuthSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Card className="h-full">
+            <GlowCard className="h-full">
               <CardHeader>
                 <Users className="w-12 h-12 text-primary mb-4" />
                 <CardTitle>Sauna Users</CardTitle>
@@ -76,7 +69,7 @@ export default function AuthSection() {
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               </CardContent>
-            </Card>
+            </GlowCard>
           </motion.div>
 
           <motion.div
@@ -84,7 +77,7 @@ export default function AuthSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Card className="h-full">
+            <GlowCard className="h-full">
               <CardHeader>
                 <Building2 className="w-12 h-12 text-primary mb-4" />
                 <CardTitle>Sauna Owners</CardTitle>
@@ -117,7 +110,7 @@ export default function AuthSection() {
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               </CardContent>
-            </Card>
+            </GlowCard>
           </motion.div>
         </div>
       </div>
