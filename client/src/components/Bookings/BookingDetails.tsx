@@ -15,7 +15,6 @@ export function BookingDetails({
   selectedSlots,
   handleRefresh,
 }: BookingDetailsProps) {
-  const [isBooking, setIsBooking] = useState(false);
   const canBook = selectedSlots !== null;
 
   const getTotalDuration = () => {
@@ -35,7 +34,6 @@ export function BookingDetails({
     if (!selectedSlots) return;
 
     try {
-      setIsBooking(true);
       const token = await getAccessTokenSilently();
 
       
