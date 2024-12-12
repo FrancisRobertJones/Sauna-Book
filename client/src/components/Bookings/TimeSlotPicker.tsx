@@ -20,47 +20,57 @@ export function TimeSlotPicker({
     const [isLoading, setIsLoading] = useState(true);
     const { getAccessTokenSilently } = useAuth0();
     const [hasReachedLimit, setHasReachedLimit] = useState(false);
-    const [slotsCache, setSlotsCache] = useState<Record<string, TimeSlot[]>>({});
+    const [lastFetchedDate, setLastFetchedDate] = useState<string | null>(null);
 
+
+
+    const normalizeDateString = (date: Date) => {
+        const d = new Date(date);
+        d.setHours(0, 0, 0, 0);
+        return d.toISOString().split('T')[0];
+    };
 
     useEffect(() => {
-        const fetchAvailableSlots = async () => {
-            const dateKey = selectedDate.toISOString().split('T')[0];
+        const fetchSlotsForDate = async () => {
+            const normalizedSelectedDate = normalizeDateString(selectedDate);
             
-            if (slotsCache[dateKey]) {
-                setTimeSlots(slotsCache[dateKey]);
-                setIsLoading(false);
-                return;
-            }
-
-            try {
+            
+            if (lastFetchedDate === null || normalizedSelectedDate !== lastFetchedDate) {
                 setIsLoading(true);
-                const token = await getAccessTokenSilently();
+                setTimeSlots([]);
+                setHasReachedLimit(false);
 
-                const response = await fetch(
-                    `${apiUrl}/api/bookings/available-slots/${sauna._id}?date=${selectedDate.toISOString()}`,
-                    {
-                        headers: { Authorization: `Bearer ${token}` }
+                try {
+                    const token = await getAccessTokenSilently();
+                    const response = await fetch(
+                        `${apiUrl}/api/bookings/available-slots/${sauna._id}?date=${selectedDate.toISOString()}`,
+                        {
+                            headers: { 
+                                Authorization: `Bearer ${token}`,
+                                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                                'Pragma': 'no-cache'
+                            }
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch time slots');
                     }
-                );
 
-                if (!response.ok) throw new Error('Failed to fetch time slots');
-
-                const slots = await response.json();
-                setSlotsCache(prev => ({
-                    ...prev,
-                    [dateKey]: slots
-                }));
-                setTimeSlots(slots);
-            } catch (error) {
-                console.error('Error fetching time slots:', error);
-            } finally {
-                setIsLoading(false);
+                    const slots = await response.json();
+                    setTimeSlots(slots);
+                    setLastFetchedDate(normalizedSelectedDate);
+                } catch (error) {
+                    setTimeSlots([]);
+                } finally {
+                    setIsLoading(false);
+                }
             }
         };
 
-        fetchAvailableSlots();
-    }, [sauna._id, selectedDate, getAccessTokenSilently]);
+        fetchSlotsForDate();
+    }, [selectedDate, sauna._id, getAccessTokenSilently]);
+
     const getSlotStatus = (slot: TimeSlot) => {
         if (!slot.isAvailable) return "unavailable";
         if (isSlotSelectable(slot)) return "selectable";

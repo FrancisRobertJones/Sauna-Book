@@ -9,11 +9,22 @@ export default function SaunaSelectBooking() {
   const { state } = useUser()
 
   useEffect(() => {
-    if (Array.isArray(state.accessibleSaunas)) {
-      setIsLoading(false);
-    }
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        if (state.accessibleSaunas) {
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+  
+    fetchData();
   }, [state.accessibleSaunas]);
 
+  
   const SkeletonCards = () => (
     <>
       {[...Array(6)].map((_, i) => (

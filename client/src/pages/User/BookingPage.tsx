@@ -29,7 +29,7 @@ export default function BookingPage() {
     setRefresh(prev => prev + 1);
   };
 
-    useEffect(() => {
+  useEffect(() => {
     setSelectedSlots(null);
   }, [refreshKey])
 
@@ -93,7 +93,7 @@ export default function BookingPage() {
       }
     };
 
-    if (saunaId && !isSaunaLoading) {  
+    if (saunaId && !isSaunaLoading) {
       fetchAllUserBookings();
     }
   }, [saunaId, isSaunaLoading, getAccessTokenSilently, refreshKey]);
@@ -128,10 +128,11 @@ export default function BookingPage() {
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={(date) => {
-                  if (date) {
-                    setDate(date);
-                    setSelectedSlots(null);
+                onSelect={(newDate) => {
+                  if (newDate) {
+                    const startOfDay = new Date(newDate);
+                    startOfDay.setHours(0, 0, 0, 0);
+                    setDate(startOfDay);
                   }
                 }}
                 className="rounded-md border w-full max-w-sm mx-auto"
