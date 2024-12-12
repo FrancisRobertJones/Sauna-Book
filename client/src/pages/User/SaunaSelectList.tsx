@@ -1,7 +1,6 @@
-import { Suspense, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { SaunaCard } from "../../components/Bookings/SaunaCard"
 import { Skeleton } from "@/components/ui/skeleton"
-
 import { useUser } from "@/state/userContext"
 import { GlowCard } from "@/components/ui/GlowCard"
 
@@ -9,9 +8,8 @@ export default function SaunaSelectBooking() {
   const [isLoading, setIsLoading] = useState(true);
   const { state } = useUser()
 
-
   useEffect(() => {
-    if (state.accessibleSaunas) {
+    if (Array.isArray(state.accessibleSaunas)) {
       setIsLoading(false);
     }
   }, [state.accessibleSaunas]);
@@ -31,27 +29,19 @@ export default function SaunaSelectBooking() {
     </>
   );
 
-  if (isLoading || !state.accessibleSaunas.length) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold mb-8">Available Saunas</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <SkeletonCards />
-        </div>
-      </div>
-    );
-  }
-
-
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold mb-8">Available Saunas</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Suspense fallback={<SkeletonCards />}>
-          {state.accessibleSaunas.map((sauna) => (
+        {isLoading ? (
+          <SkeletonCards />
+        ) : Array.isArray(state.accessibleSaunas) && state.accessibleSaunas.length > 0 ? (
+          state.accessibleSaunas.map((sauna) => (
             <SaunaCard key={sauna._id} sauna={sauna} />
-          ))}
-        </Suspense>
+          ))
+        ) : (
+          <p>No saunas available.</p>
+        )}
       </div>
     </div>
   );

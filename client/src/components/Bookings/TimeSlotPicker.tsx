@@ -20,10 +20,19 @@ export function TimeSlotPicker({
     const [isLoading, setIsLoading] = useState(true);
     const { getAccessTokenSilently } = useAuth0();
     const [hasReachedLimit, setHasReachedLimit] = useState(false);
+    const [slotsCache, setSlotsCache] = useState<Record<string, TimeSlot[]>>({});
 
 
     useEffect(() => {
         const fetchAvailableSlots = async () => {
+            const dateKey = selectedDate.toISOString().split('T')[0];
+            
+            if (slotsCache[dateKey]) {
+                setTimeSlots(slotsCache[dateKey]);
+                setIsLoading(false);
+                return;
+            }
+
             try {
                 setIsLoading(true);
                 const token = await getAccessTokenSilently();
@@ -38,6 +47,10 @@ export function TimeSlotPicker({
                 if (!response.ok) throw new Error('Failed to fetch time slots');
 
                 const slots = await response.json();
+                setSlotsCache(prev => ({
+                    ...prev,
+                    [dateKey]: slots
+                }));
                 setTimeSlots(slots);
             } catch (error) {
                 console.error('Error fetching time slots:', error);
@@ -47,8 +60,7 @@ export function TimeSlotPicker({
         };
 
         fetchAvailableSlots();
-    }, [sauna._id, selectedDate]);
-
+    }, [sauna._id, selectedDate, getAccessTokenSilently]);
     const getSlotStatus = (slot: TimeSlot) => {
         if (!slot.isAvailable) return "unavailable";
         if (isSlotSelectable(slot)) return "selectable";
