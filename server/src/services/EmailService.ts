@@ -40,7 +40,7 @@ export class EmailService {
                     <h1>Sauna Invitation</h1>
                     <p>You've been invited to join a sauna.</p>
                     <p>Click the link below to join:</p>
-                    <a href="${process.env.FRONTEND_URL}/accept-invite?id=${invite._id}">
+                    <a href="${process.env.FRONTEND_URL}/accept-invite">
                         Accept Invitation
                     </a>
                 `
