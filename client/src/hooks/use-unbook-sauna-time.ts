@@ -17,7 +17,6 @@ export const useUnbook = (onUnbookSuccess?: () => void) => {
         try {
             setIsUnbooking(bookingId);
             const token = await getAccessTokenSilently();
-            console.log("THIS IS THE USER URI " + URI)
             const response = await fetch(`${apiUrl}/api${URI}`, {
                 method: 'POST',
                 headers: {
@@ -28,8 +27,6 @@ export const useUnbook = (onUnbookSuccess?: () => void) => {
             if (!response.ok) {
                 throw new Error('Failed to cancel booking');
             }
-
-            console.log(response)
 
             toast({
                 title: "Booking Cancelled",

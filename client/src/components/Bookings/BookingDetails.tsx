@@ -44,7 +44,6 @@ export function BookingDetails({
         const endTime = addMinutes(startTime, sauna.slotDurationMinutes);
         return { startTime, endTime };
       });
-      console.log(isBooking)
       const bookingPromises = bookingTimes.map(({ startTime, endTime }) =>
         fetch(`${apiUrl}/api/bookings`, {
           method: 'POST',

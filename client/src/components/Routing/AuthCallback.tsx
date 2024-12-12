@@ -13,16 +13,11 @@ export const Auth0Callback = () => {
 
   useEffect(() => {
     const initializeUser = async () => {
-      console.log('InitializeUser called')
       if (!isAuth0Loading && isAuthenticated) {
-        console.log('User authenticated, fetching token')
         try {
           const token = await getAccessTokenSilently();
-          console.log('Token received');
           const registerIntent = localStorage.getItem('register_intent');
           const url = new URL(`${apiUrl}/api/users/me`);
-          console.log('Fetching from URL:', url.toString()); 
-
           if (registerIntent) {
             url.searchParams.append('register_intent', registerIntent);
             localStorage.removeItem('register_intent');
@@ -31,14 +26,12 @@ export const Auth0Callback = () => {
           const userResponse = await fetch(url.toString(), {
             headers: { Authorization: `Bearer ${token}` }
           });
-          console.log('User response status:', userResponse.status); 
 
           if (!userResponse.ok) {
             throw new Error('Failed to fetch user data');
           }
 
           const userData = await userResponse.json();
-          console.log('User data received:', { role: userData.role }); 
 
           dispatch({
             type: UserActionType.LOGIN,
@@ -74,7 +67,6 @@ export const Auth0Callback = () => {
 
     initializeUser();
   }, [isAuth0Loading, isAuthenticated]);
-  console.log('Rendering callback with loading:', isAuth0Loading);
 
 
   if (isAuth0Loading) {
