@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PendingInvite } from '@/types/InviteTypes';
 import { Button } from '@/components/ui/button';
 import { GlowCard } from '@/components/ui/GlowCard';
