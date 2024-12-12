@@ -19,7 +19,7 @@ export default function BookingPage() {
   const { saunaId } = useParams();
   const { getAccessTokenSilently } = useAuth0();
   const [sauna, setSauna] = useState<ISauna | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isSaunaLoading, setSaunaLoading] = useState(true);
   const [date, setDate] = useState<Date>(new Date());
   const [selectedSlots, setSelectedSlots] = useState<TimeSlotSelection | null>(null);
   const [userBookings, setUserBookings] = useState<Booking[]>([]);
@@ -29,13 +29,17 @@ export default function BookingPage() {
     setRefresh(prev => prev + 1);
   };
 
+    useEffect(() => {
+    setSelectedSlots(null);
+  }, [refreshKey])
+
+
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchSauna = async () => {
       try {
-        setIsLoading(true);
+        setSaunaLoading(true);
         const token = await getAccessTokenSilently();
-
         const saunaResponse = await fetch(`${apiUrl}/api/saunas/${saunaId}`, {
           headers: {
             Authorization: `Bearer ${token}`
@@ -47,7 +51,6 @@ export default function BookingPage() {
         }
         const saunaData = await saunaResponse.json();
         setSauna(saunaData);
-
       } catch (error) {
         console.error('Error fetching data:', error);
         toast({
@@ -56,22 +59,20 @@ export default function BookingPage() {
           variant: "destructive",
         });
       } finally {
-        setIsLoading(false);
+        setSaunaLoading(false);
       }
     };
 
     if (saunaId) {
-      fetchData();
+      fetchSauna();
     }
   }, [saunaId, getAccessTokenSilently, refreshKey]);
-
 
 
 
   useEffect(() => {
     const fetchAllUserBookings = async () => {
       try {
-        await new Promise(resolve => setTimeout(resolve, 100));
         const token = await getAccessTokenSilently();
         const response = await fetch(
           `${apiUrl}/api/bookings/my-bookings`,
@@ -86,23 +87,19 @@ export default function BookingPage() {
         console.error('Error fetching bookings:', error);
         toast({
           title: "Error",
-          description: "Failed to load your bookings 2"
+          description: "Failed to load your bookings"
         });
+      } finally {
       }
     };
 
-    if (saunaId) {
+    if (saunaId && !isSaunaLoading) {  
       fetchAllUserBookings();
     }
-  }, [saunaId, getAccessTokenSilently, refreshKey]);
+  }, [saunaId, isSaunaLoading, getAccessTokenSilently, refreshKey]);
 
-  useEffect(() => {
-    setSelectedSlots(null);
-  }, [refreshKey])
-
-
-  if (isLoading) {
-    return <LoadingAnimation isLoading={isLoading} text="Loading sauna details..." />;
+  if (isSaunaLoading) {
+    return <LoadingAnimation isLoading={isSaunaLoading} text="Loading sauna details..." />;
   }
 
   if (!sauna) {
