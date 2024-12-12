@@ -27,7 +27,7 @@ const AcceptInvitePage = () => {
                                 Welcome to Book a Bastu
                             </h1>
                             <p className="mt-6 text-lg text-muted-foreground">
-                                Sign in / sign up to access your personal invitation. <br/> <span className='text-white'>Please use the same email that your invite was sent to</span>.
+                                Sign in / sign up to access your personal invitation. <br/>Please use the same email that your invite was sent to.
                             </p>
                             <div className="mt-8 flex flex-wrap gap-4">
                                 <Button onClick={handleUserLogin} size="lg">

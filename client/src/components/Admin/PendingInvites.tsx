@@ -36,8 +36,10 @@ export function PendingInvites() {
         }
 
         const invites = await response.json();
+        console.log('Received invites:', invites);
         setPendingInvites(invites);
       } catch (err) {
+        console.error('Error fetching invites:', err);
         setError(err instanceof Error ? err.message : 'Failed to load invites');
       } finally {
         setIsLoading(false);
@@ -76,7 +78,7 @@ export function PendingInvites() {
         description: "You have successfully accepted the invite.",
         variant: "default",
       });
-  
+
       setTimeout(() => {
         navigate('/booking');
       }, 100);
@@ -101,22 +103,22 @@ export function PendingInvites() {
       <main className="flex-grow flex items-start justify-center pt-12 px-4">
         <GlowCard className="w-full max-w-2xl bg-background/80 backdrop-blur-sm border-muted-foreground/20">
           <CardHeader>
-            <CardTitle className="text-2xl font-semibold text-center">
+            <CardTitle className="text-xl sm:text-2xl font-semibold text-center">
               Pending Invites ({pendingInvites.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
             {pendingInvites.map(invite => (
               <div key={invite._id} className="mb-4 last:mb-0">
-                <Card className="bg-muted/50 border-muted-foreground/20">
-                  <CardContent className="flex justify-between items-center p-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <GlowCard className="bg-muted/50 border-muted-foreground/20">
+                  <CardContent className="flex flex-col sm:flex-row justify-between items-center p-4 sm:p-6 space-y-4 sm:space-y-0">
+                    <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <span className="text-2xl font-bold text-primary">
                           {invite.saunaId?.name?.[0] || '?'}
                         </span>
                       </div>
-                      <div>
+                      <div className="text-center sm:text-left">
                         <h3 className="text-lg font-semibold">
                           {invite.saunaId?.name || 'Unknown Sauna'}
                         </h3>
@@ -127,12 +129,13 @@ export function PendingInvites() {
                     </div>
                     <Button
                       onClick={() => acceptInvite(invite._id)}
-                      className="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-200"
+                      variant={"secondary"}
+                      className="w-full sm:w-auto"
                     >
                       Accept Invite
                     </Button>
                   </CardContent>
-                </Card>
+                </GlowCard>
               </div>
             ))}
           </CardContent>
