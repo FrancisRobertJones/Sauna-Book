@@ -7,7 +7,7 @@ import { LoadingAnimation } from '../Loading/Loading';
 import { apiUrl } from '@/constants/api-url';
 
 export const Auth0Callback = () => {
-  const { isAuthenticated, isLoading: isAuth0Loading, getAccessTokenSilently } = useAuth0();
+  const { logout, isAuthenticated, isLoading: isAuth0Loading, getAccessTokenSilently } = useAuth0();
   const navigate = useNavigate();
   const { dispatch } = useUser();
 
@@ -26,6 +26,15 @@ export const Auth0Callback = () => {
           const userResponse = await fetch(url.toString(), {
             headers: { Authorization: `Bearer ${token}` }
           });
+
+          if (userResponse.status === 400) {
+            await logout({
+              logoutParams: {
+                returnTo: window.location.origin + '/select-account-type'
+              }
+            });
+            return;
+          }
 
           if (!userResponse.ok) {
             throw new Error('Failed to fetch user data');

@@ -1,5 +1,6 @@
 import { Ban } from 'lucide-react'
 
+
 export default function NoAccess() {
   return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-4 duration-1000 flex flex-col items-center justify-center space-y-4 text-center">
@@ -13,4 +14,6 @@ export default function NoAccess() {
       </div>
   )
 }
+
+
 

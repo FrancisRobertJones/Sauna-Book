@@ -85,7 +85,14 @@ export default function LandingPage() {
         </div>
       </section>
 
-
+      <div className="text-center mb-16">
+        <h1 className="text-4xl font-bold tracking-tight sm:text-6xl mb-6">
+          Revolutionize Your Sauna Management
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          Modernize your sauna bookings with our cutting-edge digital platform. Streamline operations, enhance user experience, and boost your business.
+        </p>
+      </div>
       <AuthSection />
 
 
