@@ -61,6 +61,13 @@ const baseAuth = [checkJwt, linkUser, attachUserStatus];
 app.use(helmet());
 app.use(express.json());
 
+if (process.env.TZ) {
+  console.log(`Server timezone set to: ${process.env.TZ}`);
+} else {
+  process.env.TZ = 'Europe/Stockholm';
+  console.log('Defaulting server timezone to Europe/Stockholm');
+}
+
 mongoose
   .connect(config.mongoUri)
   .then(() => {
