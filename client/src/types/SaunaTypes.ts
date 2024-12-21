@@ -1,7 +1,9 @@
 export interface TimeSlot {
-    start: string; 
-    end: string;    
-  }
+  startTime: Date;
+  endTime: Date;
+  isAvailable: boolean;
+  currentBookings: number;
+}
   
   export interface OperatingHours {
     weekday: TimeSlot;
