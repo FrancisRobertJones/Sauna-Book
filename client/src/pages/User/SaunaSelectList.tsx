@@ -6,25 +6,14 @@ import { GlowCard } from "@/components/ui/GlowCard"
 
 export default function SaunaSelectBooking() {
   const [isLoading, setIsLoading] = useState(true);
-  const { state } = useUser()
+  const { state } = useUser();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        if (state.accessibleSaunas) {
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error('Error:', error);
-      }
-    };
-  
-    fetchData();
+    if (state.accessibleSaunas !== undefined) {
+      setIsLoading(false);
+    }
   }, [state.accessibleSaunas]);
 
-  
   const SkeletonCards = () => (
     <>
       {[...Array(6)].map((_, i) => (
@@ -40,19 +29,33 @@ export default function SaunaSelectBooking() {
     </>
   );
 
+  const renderContent = () => {
+    if (isLoading) {
+      return <SkeletonCards />;
+    }
+
+    if (!Array.isArray(state.accessibleSaunas)) {
+      return <p className="col-span-full text-center">Error loading saunas. Please try again.</p>;
+    }
+
+    if (state.accessibleSaunas.length === 0) {
+      return (
+        <GlowCard className="col-span-full p-6">
+          <p className="text-center text-muted-foreground">No saunas are currently available.</p>
+        </GlowCard>
+      );
+    }
+
+    return state.accessibleSaunas.map((sauna) => (
+      <SaunaCard key={sauna._id} sauna={sauna} />
+    ));
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold mb-8">Available Saunas</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {isLoading ? (
-          <SkeletonCards />
-        ) : Array.isArray(state.accessibleSaunas) && state.accessibleSaunas.length > 0 ? (
-          state.accessibleSaunas.map((sauna) => (
-            <SaunaCard key={sauna._id} sauna={sauna} />
-          ))
-        ) : (
-          <p>No saunas available.</p>
-        )}
+        {renderContent()}
       </div>
     </div>
   );
