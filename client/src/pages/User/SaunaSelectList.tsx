@@ -3,16 +3,27 @@ import { SaunaCard } from "../../components/Bookings/SaunaCard"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useUser } from "@/state/userContext"
 import { GlowCard } from "@/components/ui/GlowCard"
+import { useAuth0 } from "@auth0/auth0-react"
 
 export default function SaunaSelectBooking() {
   const [isLoading, setIsLoading] = useState(true);
   const { state } = useUser();
+  const { isAuthenticated } = useAuth0();
+
 
   useEffect(() => {
-    if (state.accessibleSaunas !== undefined) {
+    console.log('SaunaSelect mount:', {
+      isAuthenticated,
+      accessibleSaunas: state.accessibleSaunas,
+      isLoading
+    });
+  }, [isAuthenticated, state.accessibleSaunas, isLoading]);
+
+  useEffect(() => {
+    if (isAuthenticated && state.accessibleSaunas !== undefined) {
       setIsLoading(false);
     }
-  }, [state.accessibleSaunas]);
+  }, [isAuthenticated, state.accessibleSaunas]);
 
   const SkeletonCards = () => (
     <>
@@ -30,6 +41,10 @@ export default function SaunaSelectBooking() {
   );
 
   const renderContent = () => {
+    if (!isAuthenticated) {
+      return <p className="col-span-full text-center">Please log in to view available saunas.</p>;
+    }
+    
     if (isLoading) {
       return <SkeletonCards />;
     }

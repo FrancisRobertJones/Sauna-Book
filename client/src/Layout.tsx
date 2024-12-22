@@ -20,6 +20,8 @@ const Layout = () => {
 
   useEffect(() => {
     const initializeUser = async () => {
+      console.log('Initializing user:', { isAuthenticated, user });
+
       if (isAuthenticated && user) {
         try {
           const token = await getAccessTokenSilently();
@@ -61,6 +63,11 @@ const Layout = () => {
             const saunaDetails = await Promise.all(saunaDetailsPromises);
             saunas = saunaDetails.filter((sauna) => sauna !== null); 
           }
+
+          console.log('About to dispatch user data:', {
+            role: userData.role,
+            saunasCount: saunas.length
+          });
 
           const dispatchPayload: IUserAction = {
             type: UserActionType.LOGIN,
