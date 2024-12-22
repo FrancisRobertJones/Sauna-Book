@@ -7,24 +7,16 @@ import { useEffect, useState } from "react";
 export default function SaunaSelectBooking() {
   const [isInitialLoad, setIsInitialLoad] = useState(true); 
   const { state } = useUser();
-
+  
   useEffect(() => {
-    console.log('State changed:', {
-      accessibleSaunas: state.accessibleSaunas,
-      isInitialLoad,
-      isAuthenticated: state.isAuthenticated,
-      role: state.role
-    });
-
-    if (state.accessibleSaunas !== undefined) {
+    if (state.isAuthenticated && state.accessibleSaunas !== undefined) {
       setIsInitialLoad(false);
     }
-  }, [state.accessibleSaunas]);
+  }, [state.accessibleSaunas, state.isAuthenticated]);
 
-  console.log('Render state:', {
-    accessibleSaunas: state.accessibleSaunas,
-    isInitialLoad
-  });
+  if (isInitialLoad) {
+    return <LoadingAnimation isLoading={true} text="Loading available saunas..." />;
+  }
 
   if (isInitialLoad) {
     return <LoadingAnimation isLoading={true} text="Loading available saunas..." />;
