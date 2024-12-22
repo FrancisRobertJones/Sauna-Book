@@ -1,6 +1,6 @@
 export interface TimeSlot {
-  startTime: Date;
-  endTime: Date;
+  start: string;
+  end: string;
   isAvailable: boolean;
   currentBookings: number;
 }
