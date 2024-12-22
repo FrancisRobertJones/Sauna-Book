@@ -9,7 +9,7 @@ import { apiUrl } from '@/constants/api-url';
 export const Auth0Callback = () => {
   const { logout, isAuthenticated, isLoading: isAuth0Loading, getAccessTokenSilently } = useAuth0();
   const navigate = useNavigate();
-  const { dispatch, state } = useUser(); 
+  const { dispatch, state } = useUser();
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export const Auth0Callback = () => {
             url.searchParams.append('register_intent', registerIntent);
             localStorage.removeItem('register_intent');
           }
-  
+
           const userResponse = await fetch(url.toString(), {
             headers: { Authorization: `Bearer ${token}` }
           });
@@ -93,7 +93,7 @@ export const Auth0Callback = () => {
             if (userData.hasPendingInvites) {
               setPendingNavigation('/check-invites');
             } else if (userData.saunaAccess?.length > 0) {
-              window.location.replace('/booking');
+              window.location.href = `${window.location.origin}/booking`
             } else {
               setPendingNavigation('/no-access');
             }
