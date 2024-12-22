@@ -93,7 +93,7 @@ export const Auth0Callback = () => {
             if (userData.hasPendingInvites) {
               setPendingNavigation('/check-invites');
             } else if (userData.saunaAccess?.length > 0) {
-              setPendingNavigation('/booking');
+              window.location.replace('/booking');
             } else {
               setPendingNavigation('/no-access');
             }

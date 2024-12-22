@@ -1,18 +1,30 @@
-import { useEffect, useState } from "react"
-import { SaunaCard } from "../../components/Bookings/SaunaCard"
-import { useUser } from "@/state/userContext"
-import { GlowCard } from "@/components/ui/GlowCard"
-import { LoadingAnimation } from "@/components/Loading/Loading"
+import { SaunaCard } from "@/components/Bookings/SaunaCard";
+import { LoadingAnimation } from "@/components/Loading/Loading";
+import { GlowCard } from "@/components/ui/GlowCard";
+import { useUser } from "@/state/userContext";
+import { useEffect, useState } from "react";
 
 export default function SaunaSelectBooking() {
   const [isInitialLoad, setIsInitialLoad] = useState(true); 
   const { state } = useUser();
 
   useEffect(() => {
-    if (state.accessibleSaunas?.length > 0) {
+    console.log('State changed:', {
+      accessibleSaunas: state.accessibleSaunas,
+      isInitialLoad,
+      isAuthenticated: state.isAuthenticated,
+      role: state.role
+    });
+
+    if (state.accessibleSaunas !== undefined) {
       setIsInitialLoad(false);
     }
   }, [state.accessibleSaunas]);
+
+  console.log('Render state:', {
+    accessibleSaunas: state.accessibleSaunas,
+    isInitialLoad
+  });
 
   if (isInitialLoad) {
     return <LoadingAnimation isLoading={true} text="Loading available saunas..." />;
