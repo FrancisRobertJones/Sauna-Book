@@ -1,76 +1,38 @@
 import { useEffect, useState } from "react"
 import { SaunaCard } from "../../components/Bookings/SaunaCard"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useUser } from "@/state/userContext"
 import { GlowCard } from "@/components/ui/GlowCard"
-import { useAuth0 } from "@auth0/auth0-react"
+import { LoadingAnimation } from "@/components/Loading/Loading"
 
 export default function SaunaSelectBooking() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true); 
   const { state } = useUser();
-  const { isAuthenticated } = useAuth0();
-
 
   useEffect(() => {
-    console.log('SaunaSelect mount:', {
-      isAuthenticated,
-      accessibleSaunas: state.accessibleSaunas,
-      isLoading
-    });
-  }, [isAuthenticated, state.accessibleSaunas, isLoading]);
-
-  useEffect(() => {
-    if (isAuthenticated && state.accessibleSaunas !== undefined) {
-      setIsLoading(false);
+    if (state.accessibleSaunas?.length > 0) {
+      setIsInitialLoad(false);
     }
-  }, [isAuthenticated, state.accessibleSaunas]);
+  }, [state.accessibleSaunas]);
 
-  const SkeletonCards = () => (
-    <>
-      {[...Array(6)].map((_, i) => (
-        <GlowCard key={i} className="p-4">
-          <Skeleton className="h-[200px] w-full rounded-lg" />
-          <div className="space-y-2 mt-4">
-            <Skeleton className="h-4 w-2/3" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-          </div>
-        </GlowCard>
-      ))}
-    </>
-  );
-
-  const renderContent = () => {
-    if (!isAuthenticated) {
-      return <p className="col-span-full text-center">Please log in to view available saunas.</p>;
-    }
-    
-    if (isLoading) {
-      return <SkeletonCards />;
-    }
-
-    if (!Array.isArray(state.accessibleSaunas)) {
-      return <p className="col-span-full text-center">Error loading saunas. Please try again.</p>;
-    }
-
-    if (state.accessibleSaunas.length === 0) {
-      return (
-        <GlowCard className="col-span-full p-6">
-          <p className="text-center text-muted-foreground">No saunas are currently available.</p>
-        </GlowCard>
-      );
-    }
-
-    return state.accessibleSaunas.map((sauna) => (
-      <SaunaCard key={sauna._id} sauna={sauna} />
-    ));
-  };
+  if (isInitialLoad) {
+    return <LoadingAnimation isLoading={true} text="Loading available saunas..." />;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold mb-8">Available Saunas</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {renderContent()}
+        {Array.isArray(state.accessibleSaunas) && state.accessibleSaunas.length > 0 ? (
+          state.accessibleSaunas.map((sauna) => (
+            <SaunaCard key={sauna._id} sauna={sauna} />
+          ))
+        ) : (
+          <GlowCard className="col-span-full p-6">
+            <p className="text-center text-muted-foreground">
+              No saunas are currently available.
+            </p>
+          </GlowCard>
+        )}
       </div>
     </div>
   );
