@@ -1,5 +1,5 @@
 import { useAuth0 } from '@auth0/auth0-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/state/userContext';
 import { UserActionType } from '@/reducers/userReducer';
@@ -9,7 +9,14 @@ import { apiUrl } from '@/constants/api-url';
 export const Auth0Callback = () => {
   const { logout, isAuthenticated, isLoading: isAuth0Loading, getAccessTokenSilently } = useAuth0();
   const navigate = useNavigate();
-  const { dispatch } = useUser();
+  const { dispatch, state } = useUser(); 
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (pendingNavigation && state.accessibleSaunas !== undefined) {
+      navigate(pendingNavigation);
+    }
+  }, [pendingNavigation, state.accessibleSaunas, navigate]);
 
   useEffect(() => {
     const initializeUser = async () => {
@@ -81,19 +88,19 @@ export const Auth0Callback = () => {
           }
 
           if (userData.role === 'admin') {
-            navigate('/my-saunas');
+            setPendingNavigation('/my-saunas');
           } else {
             if (userData.hasPendingInvites) {
-              navigate('/check-invites');
+              setPendingNavigation('/check-invites');
             } else if (userData.saunaAccess?.length > 0) {
-              navigate('/booking');
+              setPendingNavigation('/booking');
             } else {
-              navigate('/no-access');
+              setPendingNavigation('/no-access');
             }
           }
         } catch (error) {
           console.error('Error in Auth0Callback:', error);
-          navigate('/register-user');
+          setPendingNavigation('/register-user');
         }
       }
     };
@@ -101,10 +108,5 @@ export const Auth0Callback = () => {
     initializeUser();
   }, [isAuth0Loading, isAuthenticated]);
 
-
-  if (isAuth0Loading) {
-    return <LoadingAnimation isLoading={true} text="Loading..." />;
-  }
-
-  return <LoadingAnimation isLoading={true} text="Redirecting..." />;
+  return <LoadingAnimation isLoading={true} text="Setting up your account..." />;
 };
