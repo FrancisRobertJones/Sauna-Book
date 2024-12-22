@@ -42,19 +42,43 @@ export const Auth0Callback = () => {
 
           const userData = await userResponse.json();
 
-          dispatch({
-            type: UserActionType.LOGIN,
-            payload: {
-              auth0User: userData,
-              role: userData.role,
-              adminSaunas: userData.role === 'admin' ? [] : undefined,
-              accessibleSaunas: userData.role === 'user' ? userData.saunaAccess : [],
-              status: {
-                hasPendingInvites: userData.hasPendingInvites,
-                isSaunaMember: userData.saunaAccess?.length > 0
+          if (userData.role === 'user' && userData.saunaAccess?.length > 0) {
+            const saunaDetailsPromises = userData.saunaAccess.map((saunaId: string) =>
+              fetch(`${apiUrl}/api/saunas/${saunaId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              }).then((res) => (res.ok ? res.json() : null))
+            );
+
+            const saunaDetails = await Promise.all(saunaDetailsPromises);
+            const validSaunas = saunaDetails.filter((sauna) => sauna !== null);
+
+            dispatch({
+              type: UserActionType.LOGIN,
+              payload: {
+                auth0User: userData,
+                role: userData.role,
+                accessibleSaunas: validSaunas,
+                status: {
+                  hasPendingInvites: userData.hasPendingInvites,
+                  isSaunaMember: validSaunas.length > 0
+                }
               }
-            }
-          });
+            });
+          } else {
+            dispatch({
+              type: UserActionType.LOGIN,
+              payload: {
+                auth0User: userData,
+                role: userData.role,
+                adminSaunas: userData.role === 'admin' ? [] : undefined,
+                accessibleSaunas: [],
+                status: {
+                  hasPendingInvites: userData.hasPendingInvites,
+                  isSaunaMember: false
+                }
+              }
+            });
+          }
 
           if (userData.role === 'admin') {
             navigate('/my-saunas');
