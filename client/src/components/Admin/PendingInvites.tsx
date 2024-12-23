@@ -17,7 +17,7 @@ export function PendingInvites() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate()
-  const { dispatch, state } = useUser();
+  const { dispatch } = useUser();
 
   useEffect(() => {
     const checkInvites = async () => {
