@@ -18,7 +18,8 @@ export enum UserActionType {
   LOGOUT = 'LOGOUT',
   REFRESH_SAUNAS = 'REFRESH_SAUNAS',
   UPDATE_STATUS = 'UPDATE_STATUS',
-  UPDATE_ADMIN_SAUNAS = 'UPDATE_ADMIN_SAUNAS'
+  UPDATE_ADMIN_SAUNAS = 'UPDATE_ADMIN_SAUNAS',
+  UPDATE_ACCESSIBLE_SAUNAS = 'UPDATE_ACCESSIBLE_SAUNAS'
 }
 
 export interface IUserAction {
@@ -106,6 +107,20 @@ export const userReducer = (state: UserState, action: IUserAction): UserState =>
         action.payload.adminSaunas,
         state.accessibleSaunas,
         state.status,
+      );
+
+    case UserActionType.UPDATE_ACCESSIBLE_SAUNAS:
+      if (!action.payload?.accessibleSaunas) return state;
+      return new UserState(
+        state.isAuthenticated,
+        state.user,
+        state.role,
+        state.adminSaunas,
+        action.payload.accessibleSaunas,
+        {
+          ...state.status,
+          isSaunaMember: action.payload.accessibleSaunas.length > 0
+        }
       );
 
     case UserActionType.LOGOUT:

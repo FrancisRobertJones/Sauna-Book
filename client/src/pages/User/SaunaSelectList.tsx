@@ -9,25 +9,20 @@ export default function SaunaSelectBooking() {
   const { state } = useUser();
 
   useEffect(() => {
-    console.log('Sauna state check:', {
-      isArray: Array.isArray(state.accessibleSaunas),
-      saunas: state.accessibleSaunas,
-      length: state.accessibleSaunas?.length
-    });
+    const initializeData = async () => {
+      if (
+        state.isAuthenticated &&
+        state.accessibleSaunas !== undefined &&
+        state.role === 'user'
+      ) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        setIsInitialLoad(false);
+      }
+    };
 
-    if (
-      state.isAuthenticated && 
-      state.accessibleSaunas !== undefined && 
-      state.role === 'user'
-    ) {
-      setIsInitialLoad(false);
-    }
+    initializeData();
   }, [state.accessibleSaunas, state.isAuthenticated, state.role]);
 
-  console.log('Pre-render state:', {
-    accessibleSaunas: state.accessibleSaunas,
-    condition: Array.isArray(state.accessibleSaunas) && state.accessibleSaunas.length > 0
-  });
 
   if (isInitialLoad || !state.isAuthenticated || state.accessibleSaunas === undefined) {
     return <LoadingAnimation isLoading={true} text="Loading available saunas..." />;

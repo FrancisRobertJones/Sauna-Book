@@ -52,6 +52,7 @@ export function PendingInvites() {
   const acceptInvite = async (inviteId: string) => {
     try {
       const token = await getAccessTokenSilently();
+
       const response = await fetch(`${apiUrl}/api/invite/${inviteId}/accept`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
@@ -61,15 +62,39 @@ export function PendingInvites() {
         throw new Error('Failed to accept invite');
       }
 
+      const userResponse = await fetch(`${apiUrl}/api/users/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!userResponse.ok) {
+        throw new Error('Failed to fetch updated user data');
+      }
+
+      const userData = await userResponse.json();
+
+      const saunaDetailsPromises = userData.saunaAccess.map((saunaId: string) =>
+        fetch(`${apiUrl}/api/saunas/${saunaId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }).then((res) => (res.ok ? res.json() : null))
+      );
+
+      const saunaDetails = await Promise.all(saunaDetailsPromises);
+      const validSaunas = saunaDetails.filter((sauna) => sauna !== null);
+
+      dispatch({
+        type: UserActionType.UPDATE_ACCESSIBLE_SAUNAS,
+        payload: {
+          accessibleSaunas: validSaunas
+        }
+      });
+
       dispatch({
         type: UserActionType.UPDATE_STATUS,
         payload: {
           status: {
-            ...state.status,
             hasPendingInvites: false,
             isSaunaMember: true
-          },
-          role: state.role || "user"
+          }
         }
       });
 
@@ -79,15 +104,19 @@ export function PendingInvites() {
         variant: "default",
       });
 
-      setTimeout(() => {
-        navigate('/booking');
-      }, 100);
-
       setPendingInvites(current =>
         current.filter(invite => invite._id !== inviteId)
       );
+
+      navigate('/booking');
+
     } catch (err) {
       console.error('Error accepting invite:', err);
+      toast({
+        title: "Error",
+        description: "Failed to accept invite. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
