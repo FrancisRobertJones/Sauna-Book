@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import { format } from 'date-fns';
 import { GlowCard } from "../ui/GlowCard";
 import { apiUrl } from "@/constants/api-url";
+import BookingLimitInfo from "./BookingLimitInfo";
 
 
 
@@ -21,7 +22,7 @@ export function TimeSlotPicker({
     const { getAccessTokenSilently } = useAuth0();
     const [hasReachedLimit, setHasReachedLimit] = useState(false);
     const [lastFetchedDate, setLastFetchedDate] = useState<string | null>(null);
-
+    const [userTotalBookings, setUserTotalBookings] = useState<number>(0);
 
 
     const normalizeDateString = (date: Date) => {
@@ -33,8 +34,8 @@ export function TimeSlotPicker({
     useEffect(() => {
         const fetchSlotsForDate = async () => {
             const normalizedSelectedDate = normalizeDateString(selectedDate);
-            
-            
+
+
             if (lastFetchedDate === null || normalizedSelectedDate !== lastFetchedDate) {
                 setIsLoading(true);
                 setTimeSlots([]);
@@ -45,7 +46,7 @@ export function TimeSlotPicker({
                     const response = await fetch(
                         `${apiUrl}/api/bookings/available-slots/${sauna._id}?date=${selectedDate.toISOString()}`,
                         {
-                            headers: { 
+                            headers: {
                                 Authorization: `Bearer ${token}`,
                                 'Cache-Control': 'no-cache, no-store, must-revalidate',
                                 'Pragma': 'no-cache'
@@ -71,6 +72,32 @@ export function TimeSlotPicker({
         fetchSlotsForDate();
     }, [selectedDate, sauna._id, getAccessTokenSilently]);
 
+    useEffect(() => {
+        const fetchUserBookings = async () => {
+            try {
+                const token = await getAccessTokenSilently();
+                const response = await fetch(
+                    `${apiUrl}/api/bookings/user-bookings-count/${sauna._id}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Cache-Control': 'no-cache'
+                        }
+                    }
+                );
+
+                if (response.ok) {
+                    const { count } = await response.json();
+                    setUserTotalBookings(count);
+                }
+            } catch (error) {
+                console.error('Error fetching user bookings:', error);
+            }
+        };
+
+        fetchUserBookings();
+    }, [sauna._id, getAccessTokenSilently]);
+
     const getSlotStatus = (slot: TimeSlot) => {
         if (!slot.isAvailable) return "unavailable";
         if (isSlotSelectable(slot)) return "selectable";
@@ -87,10 +114,10 @@ export function TimeSlotPicker({
         const selectedIndex = timeSlots.findIndex(slot =>
             new Date(slot.startTime).toISOString() === slotTime
         );
-    
+
         if (!timeSlots[selectedIndex].isAvailable) return;
         if (hasReachedLimit) return;
-    
+
         const checkConsecutiveAvailability = (startIndex: number, count: number) => {
             for (let i = startIndex; i < startIndex + count; i++) {
                 if (!timeSlots[i] || !timeSlots[i].isAvailable) {
@@ -99,34 +126,34 @@ export function TimeSlotPicker({
             }
             return true;
         };
-    
+
         if (!selectedSlots) {
             onSlotsSelect({
                 startSlot: slotTime,
                 numberOfSlots: 1
             });
-            
+
             if (sauna.maxConcurrentBookings === 1) {
                 setHasReachedLimit(true);
             }
             return;
         }
-    
+
         const currentIndex = timeSlots.findIndex(slot =>
             new Date(slot.startTime).toISOString() === selectedSlots.startSlot
         );
-    
+
         const isConsecutive = selectedIndex === currentIndex + selectedSlots.numberOfSlots;
         const isWithinLimit = selectedSlots.numberOfSlots < sauna.maxConcurrentBookings;
-        
+
         if (isConsecutive && isWithinLimit) {
             if (checkConsecutiveAvailability(currentIndex, selectedSlots.numberOfSlots + 1)) {
                 const newNumberOfSlots = selectedSlots.numberOfSlots + 1;
                 onSlotsSelect({
-                    startSlot: selectedSlots.startSlot, 
+                    startSlot: selectedSlots.startSlot,
                     numberOfSlots: newNumberOfSlots
                 });
-    
+
                 if (newNumberOfSlots === sauna.maxConcurrentBookings) {
                     setHasReachedLimit(true);
                 }
@@ -136,7 +163,7 @@ export function TimeSlotPicker({
                 startSlot: slotTime,
                 numberOfSlots: 1
             });
-            
+
             if (sauna.maxConcurrentBookings === 1) {
                 setHasReachedLimit(true);
             }
@@ -145,6 +172,7 @@ export function TimeSlotPicker({
     const isSlotSelectable = (slot: TimeSlot) => {
         if (!slot.isAvailable) return false;
         if (hasReachedLimit) return false;
+        if (userTotalBookings >= sauna.maxTotalBookings) return false;
 
         if (sauna.maxConcurrentBookings === 1 && selectedSlots) return false;
 
@@ -231,6 +259,10 @@ export function TimeSlotPicker({
                     )}
                 </div>
             )}
+            <BookingLimitInfo
+                userTotalBookings={userTotalBookings}
+                maxTotalBookings={sauna.maxTotalBookings}
+            />
         </GlowCard>
     );
 }

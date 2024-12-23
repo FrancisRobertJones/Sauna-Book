@@ -34,7 +34,7 @@ export class SaunaService {
             slotDurationMinutes: updates.slotDurationMinutes,
             operatingHours: updates.operatingHours,
             maxConcurrentBookings: updates.maxConcurrentBookings,
-            maxTotalBookings: updates.maxBookingsPerUser,
+            maxTotalBookings: updates.maxTotalBookings,
             location: updates.location,
             description: updates.description
         };

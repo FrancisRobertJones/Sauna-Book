@@ -75,7 +75,7 @@ export class BookingController {
   adminCancelBooking = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { bookingId, userId } = req.params;
-    
+
       await this.bookingService.cancelBookingAdmin(bookingId, userId);
       res.json({ message: 'Booking cancelled successfully' });
     } catch (error) {
@@ -98,6 +98,27 @@ export class BookingController {
       next(error);
     }
   };
+
+  getUserBookingsCount = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const authReq = req as AuthRequest;
+        const userId = authReq.auth?.payload.sub;
+        const { saunaId } = req.params;
+
+        if (!userId) {
+            throw new ApplicationError('Unauthorized', 401);
+        }
+
+        if (!saunaId) {
+            throw new ApplicationError('No sauna id provided', 400);
+        }
+
+        const bookingsCount = await this.bookingService.getUserBookingsCount(userId, saunaId);
+        res.json({ count: bookingsCount });
+    } catch (error) {
+        next(error);
+    }
+}
 
   getBooking = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -188,8 +209,8 @@ export class BookingController {
 
       const user = await this.bookingService.getSaunaUserFromBooking(bookingId)
       console.log("this is the user in controller : " + user)
-      return res.json(user); 
-      
+      return res.json(user);
+
     } catch (error) {
       next(error);
     }
