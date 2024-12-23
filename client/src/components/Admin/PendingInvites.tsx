@@ -18,6 +18,8 @@ export function PendingInvites() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate()
   const { dispatch } = useUser();
+  const [processingInviteId, setProcessingInviteId] = useState<string | null>(null);
+
 
   useEffect(() => {
     const checkInvites = async () => {
@@ -50,6 +52,7 @@ export function PendingInvites() {
   }, [user]);
 
   const acceptInvite = async (inviteId: string) => {
+    setProcessingInviteId(inviteId)
     try {
       const token = await getAccessTokenSilently();
 
@@ -118,6 +121,9 @@ export function PendingInvites() {
         variant: "destructive",
       });
     }
+    finally {
+      setProcessingInviteId(null);
+    }
   };
 
   if (isLoading) return <LoadingAnimation isLoading={true} text="Loading invites..." />;
@@ -158,10 +164,37 @@ export function PendingInvites() {
                     </div>
                     <Button
                       onClick={() => acceptInvite(invite._id)}
-                      variant={"secondary"}
+                      variant="secondary"
                       className="w-full sm:w-auto"
+                      disabled={processingInviteId === invite._id}
                     >
-                      Accept Invite
+                      {processingInviteId === invite._id ? (
+                        <>
+                          <span className="mr-2">Accepting invite...</span>
+                          <svg
+                            className="animate-spin h-4 w-4"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            />
+                          </svg>
+                        </>
+                      ) : (
+                        'Accept Invite'
+                      )}
                     </Button>
                   </CardContent>
                 </GlowCard>
