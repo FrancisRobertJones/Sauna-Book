@@ -51,6 +51,17 @@ export class BookingService {
       throw new ApplicationError('Sauna not found', 404);
     }
 
+    const userBookings = await this.bookingRepository.countUserActiveBookings(userId, saunaId);
+
+    if (sauna.maxTotalBookings && userBookings >= sauna.maxTotalBookings) {
+    console.log('Debug - Should block booking:', {
+      maxAllowed: sauna.maxTotalBookings,
+      current: userBookings
+    });
+    throw new ApplicationError(`Maximum limit of ${sauna.maxTotalBookings} active bookings reached for this sauna`, 400);
+  }
+
+
     const endTime = new Date(startTime);
     endTime.setMinutes(endTime.getMinutes() + sauna.slotDurationMinutes);
 
@@ -62,11 +73,6 @@ export class BookingService {
 
     if (concurrentBookings >= sauna.maxConcurrentBookings) {
       throw new ApplicationError('This time slot is fully booked', 400);
-    }
-
-    const userBookings = await this.bookingRepository.countUserActiveBookings(userId);
-    if (sauna.maxBookingsPerUser && userBookings >= sauna.maxBookingsPerUser) {
-      throw new ApplicationError('User has reached maximum booking limit', 400);
     }
 
     return this.bookingRepository.create({
@@ -114,6 +120,15 @@ export class BookingService {
   async getUserBookings(userId: string) {
     return this.bookingRepository.findByUser(userId);
   }
+
+  async getUserBookingsCount(userId: string, saunaId: string): Promise<number> {
+    const hasAccess = await this.userService.hasAccessToSauna(userId, saunaId);
+    if (!hasAccess) {
+        throw new ApplicationError('User does not have access to this sauna', 403);
+    }
+
+    return this.bookingRepository.countUserActiveBookings(userId, saunaId);
+}
 
   async getBooking(bookingId: string, userId: string) {
     const booking = await this.bookingRepository.findById(bookingId);

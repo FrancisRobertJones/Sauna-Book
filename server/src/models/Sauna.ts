@@ -116,7 +116,7 @@ export interface ISauna extends Document {
   slotDurationMinutes: number;
   operatingHours: OperatingHours;
   maxConcurrentBookings: number;
-  maxBookingsPerUser:number;
+  maxTotalBookings: number;
   location?: string;
   description?: string;
 }

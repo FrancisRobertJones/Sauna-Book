@@ -63,9 +63,10 @@ export class BookingRepository {
     });
   }
 
-  async countUserActiveBookings(userId: string) {
+  async countUserActiveBookings(userId: string, saunaId: string) {
     return Booking.countDocuments({
       userId,
+      saunaId,
       status: 'active',
       startTime: { $gte: new Date() }
     });

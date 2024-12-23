@@ -22,6 +22,11 @@ router.get(
   bookingController.getUserBookings as RequestHandler
 );
 
+router.get(
+  '/user-bookings-count/:saunaId',
+  bookingController.getUserBookingsCount as RequestHandler
+)
+
 router.post(
   '/',
   bookingController.createBooking as RequestHandler
