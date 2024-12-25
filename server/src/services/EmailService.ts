@@ -26,21 +26,24 @@ export class EmailService {
         });
     }
 
-    async sendInviteEmail(email: string, invite: IInvite): Promise<void> {
+    async sendInviteEmail(email: string, name: string): Promise<void> {
         if (!this.transporter) {
             throw new Error('Email service not initialized');
         }
 
         try {
+            const frontendUrl = 'https://boka-bastu.vercel.app';
+            const inviteLink = `${frontendUrl}/accept-invite`;
+
             const result = await this.transporter.sendMail({
                 from: `"Sauna Booking" <${process.env.GMAIL_USER}>`,
                 to: email,
-                subject: 'You\'ve Been Invited to a Sauna!',
+                subject: `You\'ve Been Invited to ${name}!'`,
                 html: `
                     <h1>Sauna Invitation</h1>
                     <p>You've been invited to join a sauna.</p>
                     <p>Click the link below to join:</p>
-                    <a href="${process.env.FRONTEND_URL}/accept-invite">
+                    <a href="${inviteLink}">
                         Accept Invitation
                     </a>
                 `
@@ -52,7 +55,7 @@ export class EmailService {
         }
     }
 
-    async sendInviteWithdrawEmail(email: string, invite: IInvite): Promise<void> {
+    async sendInviteWithdrawEmail(email: string, name: string): Promise<void> {
         if (!this.transporter) {
             throw new Error('Email service not initialized');
         }
@@ -64,11 +67,10 @@ export class EmailService {
                 subject: 'You\'re Invite Has Been Withdrawn!',
                 html: `
                     <h1>Sauna Invite Has Been Withdrawn!</h1>
-                    <p>The admin for ${invite._id} has withdrawn your invitation.</p>
+                    <p>The admin for ${name} has withdrawn your invitation.</p>
                     <p>Please contact your BRF to get a new invitation.</p>
                 `
             });
-            //TODO add sauna name to invite model. 
             console.log('Email sent:', result);
         } catch (error) {
             console.error('Detailed email error:', error);
@@ -76,7 +78,7 @@ export class EmailService {
         }
     }
 
-    async sendInviteAcceptedEmail(email: string, invite: IInvite): Promise<void> {
+    async sendInviteAcceptedEmail(email: string, name: string): Promise<void> {
         if (!this.transporter) {
             throw new Error('Email service not initialized');
         }
@@ -85,7 +87,7 @@ export class EmailService {
             const result = await this.transporter.sendMail({
                 from: `"Sauna Booking" <${process.env.GMAIL_USER}>`,
                 to: email,
-                subject: `Welcome to ${invite._id}!`,
+                subject: `Welcome to ${name}!`,
                 html: `
                     <h1>You've successfully accepted your invitation!</h1>
                     <p>Find all details about booking under "My Saunas" after logging in.</p>
