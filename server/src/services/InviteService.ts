@@ -56,7 +56,7 @@ export class InviteService {
 
         const invite = await this.inviteRepository.create(inviteData);
 
-        await this.emailService.sendInviteEmail(email, invite);
+        await this.emailService.sendInviteEmail(email, sauna.name);
 
         return invite;
     }
@@ -138,7 +138,7 @@ export class InviteService {
             throw new ApplicationError('Failed to cancel invite', 500);
         }
 
-        await this.emailService.sendInviteWithdrawEmail(invite.email, invite);
+        await this.emailService.sendInviteWithdrawEmail(invite.email, sauna.name);
 
         return updatedInvite;
     }
@@ -156,6 +156,12 @@ export class InviteService {
         if (!mongoose.Types.ObjectId.isValid(saunaId)) {
             throw new ApplicationError('Invalid sauna ID format', 400);
         }
+
+        const sauna = await this.saunaService.findById(invite.saunaId.toString());
+
+        if (!sauna) {
+            throw new ApplicationError('Not authorized to cancel invite', 403);
+        }
     
         const userHasAccess = await this.userService.hasAccessToSauna(
             userId,
@@ -171,7 +177,7 @@ export class InviteService {
         await this.inviteRepository.updateStatus(inviteId, InviteStatus.ACCEPTED);
         
         try {
-            await this.emailService.sendInviteAcceptedEmail(invite.email, invite);
+            await this.emailService.sendInviteAcceptedEmail(invite.email, sauna?.name);
         } catch (error) {
             console.error('Failed to send acceptance email:', error);
         }
