@@ -30,4 +30,8 @@ export class SaunaRepository {
         
         return updated;
     }
+
+    async deleteSauna(saunaId: string): Promise<void> {
+        await Sauna.findByIdAndDelete(saunaId);
+      }
 }

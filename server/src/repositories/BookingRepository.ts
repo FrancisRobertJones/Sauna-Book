@@ -130,4 +130,17 @@ export class BookingRepository {
       startTime: { $gte: today }
     });
   }
+
+  async cancelAllFutureBookings(saunaId: string): Promise<void> {
+    await Booking.updateMany(
+      {
+        saunaId,
+        startTime: { $gt: new Date() },
+        status: 'active'
+      },
+      {
+        status: 'cancelled'
+      }
+    );
+  }
 }

@@ -105,7 +105,7 @@ export default function SaunaSettingsForm({ saunaId }: { saunaId: string }) {
                 description: 'Sauna has been successfully deleted.',
             });
 
-            navigate('/dashboard');
+            navigate('/');
 
         } catch (error) {
             toast({

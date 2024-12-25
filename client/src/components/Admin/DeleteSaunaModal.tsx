@@ -1,12 +1,14 @@
-import { AlertTriangle } from 'lucide-react'
+import { Trash2, AlertCircle } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
 
 interface DeleteSaunaModalProps {
   isOpen: boolean
@@ -28,42 +30,46 @@ export function DeleteSaunaModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] bg-black text-white border border-white">
+      <DialogContent className="sm:max-w-[425px] bg-white text-black border border-gray-200">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Delete Sauna</DialogTitle>
+          <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+            <Trash2 className="w-6 h-6" />
+            Delete Sauna
+          </DialogTitle>
+          <DialogDescription className="text-gray-600">
+            This action cannot be undone.
+          </DialogDescription>
         </DialogHeader>
-        <div className="py-6">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <AlertTriangle className="w-8 h-8" />
-            <h3 className="text-lg font-semibold">Are you sure?</h3>
-            <AlertTriangle className="w-8 h-8" />
+        <Separator className="my-4" />
+        <div className="py-4">
+          <div className="flex items-center gap-2 mb-4 text-red-600">
+            <AlertCircle className="w-5 h-5" />
+            <p className="font-semibold">Warning</p>
           </div>
-          <p className="font-medium mb-4 text-center border-y border-white py-2">
-            Warning: This action cannot be undone.
+          <p className="mb-4">
+            You are about to delete the sauna &quot;{saunaName}&quot;.
           </p>
-          <p className="mb-2 text-center">
-            You are about to delete the sauna &quot;{saunaName}&quot;. This will:
-          </p>
-          <ul className="list-none mt-2 space-y-2 text-gray-300">
-            <li className="flex items-center">
-              <span className="w-2 h-2 bg-white rounded-full mr-2"></span>
-              Remove all sauna settings and information
-            </li>
-            <li className="flex items-center">
-              <span className="w-2 h-2 bg-white rounded-full mr-2"></span>
-              Cancel all future bookings
-            </li>
-            <li className="flex items-center">
-              <span className="w-2 h-2 bg-white rounded-full mr-2"></span>
-              Remove access for all users
-            </li>
+          <p className="font-medium mb-2">This will:</p>
+          <ul className="list-disc pl-5 space-y-1 text-gray-700">
+            <li>Remove all sauna settings and information</li>
+            <li>Cancel all future bookings</li>
+            <li>Remove access for all users</li>
           </ul>
         </div>
-        <DialogFooter className="bg-white px-6 py-4 rounded-b-lg">
-          <Button variant="outline" onClick={onClose} className="bg-white text-black border-black hover:bg-gray-200">
+        <Separator className="my-4" />
+        <DialogFooter className="flex flex-col sm:flex-row gap-2">
+          <Button 
+            variant="default" 
+            onClick={onClose} 
+            className="w-full sm:w-auto border-gray-300 hover:bg-gray-100 hover:text-black"
+          >
             Cancel
           </Button>
-          <Button variant="destructive" onClick={handleConfirm} className="bg-black text-white hover:bg-gray-800">
+          <Button 
+            variant="destructive" 
+            onClick={handleConfirm} 
+            className="w-full sm:w-auto hover:bg-gray-800"
+          >
             Delete Sauna
           </Button>
         </DialogFooter>

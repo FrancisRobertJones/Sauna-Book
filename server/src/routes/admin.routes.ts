@@ -37,4 +37,7 @@ router.post(
 
 router.delete('/sauna/:saunaId/users/:userId', ((req, res) => saunaController.removeSaunaAccess(req, res)) as RequestHandler);
 
+router.delete('/sauna/:saunaId', ((req, res, next) => saunaController.deleteSauna(req, res, next)) as RequestHandler);
+
+
 export default router;

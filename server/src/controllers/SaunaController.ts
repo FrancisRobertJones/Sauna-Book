@@ -123,4 +123,21 @@ export class SaunaController {
             next(error);
         }
     }
+
+    async deleteSauna (req: Request, res: Response, next: NextFunction) {
+        try {
+          const authReq = req as AuthRequest;
+          const adminId = authReq.auth?.payload.sub;
+          const { saunaId } = req.params;
+      
+          if (!adminId) {
+            throw new ApplicationError('Unauthorized', 401);
+          }
+      
+          await this.saunaService.deleteSauna(saunaId, adminId);
+          res.status(200).json({ message: 'Sauna deleted successfully' });
+        } catch (error) {
+          next(error);
+        }
+      };
 }

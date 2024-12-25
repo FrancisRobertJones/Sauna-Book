@@ -7,6 +7,7 @@ import { SaunaRepository } from '../repositories/SaunaRepository';
 import { EmailService } from './EmailService';
 import { BookingRepository } from '../repositories/BookingRepository';
 import { Booking } from '../models/Booking';
+import { SaunaService } from './SaunaService';
 
 @Service()
 export class UserService {
@@ -144,4 +145,14 @@ export class UserService {
         await this.bookingRepository.deleteFutureBookings(saunaId, userId);
         return user.save(); 
     }
+
+    async removeSaunaAccessForAllUsers(saunaId: string): Promise<void> {
+        const sauna = await this.saunaRepository.findById(saunaId);
+        if (!sauna) {
+          throw new ApplicationError('Sauna not found', 404);
+        }
+        
+        await this.userRepository.removeSaunaAccessForAllUsers(saunaId);
+      }
+
 }

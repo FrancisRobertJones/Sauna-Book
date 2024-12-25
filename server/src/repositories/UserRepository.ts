@@ -45,4 +45,11 @@ export class UserRepository {
             saunaAccess: new mongoose.Types.ObjectId(saunaId)
         }).sort({ createdAt: -1 });
     }
+
+    async removeSaunaAccessForAllUsers(saunaId: string): Promise<void> {
+        await User.updateMany(
+          { saunaAccess: saunaId },
+          { $pull: { saunaAccess: saunaId } }
+        );
+      }
 }

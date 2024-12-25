@@ -8,18 +8,19 @@ import { UserStats } from '../types/admin.types';
 import { UserRepository } from '../repositories/UserRepository';
 import { BookingDTO } from '../models/Booking';
 import { IUser, UserDTO } from '../models/User';
+import { SaunaRepository } from '../repositories/SaunaRepository';
 
 @Service()
 export class BookingService {
   constructor(
     private bookingRepository: BookingRepository,
-    private saunaService: SaunaService,
+    private saunaRepository: SaunaRepository,
     private userService: UserService,
     private userRepository: UserRepository
   ) { }
 
   async getAvailableSlots(saunaId: string, date: Date) {
-    const sauna = await this.saunaService.findById(saunaId);
+    const sauna = await this.saunaRepository.findById(saunaId);
     if (!sauna) {
       throw new ApplicationError('Sauna not found', 404);
     }
@@ -46,7 +47,7 @@ export class BookingService {
       throw new ApplicationError('User does not have access to this sauna', 403);
     }
 
-    const sauna = await this.saunaService.findById(saunaId);
+    const sauna = await this.saunaRepository.findById(saunaId);
     if (!sauna) {
       throw new ApplicationError('Sauna not found', 404);
     }
@@ -144,7 +145,7 @@ export class BookingService {
   }
 
   async getSaunaBookings(saunaId: string, userId: string, date?: Date) {
-    const sauna = await this.saunaService.findById(saunaId);
+    const sauna = await this.saunaRepository.findById(saunaId);
     if (!sauna || sauna.adminId !== userId) {
       throw new ApplicationError('Not authorized to view these bookings', 403);
     }
@@ -153,7 +154,7 @@ export class BookingService {
   }
 
   async getAllSaunaBookings(saunaId: string, userId: string) {
-    const sauna = await this.saunaService.findById(saunaId);
+    const sauna = await this.saunaRepository.findById(saunaId);
     if (!sauna || sauna.adminId !== userId) {
       throw new ApplicationError('Not authorized to view these bookings', 403);
     }
@@ -162,7 +163,7 @@ export class BookingService {
   }
 
   async getSaunaUsers(saunaId: string, adminId: string): Promise<UserStats[]> {
-    const sauna = await this.saunaService.findById(saunaId);
+    const sauna = await this.saunaRepository.findById(saunaId);
     if (!sauna || sauna.adminId !== adminId) {
       throw new ApplicationError('Not authorized to view these users', 403);
     }
@@ -202,5 +203,10 @@ export class BookingService {
     return user;
 
   }
+
+  async cancelAllFutureBookings(saunaId: string): Promise<void> {
+    await this.bookingRepository.cancelAllFutureBookings(saunaId);
+  }
+  
 
 }
