@@ -27,6 +27,8 @@ export class EmailService {
     }
 
     async sendInviteEmail(email: string, invite: IInvite): Promise<void> {
+        console.log('All env variables:', process.env);
+
         if (!this.transporter) {
             throw new Error('Email service not initialized');
         }
