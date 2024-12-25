@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { CalendarClock, AlertTriangle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert"
+import { GlowCard } from "../ui/GlowCard"
 
 interface BookingLimitInfoProps {
   userTotalBookings: number
@@ -14,7 +15,7 @@ export default function BookingLimitInfo({ userTotalBookings, maxTotalBookings }
   const bookingsPercentage = (userTotalBookings / maxTotalBookings) * 100
 
   return (
-    <Card className="w-full max-w-md">
+    <GlowCard className="w-full max-w-md my-4">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Booking Limit</CardTitle>
         <CalendarClock className="h-4 w-4 text-muted-foreground" />
@@ -44,6 +45,6 @@ export default function BookingLimitInfo({ userTotalBookings, maxTotalBookings }
           </>
         )}
       </CardContent>
-    </Card>
+    </GlowCard>
   )
 }
