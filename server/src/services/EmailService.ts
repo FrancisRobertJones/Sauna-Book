@@ -38,7 +38,7 @@ export class EmailService {
             const result = await this.transporter.sendMail({
                 from: `"Sauna Booking" <${process.env.GMAIL_USER}>`,
                 to: email,
-                subject: `You\'ve Been Invited to ${name}!'`,
+                subject: `You\'ve Been Invited to ${name}!`,
                 html: `
                     <h1>Sauna Invitation</h1>
                     <p>You've been invited to join a sauna.</p>

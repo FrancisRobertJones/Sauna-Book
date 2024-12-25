@@ -5,6 +5,7 @@ import { AuthRequest } from '../types/auth.types';
 import { RequestHandler } from 'express';
 import { z } from 'zod';
 import { CreateInviteSchema } from '../models/Invite';
+import { ApplicationError } from '../utils/errors';
 
 
 
@@ -16,30 +17,38 @@ export class InviteController {
         try {
             const authReq = req as AuthRequest;
             const adminId = authReq.auth?.payload.sub;
-
+            
             if (!adminId) {
-                res.status(401).json({ error: 'Unauthorized' });
+                res.status(401).json({ message: 'Unauthorized' });
                 return;
             }
-
+            
             const validatedData = CreateInviteSchema.parse(req.body);
-
+            
             const invite = await this.inviteService.createInvite(
                 validatedData.saunaId,
                 validatedData.email,
                 adminId
             );
-
+            
             res.status(201).json(invite);
         } catch (error) {
             if (error instanceof z.ZodError) {
-                res.status(400).json({ error: error.errors });
+                res.status(400).json({ message: error.errors });
                 return;
             }
+            
+            if (error instanceof ApplicationError) {
+                res.status(error.statusCode).json({ 
+                    message: error.message 
+                });
+                return;
+            }
+            
+            console.error('Unexpected error in createInvite:', error);
             next(error);
         }
     };
-
     getInvitesBySauna: RequestHandler = async (
         req: Request,
         res: Response,
@@ -123,17 +132,17 @@ export class InviteController {
             const authReq = req as AuthRequest;
             const userId = authReq.auth?.payload.sub;
             const { inviteId } = req.params;
- 
+
             if (!userId) {
                 res.status(401).json({ error: 'Unauthorized' });
                 return;
             }
- 
+
             if (!inviteId) {
                 res.status(400).json({ error: 'Invite ID is required' });
                 return;
             }
- 
+
             await this.inviteService.acceptInvite(inviteId, userId);
             res.status(200).json({ message: 'Invite accepted successfully' });
         } catch (error) {

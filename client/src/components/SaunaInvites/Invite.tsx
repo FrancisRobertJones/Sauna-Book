@@ -52,15 +52,25 @@ export default function CreateInviteForm({ saunaId }: CreateInviteFormProps) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           email: values.email,
-          saunaId 
+          saunaId
         })
       })
 
+      const data = await response.json()
+      
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(`Failed to create invite: ${JSON.stringify(errorData)}`)
+        if (response.status === 400 && data.message?.includes('already has access')) {
+          toast({
+            title: "Already a member",
+            description: data.message || "This user already has access to the sauna",
+            variant: "destructive"
+          })
+          form.reset()
+          return
+        }
+        throw new Error(data.message || 'Failed to create invite')
       }
 
       toast({
@@ -72,7 +82,7 @@ export default function CreateInviteForm({ saunaId }: CreateInviteFormProps) {
       console.error('Error creating invite:', error)
       toast({
         title: "Error",
-        description: "Failed to create invite. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to create invite. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -81,16 +91,15 @@ export default function CreateInviteForm({ saunaId }: CreateInviteFormProps) {
   }
 
   return (
-    <Card className="w-[500px]">
+    <Card className="w-full max-w-lg mx-auto">
       <CardHeader>
-        <CardTitle>Create an invite</CardTitle>
+        <CardTitle className="text-xl sm:text-2xl">Create an invite</CardTitle>
         <CardDescription>Enter an email address to send an invitation.</CardDescription>
-        <CardDescription className='text-bold '>Please ensure your new user checks spam.</CardDescription>
-
+        <CardDescription className="font-medium text-amber-600">Please ensure your new user checks spam.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="email"
@@ -100,7 +109,7 @@ export default function CreateInviteForm({ saunaId }: CreateInviteFormProps) {
                   <FormControl>
                     <Input placeholder="name@example.com" {...field} />
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="text-sm">
                     We'll send an invitation to this email address.
                   </FormDescription>
                   <FormMessage />
@@ -110,9 +119,9 @@ export default function CreateInviteForm({ saunaId }: CreateInviteFormProps) {
           </form>
         </Form>
       </CardContent>
-      <CardFooter>
-        <Button 
-          type="submit" 
+      <CardFooter className="px-4 sm:px-6">
+        <Button
+          type="submit"
           onClick={form.handleSubmit(onSubmit)}
           disabled={isLoading}
           className="w-full"
