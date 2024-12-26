@@ -1,7 +1,6 @@
 import { toast } from "@/hooks/use-toast";
 import { Booking } from "@/types/BookingTypes";
 import { useEffect, useState } from "react";
-import { LoadingAnimation } from "../Loading/Loading";
 import { GlowCard } from "../ui/GlowCard";
 import { CardContent, CardHeader, CardTitle } from "../ui/card";
 
@@ -17,7 +16,6 @@ export function SaunaStatsCard({ allBookings }: {allBookings: Booking[]}) {
 
     useEffect(() => {
         const processStats = async () => {
-            if (!allBookings) return;
             try {
                 const activeBookings: Booking[] = allBookings.filter(booking => booking.status === 'active');
 
@@ -41,10 +39,10 @@ export function SaunaStatsCard({ allBookings }: {allBookings: Booking[]}) {
                     todayBookings
                 });
             } catch (error) {
-                console.error('Error fetching sauna stats:', error);
+                console.error('Error processing sauna stats:', error);
                 toast({
                     title: "Error",
-                    description: "Failed to load sauna statistics.",
+                    description: "Failed to process sauna statistics.",
                     variant: "destructive",
                 });
             } finally {
@@ -56,7 +54,20 @@ export function SaunaStatsCard({ allBookings }: {allBookings: Booking[]}) {
     }, [allBookings]);
 
     if (isLoading) {
-        return <LoadingAnimation isLoading={isLoading} text="Loading sauna statistics..." />;
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[1, 2, 3].map((i) => (
+                    <GlowCard key={i}>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <div className="h-4 bg-muted animate-pulse rounded w-24" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="h-8 bg-muted animate-pulse rounded w-16" />
+                        </CardContent>
+                    </GlowCard>
+                ))}
+            </div>
+        );
     }
 
     return (
