@@ -186,7 +186,7 @@ export default function SaunaSettingsForm({ saunaId }: { saunaId: string }) {
                     </form>
                 </Form>
             </CardContent>
-            <CardFooter className="flex justify-between">
+            <CardFooter className="flex justify-between gap-4">
                 <Button 
                     type="button" 
                     variant="destructive"
