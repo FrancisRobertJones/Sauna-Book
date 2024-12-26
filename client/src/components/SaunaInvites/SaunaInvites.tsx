@@ -11,6 +11,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { useWithdrawInvite } from '@/hooks/use-withdraw-invite'
+import { LoadingAnimation } from '../Loading/Loading'
 
 interface SaunaUsersProps {
   saunaId: string;
@@ -25,7 +26,10 @@ export function SaunaUserInvites({ saunaId }: SaunaUsersProps) {
   });
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return <LoadingAnimation 
+        isLoading={isLoading}
+        text='Fetching invites'
+    />
   }
 
   if (error) {
