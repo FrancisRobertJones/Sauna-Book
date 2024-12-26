@@ -12,7 +12,6 @@ interface SaunaStats {
 
 export function SaunaStatsCard({ allBookings }: {allBookings: Booking[]}) {
     const [stats, setStats] = useState<SaunaStats>({ totalBookings: 0, activeUsers: 0, todayBookings: 0 });
-    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const processStats = async () => {
@@ -45,30 +44,11 @@ export function SaunaStatsCard({ allBookings }: {allBookings: Booking[]}) {
                     description: "Failed to process sauna statistics.",
                     variant: "destructive",
                 });
-            } finally {
-                setIsLoading(false);
             }
         };
 
         processStats();
     }, [allBookings]);
-
-    if (isLoading) {
-        return (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[1, 2, 3].map((i) => (
-                    <GlowCard key={i}>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <div className="h-4 bg-muted animate-pulse rounded w-24" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="h-8 bg-muted animate-pulse rounded w-16" />
-                        </CardContent>
-                    </GlowCard>
-                ))}
-            </div>
-        );
-    }
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

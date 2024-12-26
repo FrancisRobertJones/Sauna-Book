@@ -11,28 +11,44 @@ import { Booking } from '@/types/BookingTypes';
 import { useAuth0 } from '@auth0/auth0-react';
 import { AdminBookingsForm } from '@/components/Admin/AdminBookingsForm';
 import { apiUrl } from '@/constants/api-url';
+import { LoadingAnimation } from '@/components/Loading/Loading';
 
 const SaunaAdminDashboard = () => {
     const { saunaId } = useParams<{ saunaId: string }>();
     const [allBookings, setAllBookings] = useState<Booking[]>();
     const { getAccessTokenSilently } = useAuth0();
-
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         const fetchBookings = async () => {
-            const token = await getAccessTokenSilently();
-            const response = await fetch(
-                `${apiUrl}/api/adminbooking/sauna/${saunaId}/all-bookings`,
-                {
-                    headers: { Authorization: `Bearer ${token}` }
-                }
-            );
-            if (!response.ok) throw new Error('Failed to fetch bookings');
-            const bookings: Booking[] = await response.json();
-            if (bookings) setAllBookings(bookings)
-        }
-        fetchBookings()
-    }, [saunaId])
+            try {
+                setIsLoading(true);
+                const token = await getAccessTokenSilently();
+                const response = await fetch(
+                    `${apiUrl}/api/adminbooking/sauna/${saunaId}/all-bookings`,
+                    {
+                        headers: { Authorization: `Bearer ${token}` }
+                    }
+                );
+                if (!response.ok) throw new Error('Failed to fetch bookings');
+                const bookings: Booking[] = await response.json();
+                if (bookings) setAllBookings(bookings);
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchBookings();
+    }, [saunaId]);
+
+    if (isLoading) {
+        return <LoadingAnimation
+            isLoading={isLoading}
+            text="Loading sauna stats"
+        />;
+    }
 
 
     return (
