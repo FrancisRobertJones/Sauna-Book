@@ -7,8 +7,7 @@ import { ApplicationError } from '../utils/errors';
 import { EmailService } from './EmailService';
 import mongoose from 'mongoose';
 
-const SEVEN_DAYS_FROM_CREATION = Date.now() + 7 * 24 * 60 * 60 * 1000;
-
+const SEVEN_DAYS_IN_MS = 7 * 24 * 60 * 60 * 1000;
 
 @Service()
 export class InviteService {
@@ -45,16 +44,19 @@ export class InviteService {
         if (hasExistingInvite) {
             throw new ApplicationError('User already has a pending invite', 400);
         }
+        const now = Date.now();
 
+    
         const inviteData = {
-            email,
+            email: email.toLowerCase(), 
             saunaId,
             invitedBy,
             status: InviteStatus.PENDING,
-            expiresAt: new Date(Date.now() + SEVEN_DAYS_FROM_CREATION)
+            expiresAt: new Date(Date.now() + SEVEN_DAYS_IN_MS)
         };
-
+    
         const invite = await this.inviteRepository.create(inviteData);
+        console.log('Created invite:', invite);
 
         await this.emailService.sendInviteEmail(email, sauna.name);
 
@@ -73,12 +75,13 @@ export class InviteService {
 
     async hasPendingInvites(userId: string): Promise<boolean> {
         const user = await this.userService.findBySub(userId);
+        
         if (!user) return false;
-
-        const count = await this.inviteRepository.countPendingInvites(user.email);
-        return count > 0;
+        
+        const pendingInvites = await this.findPendingByEmail(user.email);
+        
+        return pendingInvites.length > 0;
     }
-
 
     async processUserInvites(email: string, userId: string): Promise<void> {
         try {
