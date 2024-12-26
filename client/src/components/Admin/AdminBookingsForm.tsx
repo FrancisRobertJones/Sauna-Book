@@ -8,6 +8,7 @@ import { UserDetailsResponse } from '@/types/UserTypes'
 import { useUnbook } from '@/hooks/use-unbook-sauna-time'
 import { toast } from '@/hooks/use-toast'
 import { apiUrl } from '@/constants/api-url'
+import { LoadingAnimation } from '../Loading/Loading'
 
 interface AdminBookingsFormProps {
     allBookings: Booking[]
@@ -80,14 +81,14 @@ export function AdminBookingsForm({ allBookings, setAllBookings }: AdminBookings
 
         try {
             await unbook(selectedBooking._id, ROLE, userData._id)
-            
-            setAllBookings(prevBookings => 
+
+            setAllBookings(prevBookings =>
                 prevBookings?.filter(booking => booking._id !== selectedBooking._id)
             )
-            setFilteredBookings(prevFiltered => 
+            setFilteredBookings(prevFiltered =>
                 prevFiltered.filter(booking => booking._id !== selectedBooking._id)
             )
-            
+
             setIsDeleteModalOpen(false)
             setSelectedBooking(null)
             setUserData(null)
@@ -105,6 +106,12 @@ export function AdminBookingsForm({ allBookings, setAllBookings }: AdminBookings
         setIsDeleteModalOpen(false)
         setSelectedBooking(null)
         setUserData(null)
+    }
+
+    if (isLoading) {
+        return <LoadingAnimation
+            isLoading={isLoading}
+            text='Loading bookings...' />
     }
 
     return (
