@@ -8,6 +8,8 @@ import { format } from 'date-fns';
 import { GlowCard } from "../ui/GlowCard";
 import { apiUrl } from "@/constants/api-url";
 import BookingLimitInfo from "./BookingLimitInfo";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+
 
 
 
@@ -202,10 +204,11 @@ export function TimeSlotPicker({
         return slotIndex >= currentIndex &&
             slotIndex < currentIndex + selectedSlots.numberOfSlots;
     };
-
     if (isLoading) {
         return <LoadingAnimation isLoading={isLoading} text="Loading available times..." />;
     }
+
+    const hasAvailableSlots = timeSlots.some(slot => slot.isAvailable);
 
     return (
         <GlowCard className="rounded-lg border bg-card p-6">
@@ -221,6 +224,16 @@ export function TimeSlotPicker({
                     </Button>
                 )}
             </div>
+            
+            {!hasAvailableSlots && (
+                <Alert variant="destructive" className="mb-4">
+                    <AlertTitle>No Available Times</AlertTitle>
+                    <AlertDescription>
+                        There are no available time slots for this day. Please select another date.
+                    </AlertDescription>
+                </Alert>
+            )}
+
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
                 {timeSlots.map((slot) => {
                     const status = getSlotStatus(slot);
@@ -242,6 +255,7 @@ export function TimeSlotPicker({
                     );
                 })}
             </div>
+            
             {selectedSlots && (
                 <div className="mt-4 space-y-2">
                     <p className="text-sm text-muted-foreground">
