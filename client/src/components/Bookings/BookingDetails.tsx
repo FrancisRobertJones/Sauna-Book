@@ -7,6 +7,7 @@ import { GlowCard } from "../ui/GlowCard"
 import { useAuth0 } from "@auth0/auth0-react"
 import { toast } from "@/hooks/use-toast"
 import { apiUrl } from "@/constants/api-url"
+import { useState } from "react"
 
 export function BookingDetails({
   sauna,
@@ -14,7 +15,9 @@ export function BookingDetails({
   selectedSlots,
   handleRefresh,
 }: BookingDetailsProps) {
+  const [isBooking, setIsBooking] = useState(false);
   const canBook = selectedSlots !== null;
+
 
   const getTotalDuration = () => {
     if (!selectedSlots) return 0;
@@ -30,12 +33,14 @@ export function BookingDetails({
   };
 
   const handleBooking = async () => {
-    if (!selectedSlots) return;
+    if (!selectedSlots || isBooking) return;
+
+    setIsBooking(true);
 
     try {
       const token = await getAccessTokenSilently();
 
-      
+
       const bookingTimes = Array.from({ length: selectedSlots.numberOfSlots }, (_, index) => {
         const startTime = addMinutes(new Date(selectedSlots.startSlot), index * sauna.slotDurationMinutes);
         const endTime = addMinutes(startTime, sauna.slotDurationMinutes);
@@ -71,6 +76,8 @@ export function BookingDetails({
         description: "Unable to confirm your bookings. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsBooking(false);
     }
   };
 
@@ -123,10 +130,10 @@ export function BookingDetails({
       <CardFooter className="flex flex-col gap-2">
         <Button
           className="w-full"
-          disabled={!canBook}
+          disabled={!canBook || isBooking}
           onClick={handleBooking}
         >
-          Confirm Booking
+          {isBooking ? "Confirming..." : "Confirm Booking"}
         </Button>
       </CardFooter>
     </GlowCard>
