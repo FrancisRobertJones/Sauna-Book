@@ -19,7 +19,9 @@ export enum UserActionType {
   REFRESH_SAUNAS = 'REFRESH_SAUNAS',
   UPDATE_STATUS = 'UPDATE_STATUS',
   UPDATE_ADMIN_SAUNAS = 'UPDATE_ADMIN_SAUNAS',
-  UPDATE_ACCESSIBLE_SAUNAS = 'UPDATE_ACCESSIBLE_SAUNAS'
+  UPDATE_ACCESSIBLE_SAUNAS = 'UPDATE_ACCESSIBLE_SAUNAS',
+  UPDATE_USER = 'UPDATE_USER',
+  DELETE_USER = 'DELETE_USER'
 }
 
 export interface IUserAction {
@@ -33,6 +35,7 @@ export interface IUserAction {
       hasPendingInvites: boolean;
       isSaunaMember: boolean;
     };
+    name?: string;
   };
 }
 
@@ -122,6 +125,23 @@ export const userReducer = (state: UserState, action: IUserAction): UserState =>
           isSaunaMember: action.payload.accessibleSaunas.length > 0
         }
       );
+
+    case UserActionType.UPDATE_USER:
+      if (!action.payload?.name || !state.user) return state;
+      return new UserState(
+        state.isAuthenticated,
+        {
+          ...state.user,
+          name: action.payload.name
+        },
+        state.role,
+        state.adminSaunas,
+        state.accessibleSaunas,
+        state.status
+      );
+
+    case UserActionType.DELETE_USER:
+      return new UserState();
 
     case UserActionType.LOGOUT:
       return new UserState();

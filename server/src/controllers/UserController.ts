@@ -66,10 +66,17 @@ export class UserController {
         }
     };
 
-    updateUser = async (req: Request, res: Response, next: NextFunction) => {
+    updateUsername = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const user = await this.userService.updateUser(req.params.id, req.body);
-            res.json(user);
+            console.log("hello update")
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            console.log("hello delete")
         } catch (error) {
             next(error);
         }
