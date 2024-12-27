@@ -32,7 +32,7 @@ export class EmailService {
         }
 
         try {
-            const frontendUrl = 'https://boka-bastu.vercel.app';
+            const frontendUrl = 'https://sauna-book.xyz';
             const inviteLink = `${frontendUrl}/accept-invite`;
 
             const result = await this.transporter.sendMail({
