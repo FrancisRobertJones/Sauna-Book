@@ -33,6 +33,7 @@ import {
 import { useUser } from '@/state/userContext'
 import { useUpdateProfile } from '@/hooks/use-update-user'
 import { useDeleteAccount } from '@/hooks/use-delete-user'
+import { useNavigate } from 'react-router-dom'
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -44,6 +45,8 @@ export default function ProfilePage() {
   const { state } = useUser()
   const { updateProfile, isUpdating, error: updateError } = useUpdateProfile()
   const { deleteAccount, isDeleting, error: deleteError } = useDeleteAccount()
+  const navigate = useNavigate()
+
 
   const [isEditing, setIsEditing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -62,6 +65,14 @@ export default function ProfilePage() {
       setIsEditing(false)
     } catch (err) {
       setError(updateError || 'Failed to update profile. Please try again.')
+    }
+  }
+
+  const handleSaunaClick = (saunaId: string, isAdmin: boolean) => {
+    if (isAdmin) {
+      navigate(`/admin/sauna/${saunaId}`)
+    } else {
+      navigate(`/booking/${saunaId}`)
     }
   }
 
@@ -182,7 +193,8 @@ export default function ProfilePage() {
                       <CardTitle>{sauna.name}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => handleSaunaClick(sauna._id, true)}
+                      >
                         Manage
                       </Button>
                     </CardContent>
@@ -194,8 +206,9 @@ export default function ProfilePage() {
                       <CardTitle>{sauna.name}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <Button variant="outline" className="w-full">
-                        Book
+                      <Button variant="outline" className="w-full" onClick={() => handleSaunaClick(sauna._id, false)}
+                      >
+                        Book / Manage bookings
                       </Button>
                     </CardContent>
                   </Card>

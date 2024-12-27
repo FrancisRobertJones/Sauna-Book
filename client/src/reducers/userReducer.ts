@@ -55,11 +55,14 @@ export interface AppUser {
   name: string;
   role: 'admin' | 'user';
 }
-
-const mapAuth0UserToAppUser = (auth0User: Auth0User, role: 'admin' | 'user'): AppUser => ({
+const mapAuth0UserToAppUser = (
+  auth0User: Auth0User, 
+  role: 'admin' | 'user', 
+  dbName?: string
+): AppUser => ({
   auth0Id: auth0User.sub!,
   email: auth0User.email!,
-  name: auth0User.name!,
+  name: dbName || auth0User.name!, 
   role: role
 });
 
@@ -70,7 +73,12 @@ export const userReducer = (state: UserState, action: IUserAction): UserState =>
       const role: 'admin' | 'user' = action.payload.role ?? 'user';
       return new UserState(
         true,
-        action.payload.auth0User ? mapAuth0UserToAppUser(action.payload.auth0User, role) : null,
+        action.payload.auth0User ? 
+          mapAuth0UserToAppUser(
+            action.payload.auth0User, 
+            role,
+            action.payload.name 
+          ) : null,
         role,
         action.payload.adminSaunas || [],
         action.payload.accessibleSaunas || [],
@@ -79,6 +87,8 @@ export const userReducer = (state: UserState, action: IUserAction): UserState =>
           isSaunaMember: action.payload.status?.isSaunaMember || false
         }
       );
+
+
     case UserActionType.REFRESH_SAUNAS:
       if (!action.payload) return state;
       return new UserState(

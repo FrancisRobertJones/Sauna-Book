@@ -73,6 +73,7 @@ const Layout = () => {
             type: UserActionType.LOGIN,
             payload: {
               auth0User: user,
+              name: userData.name,
               role: userData.role,
               adminSaunas: role === 'admin' ? saunas : [],
               accessibleSaunas: role === 'user' ? saunas : [],

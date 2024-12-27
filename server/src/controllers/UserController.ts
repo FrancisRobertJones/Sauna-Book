@@ -12,63 +12,87 @@ export class UserController {
     ) { }
 
     getCurrentUser: RequestHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        try {
-            console.log('GET /me endpoint hit with:');
-            console.log('Query params:', req.query);
-            console.log('Auth payload:', req.auth?.payload);
-            console.log('Register intent:', req.query.register_intent);
-
-            
-            const authReq = req as AuthRequest;
-            const auth0Id = authReq.auth?.payload.sub;
-            const email = authReq.auth?.payload['https://api.frj-sauna-booking.com/email'] as string;
-            const name = authReq.auth?.payload['https://api.frj-sauna-booking.com/name'] as string;
-            const registerIntent = req.query.register_intent as string;
-
-            if (!auth0Id || !email || !name) {
-                res.status(400).json({ error: 'Missing required user information' });
-                return;
-            }
-
-            let user = await this.userService.findUserByAuth0Id(auth0Id);
-
-            console.log('Backend received request with:', {
-                auth0Id: req.auth?.payload.sub,
-                registerIntent: req.query.register_intent,
-                headers: req.headers
-              });
-              
-              if (!user) {
-                if (registerIntent === 'admin') {
-                    user = await this.userService.createUser(auth0Id, email, name, 'admin');
-                } else if (registerIntent === 'user') {
-                    user = await this.userService.createUser(auth0Id, email, name, 'user');
-                } else {
-                    res.status(400).json({ error: 'Invalid registration intent' });
+            try {
+                const authReq = req as AuthRequest;
+                const auth0Id = authReq.auth?.payload.sub;
+                const email = authReq.auth?.payload['https://api.frj-sauna-booking.com/email'] as string;
+                const registerIntent = req.query.register_intent as string;
+        
+                if (!auth0Id || !email) {
+                    res.status(400).json({ error: 'Missing required user information' });
                     return;
                 }
-            }
-
-            const [hasPendingInvites, isSaunaMember] = await Promise.all([
-                this.inviteService.hasPendingInvites(auth0Id),
-                this.userService.isSaunaMember(auth0Id)
-            ]);
-
-            res.json({
-                ...user.toJSON(),
-                status: {
-                    hasPendingInvites,
-                    isSaunaMember
+        
+                let user = await this.userService.findUserByAuth0Id(auth0Id);
+        
+                if (!user) {
+                    const auth0Name = authReq.auth?.payload['https://api.frj-sauna-booking.com/name'] as string;
+                    if (!auth0Name) {
+                        res.status(400).json({ error: 'Missing name for new user' });
+                        return;
+                    }
+        
+                    if (registerIntent === 'admin') {
+                        user = await this.userService.createUser(auth0Id, email, auth0Name, 'admin');
+                    } else if (registerIntent === 'user') {
+                        user = await this.userService.createUser(auth0Id, email, auth0Name, 'user');
+                    } else {
+                        res.status(400).json({ error: 'Invalid registration intent' });
+                        return;
+                    }
                 }
-            });
-        } catch (error) {
-            next(error);
-        }
-    };
+        
+                const [hasPendingInvites, isSaunaMember] = await Promise.all([
+                    this.inviteService.hasPendingInvites(auth0Id),
+                    this.userService.isSaunaMember(auth0Id)
+                ]);
+        
+                const userResponse = {
+                    auth0Id: user.auth0Id,
+                    email: user.email,
+                    name: user.name,  
+                    role: user.role,
+                    saunaAccess: user.saunaAccess,
+                    _id: user._id,
+                    createdAt: user.createdAt,
+                    updatedAt: user.updatedAt,
+                    status: {
+                        hasPendingInvites,
+                        isSaunaMember
+                    }
+                };
+        
+                res.json(userResponse);
+            } catch (error) {
+                next(error);
+            }
+        };
 
     updateUsername = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            console.log("hello update")
+            console.log("Update username request received");
+            const authReq = req as AuthRequest;
+            const auth0Id = authReq.auth?.payload.sub;
+            const newName = req.body.name;
+
+            if (!auth0Id) {
+                res.status(401).json({ error: 'Unauthorized - No auth0Id' });
+                return;
+            }
+
+            if (!newName || typeof newName !== 'string' || newName.length < 2) {
+                res.status(400).json({ error: 'Invalid name provided' });
+                return;
+            }
+
+            const updatedUser = await this.userService.updateUsername(auth0Id, newName);
+            
+            if (!updatedUser) {
+                res.status(404).json({ error: 'User not found' });
+                return;
+            }
+
+            res.json(updatedUser);
         } catch (error) {
             next(error);
         }
@@ -76,7 +100,22 @@ export class UserController {
 
     deleteUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            console.log("hello delete")
+            const authReq = req as AuthRequest;
+            const auth0Id = authReq.auth?.payload.sub;
+
+            if (!auth0Id) {
+                res.status(401).json({ error: 'Unauthorized - No auth0Id' });
+                return;
+            }
+
+            const result = await this.userService.deleteUser(auth0Id);
+            
+            if (!result) {
+                res.status(404).json({ error: 'User not found' });
+                return;
+            }
+
+            res.json({ message: 'User deleted successfully' });
         } catch (error) {
             next(error);
         }

@@ -36,8 +36,21 @@ export class UserRepository {
         return User.findByIdAndUpdate(id, updateData, { new: true });
     }
 
-    async delete(id: string): Promise<IUser | null> {
-        return User.findByIdAndDelete(id);
+    async deleteUserByAuth0Id(auth0Id: string): Promise<boolean> {
+        const user = await User.findOne({ auth0Id });
+        
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        if (user.saunaAccess && user.saunaAccess.length > 0) {
+            await User.findByIdAndUpdate(
+                user._id,
+                { $set: { saunaAccess: [] } }
+            );
+        }
+        const result = await User.findOneAndDelete({ auth0Id });
+        return result !== null;
     }
 
     async findBySaunaAccess(saunaId: string): Promise<IUser[]> {
@@ -48,8 +61,24 @@ export class UserRepository {
 
     async removeSaunaAccessForAllUsers(saunaId: string): Promise<void> {
         await User.updateMany(
-          { saunaAccess: saunaId },
-          { $pull: { saunaAccess: saunaId } }
+            { saunaAccess: saunaId },
+            { $pull: { saunaAccess: saunaId } }
         );
-      }
+    }
+
+    async updateUsername(auth0Id: string, newName: string): Promise<IUser | null> {
+        const capitalizedName = newName.charAt(0).toUpperCase() + newName.slice(1);
+        
+        const result = await User.findOneAndUpdate(
+            { auth0Id },
+            { $set: { name: capitalizedName } },
+            { new: true }
+        );
+    
+        if (!result) {
+            throw new Error('User not found');
+        }
+    
+        return result;
+    }
 }
