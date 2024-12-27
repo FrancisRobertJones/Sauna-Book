@@ -19,7 +19,9 @@ export enum UserActionType {
   REFRESH_SAUNAS = 'REFRESH_SAUNAS',
   UPDATE_STATUS = 'UPDATE_STATUS',
   UPDATE_ADMIN_SAUNAS = 'UPDATE_ADMIN_SAUNAS',
-  UPDATE_ACCESSIBLE_SAUNAS = 'UPDATE_ACCESSIBLE_SAUNAS'
+  UPDATE_ACCESSIBLE_SAUNAS = 'UPDATE_ACCESSIBLE_SAUNAS',
+  UPDATE_USER = 'UPDATE_USER',
+  DELETE_USER = 'DELETE_USER'
 }
 
 export interface IUserAction {
@@ -33,6 +35,7 @@ export interface IUserAction {
       hasPendingInvites: boolean;
       isSaunaMember: boolean;
     };
+    name?: string;
   };
 }
 
@@ -52,11 +55,14 @@ export interface AppUser {
   name: string;
   role: 'admin' | 'user';
 }
-
-const mapAuth0UserToAppUser = (auth0User: Auth0User, role: 'admin' | 'user'): AppUser => ({
+const mapAuth0UserToAppUser = (
+  auth0User: Auth0User, 
+  role: 'admin' | 'user', 
+  dbName?: string
+): AppUser => ({
   auth0Id: auth0User.sub!,
   email: auth0User.email!,
-  name: auth0User.name!,
+  name: dbName || auth0User.name!, 
   role: role
 });
 
@@ -67,7 +73,12 @@ export const userReducer = (state: UserState, action: IUserAction): UserState =>
       const role: 'admin' | 'user' = action.payload.role ?? 'user';
       return new UserState(
         true,
-        action.payload.auth0User ? mapAuth0UserToAppUser(action.payload.auth0User, role) : null,
+        action.payload.auth0User ? 
+          mapAuth0UserToAppUser(
+            action.payload.auth0User, 
+            role,
+            action.payload.name 
+          ) : null,
         role,
         action.payload.adminSaunas || [],
         action.payload.accessibleSaunas || [],
@@ -76,6 +87,8 @@ export const userReducer = (state: UserState, action: IUserAction): UserState =>
           isSaunaMember: action.payload.status?.isSaunaMember || false
         }
       );
+
+
     case UserActionType.REFRESH_SAUNAS:
       if (!action.payload) return state;
       return new UserState(
@@ -122,6 +135,23 @@ export const userReducer = (state: UserState, action: IUserAction): UserState =>
           isSaunaMember: action.payload.accessibleSaunas.length > 0
         }
       );
+
+    case UserActionType.UPDATE_USER:
+      if (!action.payload?.name || !state.user) return state;
+      return new UserState(
+        state.isAuthenticated,
+        {
+          ...state.user,
+          name: action.payload.name
+        },
+        state.role,
+        state.adminSaunas,
+        state.accessibleSaunas,
+        state.status
+      );
+
+    case UserActionType.DELETE_USER:
+      return new UserState();
 
     case UserActionType.LOGOUT:
       return new UserState();

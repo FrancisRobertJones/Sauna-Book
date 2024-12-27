@@ -12,6 +12,9 @@ router.use(checkJwt);
 router.use(linkUser as RequestHandler);
 
 router.get('/me', userController.getCurrentUser as RequestHandler);
+router.put('/update', userController.updateUsername as RequestHandler);
+router.delete('/delete', userController.deleteUser as RequestHandler);
+ 
 
 
 export default router;

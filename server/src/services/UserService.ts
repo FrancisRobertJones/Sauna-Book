@@ -132,27 +132,69 @@ export class UserService {
         if (!sauna || sauna.adminId !== adminId) {
             throw new ApplicationError('Sauna not found or unauthorized', 404);
         }
-    
+
         const user = await this.userRepository.findByAuth0Id(userId);
         if (!user) {
             throw new ApplicationError('User not found', 404);
         }
-    
+
         user.saunaAccess = user.saunaAccess.filter(
             id => id.toString() !== saunaId
         );
-    
+
         await this.bookingRepository.deleteFutureBookings(saunaId, userId);
-        return user.save(); 
+        return user.save();
     }
 
     async removeSaunaAccessForAllUsers(saunaId: string): Promise<void> {
         const sauna = await this.saunaRepository.findById(saunaId);
         if (!sauna) {
-          throw new ApplicationError('Sauna not found', 404);
+            throw new ApplicationError('Sauna not found', 404);
         }
-        
+
         await this.userRepository.removeSaunaAccessForAllUsers(saunaId);
-      }
+    }
+
+    async updateUsername(auth0Id: string, newName: string): Promise<IUser | null> {
+        try {
+            const existingUser = await this.userRepository.findByAuth0Id(auth0Id);
+
+            if (!existingUser) {
+                return null;
+            }
+
+            const updatedUser = await this.userRepository.updateUsername(auth0Id, newName);
+
+            console.log(`Username updated for user ${auth0Id}`);
+
+            return updatedUser;
+        } catch (error) {
+            console.error('Error in updateUsername service:', error);
+            throw new Error('Failed to update username');
+        }
+    }
+
+    async deleteUser(auth0Id: string): Promise<boolean> {
+        try {
+            const existingUser = await this.userRepository.findByAuth0Id(auth0Id);
+            
+            if (!existingUser) {
+                return false;
+            }
+
+            //TODO FJ remove bookings associated with user
+
+            const deleted = await this.userRepository.deleteUserByAuth0Id(auth0Id);
+
+            if (deleted) {
+                console.log(`User ${auth0Id} deleted successfully`);
+            }
+
+            return deleted;
+        } catch (error) {
+            console.error('Error in deleteUser service:', error);
+            throw new Error('Failed to delete user');
+        }
+    }
 
 }

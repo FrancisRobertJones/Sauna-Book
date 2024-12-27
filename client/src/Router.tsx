@@ -18,6 +18,7 @@ import { PendingInvitesGuard } from "./components/Routing/PendingInvitesGuard";
 import MyAdminSaunas from "./pages/Admin/MyAdminSaunas";
 import { AccountTypeSelection } from "./components/Routing/AccountTypeSelection";
 import AcceptInvitePage from "./pages/User/AcceptInvitePage";
+import ProfilePage from "./pages/Profile/Profile";
 
 export const router = createBrowserRouter([
   {
@@ -90,7 +91,11 @@ export const router = createBrowserRouter([
           {
             path: "/check-invites",
             element: <PendingInvites />
-          }
+          },
+          {
+            path: "/profile",
+            element: <ProfilePage />
+          },
         ]
       }
     ]

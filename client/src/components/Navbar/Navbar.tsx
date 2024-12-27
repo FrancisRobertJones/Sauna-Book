@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, LogOut, Menu, Moon, Settings, Sun, User } from 'lucide-react';
+import { Bell, LogOut, Menu, Moon, Sun, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { UserState } from '@/reducers/userReducer';
 import { NavButtons } from './NavButtons';
+import { useAuth0 } from '@auth0/auth0-react';
 
 interface NavbarProps {
   userState: UserState;
@@ -40,11 +41,13 @@ interface NavbarProps {
 export default function Navbar({
   userState = new UserState(),
   isAuthenticated = false,
-  handleLogout = () => {},
+  handleLogout = () => { },
 }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const { loginWithRedirect } = useAuth0();
+
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
@@ -57,14 +60,14 @@ export default function Navbar({
     }
   }, []);
 
+
+
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
   };
-
-  const closeMenu = () => setIsMenuOpen(false);
 
   const handleLogoutClick = () => {
     setIsLogoutDialogOpen(true);
@@ -75,11 +78,50 @@ export default function Navbar({
     setIsLogoutDialogOpen(false);
   };
 
+  const handleUserLogin = () => {
+    localStorage.setItem('register_intent', 'user');
+
+    loginWithRedirect({
+      authorizationParams: {
+        redirect_uri: `${window.location.origin}/callback`,
+      },
+    });
+  };
+
+  const handleAdminLogin = () => {
+    localStorage.setItem('register_intent', 'admin');
+    loginWithRedirect({
+      authorizationParams: {
+        redirect_uri: `${window.location.origin}/callback`,
+      },
+    });
+  };
+
   const navItems = [
     { name: 'Home', href: '/' },
-    ...(isAuthenticated ? [{ name: 'Book a Sauna', href: '/booking' }] : []),
-    ...(userState.role === 'admin' ? [{ name: 'My Saunas', href: '/my-saunas' }] : []),
-    ...(userState.role === 'admin' ? [{ name: 'Register New Sauna', href: '/register-sauna' }] : []),
+    ...(isAuthenticated && userState.role !== 'admin' ? [
+      { name: 'Book a Sauna', href: '/booking' }
+    ] : []),
+    ...(userState.role === 'admin' ? [
+      { name: 'My Saunas', href: '/my-saunas' },
+      { name: 'Register New Sauna', href: '/register-sauna' }
+    ] : []),
+    ...(!isAuthenticated ? [
+      {
+        name: 'Login as User',
+        href: '#',
+        onClick: handleUserLogin
+      },
+      {
+        name: 'Login as Admin',
+        href: '#',
+        onClick: handleAdminLogin
+      },
+      {
+        name: 'Register',
+        href: '/select-account-type'
+      }
+    ] : [])
   ];
 
   return (
@@ -124,17 +166,25 @@ export default function Navbar({
             <NavigationMenu>
               <NavigationMenuList className="flex flex-col space-y-2">
                 {navItems.map((item) => (
-                  <NavigationMenuItem key={item.name}>
+                  <NavigationMenuItem key={item.name} className="w-full">
                     <NavigationMenuLink
                       href={item.href}
-                      className="block rounded-md p-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-                      onClick={closeMenu}
+                      className="flex w-full items-center justify-start rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
                     >
                       {item.name}
                       {item.name === 'My Saunas' && (
                         <Badge variant="secondary" className="ml-2">
                           {userState.adminSaunas.length}
                         </Badge>
+                      )}
+                      {item.name === 'Login as User' && (
+                        <span className="ml-2">👤</span>
+                      )}
+                      {item.name === 'Login as Admin' && (
+                        <span className="ml-2">👑</span>
+                      )}
+                      {item.name === 'Register' && (
+                        <span className="ml-2">📝</span>
                       )}
                     </NavigationMenuLink>
                   </NavigationMenuItem>
@@ -168,22 +218,20 @@ export default function Navbar({
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage 
-                          src="/placeholder-avatar.jpg" 
-                          alt={userState.user?.name || 'User avatar'} 
+                        <AvatarImage
+                          src="/placeholder-avatar.jpg"
+                          alt={userState.user?.name || 'User avatar'}
                         />
                         <AvatarFallback>{userState.user?.name?.[0] || 'U'}</AvatarFallback>
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <DropdownMenuItem>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="flex items-center">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Profile</span>
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogoutClick}>
