@@ -40,7 +40,7 @@ interface NavbarProps {
 export default function Navbar({
   userState = new UserState(),
   isAuthenticated = false,
-  handleLogout = () => {},
+  handleLogout = () => { },
 }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
@@ -168,22 +168,20 @@ export default function Navbar({
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage 
-                          src="/placeholder-avatar.jpg" 
-                          alt={userState.user?.name || 'User avatar'} 
+                        <AvatarImage
+                          src="/placeholder-avatar.jpg"
+                          alt={userState.user?.name || 'User avatar'}
                         />
                         <AvatarFallback>{userState.user?.name?.[0] || 'U'}</AvatarFallback>
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <DropdownMenuItem>
-                      <User className="mr-2 h-4 w-4" />
-                      <a href='/profile'><span>Profile</span></a>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="flex items-center">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Profile</span>
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogoutClick}>
