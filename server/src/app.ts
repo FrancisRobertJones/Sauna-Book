@@ -41,7 +41,7 @@ app.get('/api/health', (req, res) => {
 const allowedOrigins = [
   'http://localhost:5173',
   'https://boka-bastu.vercel.app',
-  'https://sauna-book.xyz/'
+  'https://sauna-book.xyz'
 ];
 
 app.use(cors({
