@@ -69,7 +69,7 @@ export default function LandingPage() {
           <div className="lg:grid lg:grid-cols-12 lg:gap-x-8 lg:gap-y-20">
             <div className="relative z-10 mx-auto tracking-tight max-w-2xl lg:col-span-7 lg:max-w-none lg:pt-6 xl:col-span-6">
               <h1 className="text-4xl font-bold sm:text-6xl">
-                Welcome to Book a Bastu
+                Welcome to Sauna Book
               </h1>
               <p className="mt-6 text-lg text-muted-foreground">
                 Discover a new way to manage and enjoy saunas. Whether you're a sauna enthusiast or a business owner, we've got you covered.
