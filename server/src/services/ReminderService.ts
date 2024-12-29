@@ -3,13 +3,24 @@ import { BookingRepository } from '../repositories/BookingRepository';
 import { qstash } from '../utils/qstash';
 import { ReminderRepository } from '../repositories/ReminderRepository';
 import { Types } from 'mongoose';
+import { Client } from '@upstash/qstash';
 
 @Service()
 export class ReminderService {
+    private qstash: Client;
+
     constructor(
         private reminderRepo: ReminderRepository,
         private bookingRepo: BookingRepository
-    ) { }
+    ) {
+        if (!process.env.QSTASH_TOKEN) {
+            throw new Error('QSTASH_TOKEN is not defined');
+        }
+
+        this.qstash = new Client({
+            token: process.env.QSTASH_TOKEN
+        });
+    }
 
     async createReminder(bookingId: string, userId: string) {
         const booking = await this.bookingRepo.findById(bookingId);
@@ -18,7 +29,7 @@ export class ReminderService {
         }
 
         const reminderTime = new Date(booking.startTime);
-        reminderTime.setHours(reminderTime.getHours() - 1);
+        reminderTime.setTime(reminderTime.getTime() - (60 * 60 * 1000));
 
         const notification = await this.reminderRepo.create({
             bookingId: new Types.ObjectId(bookingId),
@@ -27,11 +38,15 @@ export class ReminderService {
             status: 'pending'
         });
 
-        const baseUrl = process.env.API_URL || 'http://localhost:5001';
-        const webhookUrl = new URL('/api/notifications/send', baseUrl).toString();
-    
+        console.log('Sending to QStash:', {
+            reminderTime,
+            unixTimestamp: Math.floor(reminderTime.getTime() / 1000)
+        });
 
-        await qstash.publishJSON({
+        const baseUrl = process.env.API_URL || 'http://localhost:5001';
+        const webhookUrl = new URL('/api/webhook/notifications/send', baseUrl).toString();
+
+        const qstashResponse = await this.qstash.publishJSON({
             url: webhookUrl,
             body: {
                 notificationId: notification._id,
@@ -40,9 +55,10 @@ export class ReminderService {
             notBefore: Math.floor(reminderTime.getTime() / 1000)
         });
 
+        console.log('QStash response:', qstashResponse);
+
         return notification;
     }
-
     async deleteReminder(bookingId: string, userId: string) {
         return this.reminderRepo.deleteByBookingAndUser(bookingId, userId);
     }

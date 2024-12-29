@@ -10,6 +10,8 @@ import bookingRoutes from './routes/booking.routes';
 import inviteRoutes from './routes/invite.routes';
 import adminRoutes from './routes/admin.routes';
 import reminderRoutes from './routes/reminder.routes';
+import webhookRoutes from './routes/webhook.routes';
+
 
 import {
   checkJwt,
@@ -81,6 +83,7 @@ mongoose
   });
 
 app.use('/api/users', baseAuth, userRoutes);
+app.use('/api/webhook', webhookRoutes);
 app.use('/api/saunas', baseAuth, saunaRoutes);
 app.use('/api/reminder', baseAuth, reminderRoutes);
 app.use('/api/adminbooking', [...baseAuth, requireAdmin], adminRoutes)

@@ -11,6 +11,7 @@ import { toast } from "@/hooks/use-toast"
 import { apiUrl } from "@/constants/api-url"
 import { Bell, BellOff } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils"
 
 
 
@@ -58,7 +59,7 @@ export function BookingCard({ userBookings: initialBookings, currentSaunaId, onR
           description: "You'll receive an email 1 hour before your booking.",
         });
       } else {
-        const response = await fetch(`${apiUrl}/api/reminders/${bookingId}`, {
+        const response = await fetch(`${apiUrl}/api/reminder/${bookingId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -95,7 +96,7 @@ export function BookingCard({ userBookings: initialBookings, currentSaunaId, onR
 
         for (const booking of bookings) {
           const response = await fetch(
-            `${apiUrl}/api/reminders/booking/${booking._id}`,
+            `${apiUrl}/api/reminder/booking/${booking._id}`,
             {
               headers: { Authorization: `Bearer ${token}` }
             }
@@ -145,6 +146,13 @@ export function BookingCard({ userBookings: initialBookings, currentSaunaId, onR
     fetchBookings();
   }, [currentSaunaId, getAccessTokenSilently, refreshTrigger, refreshTrigger]);
 
+  const isWithinHour = (startTime: string) => {
+    const bookingTime = new Date(startTime);
+    const now = new Date();
+    const hourBeforeBooking = new Date(bookingTime.getTime() - (60 * 60 * 1000));
+    return now >= hourBeforeBooking;
+  };
+
   return (
     <GlowCard className="w-full max-w-md">
       <CardHeader>
@@ -180,35 +188,51 @@ export function BookingCard({ userBookings: initialBookings, currentSaunaId, onR
                   </div>
                 )}
 
-                <div className="flex space-x-2 mt-2 self-end">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleReminder(booking._id)}
-                          className={reminderStatuses[booking._id] ? 'text-blue-500' : 'text-muted-foreground'}
-                        >
-                          {reminderStatuses[booking._id] ? (
-                            <Bell className="w-4 h-4" />
-                          ) : (
-                            <BellOff className="w-4 h-4" />
-                          )}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {reminderStatuses[booking._id] ? 'Remove Reminder' : 'Set Reminder'}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                <div className="flex flex-col space-y-2 mt-2">
+                  <div className="flex items-center space-x-2">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleReminder(booking._id)}
+                            disabled={isWithinHour(booking.startTime)}
+                            className={cn(
+                              reminderStatuses[booking._id] ? 'text-blue-500' : 'text-muted-foreground',
+                              isWithinHour(booking.startTime) && 'opacity-50 cursor-not-allowed'
+                            )}
+                          >
+                            {reminderStatuses[booking._id] ? (
+                              <Bell className="w-4 h-4" />
+                            ) : (
+                              <BellOff className="w-4 h-4" />
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {isWithinHour(booking.startTime)
+                            ? 'Reminders only available for bookings more than 1 hour away'
+                            : reminderStatuses[booking._id]
+                              ? 'Cancel email reminder'
+                              : 'Set email reminder'
+                          }
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    <span className="text-sm text-muted-foreground">
+                      {reminderStatuses[booking._id] ? 'Email reminder set' : 'Set email reminder'} (1 hour before)
+                    </span>
+                  </div>
+
                   <Button
                     variant="destructive"
                     size="sm"
                     onClick={() => unbook(booking._id, ROLE)}
                     disabled={isUnbooking === booking._id}
+                    className="self-end"
                   >
-                    {isUnbooking === booking._id ? 'Cancelling...' : 'Unbook'}
+                    {isUnbooking === booking._id ? 'Cancelling...' : 'Cancel Booking'}
                   </Button>
                 </div>
               </li>
