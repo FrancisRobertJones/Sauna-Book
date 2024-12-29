@@ -1,6 +1,6 @@
 import { Service } from 'typedi';
 import nodemailer from 'nodemailer';
-import { IInvite } from '../models/Invite';
+import { IBooking } from '../models/Booking';
 
 @Service()
 export class EmailService {
@@ -116,6 +116,35 @@ export class EmailService {
                 `
             });
             console.log('Email sent:', result);
+        } catch (error) {
+            console.error('Detailed email error:', error);
+            throw error;
+        }
+    }
+
+    async sendBookingReminderEmail(email: string, booking: IBooking, saunaName: string): Promise<void> {
+        if (!this.transporter) {
+            throw new Error('Email service not initialized');
+        }
+
+        try {
+            const bookingTime = new Date(booking.startTime);
+            const result = await this.transporter.sendMail({
+                from: `"Sauna Booking" <${process.env.GMAIL_USER}>`,
+                to: email,
+                subject: 'Upcoming Sauna Booking Reminder',
+                html: `
+                    <h1>Reminder: Your Sauna Booking is Soon!</h1>
+                    <p>Your booking at ${saunaName} starts in 1 hour.</p>
+                    <p>Details:</p>
+                    <ul>
+                        <li>Date: ${bookingTime.toLocaleDateString()}</li>
+                        <li>Time: ${bookingTime.toLocaleTimeString()}</li>
+                    </ul>
+                    <p>Enjoy your sauna session!</p>
+                `
+            });
+            console.log('Reminder email sent:', result);
         } catch (error) {
             console.error('Detailed email error:', error);
             throw error;

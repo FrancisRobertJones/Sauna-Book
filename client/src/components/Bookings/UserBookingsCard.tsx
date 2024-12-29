@@ -9,6 +9,9 @@ import { useEffect, useState } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
 import { toast } from "@/hooks/use-toast"
 import { apiUrl } from "@/constants/api-url"
+import { Bell, BellOff } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
 
 
 interface BookingCardProps {
@@ -22,11 +25,98 @@ interface BookingCardProps {
 export function BookingCard({ userBookings: initialBookings, currentSaunaId, onRefresh, refreshTrigger, name }: BookingCardProps) {
   const [bookings, setBookings] = useState(initialBookings);
   const { getAccessTokenSilently } = useAuth0();
+  const [reminderStatuses, setReminderStatuses] = useState<Record<string, boolean>>({});
   const { unbook, isUnbooking } = useUnbook(() => {
     onRefresh();
   });
 
   const ROLE = "user";
+
+  const toggleReminder = async (bookingId: string) => {
+    try {
+      const token = await getAccessTokenSilently();
+
+      if (!reminderStatuses[bookingId]) {
+        const response = await fetch(`${apiUrl}/api/reminder`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ bookingId })
+        });
+
+        if (!response.ok) throw new Error('Failed to create reminder');
+
+        setReminderStatuses(prev => ({
+          ...prev,
+          [bookingId]: true
+        }));
+
+        toast({
+          title: "Reminder Set",
+          description: "You'll receive an email 1 hour before your booking.",
+        });
+      } else {
+        const response = await fetch(`${apiUrl}/api/reminders/${bookingId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to delete reminder');
+
+        setReminderStatuses(prev => ({
+          ...prev,
+          [bookingId]: false
+        }));
+
+        toast({
+          title: "Reminder Removed",
+          description: "Reminder has been cancelled.",
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling reminder:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update reminder.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    const fetchReminderStatuses = async () => {
+      try {
+        const token = await getAccessTokenSilently();
+        const statuses: Record<string, boolean> = {};
+
+        for (const booking of bookings) {
+          const response = await fetch(
+            `${apiUrl}/api/reminders/booking/${booking._id}`,
+            {
+              headers: { Authorization: `Bearer ${token}` }
+            }
+          );
+
+          if (!response.ok) throw new Error('Failed to fetch reminder status');
+          const { hasReminder } = await response.json();
+          statuses[booking._id] = hasReminder;
+        }
+
+        setReminderStatuses(statuses);
+      } catch (error) {
+        console.error('Error fetching reminder statuses:', error);
+      }
+    };
+
+    if (bookings.length > 0) {
+      fetchReminderStatuses();
+    }
+  }, [bookings, getAccessTokenSilently]);
+
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -89,15 +179,38 @@ export function BookingCard({ userBookings: initialBookings, currentSaunaId, onR
                     <span className="text-xs">At: {name}</span>
                   </div>
                 )}
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => unbook(booking._id, ROLE)}
-                  disabled={isUnbooking === booking._id}
-                  className="mt-2 self-end"
-                >
-                  {isUnbooking === booking._id ? 'Cancelling...' : 'Unbook'}
-                </Button>
+
+                <div className="flex space-x-2 mt-2 self-end">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleReminder(booking._id)}
+                          className={reminderStatuses[booking._id] ? 'text-blue-500' : 'text-muted-foreground'}
+                        >
+                          {reminderStatuses[booking._id] ? (
+                            <Bell className="w-4 h-4" />
+                          ) : (
+                            <BellOff className="w-4 h-4" />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {reminderStatuses[booking._id] ? 'Remove Reminder' : 'Set Reminder'}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => unbook(booking._id, ROLE)}
+                    disabled={isUnbooking === booking._id}
+                  >
+                    {isUnbooking === booking._id ? 'Cancelling...' : 'Unbook'}
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>
