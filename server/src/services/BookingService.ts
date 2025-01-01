@@ -9,6 +9,8 @@ import { UserRepository } from '../repositories/UserRepository';
 import { BookingDTO } from '../models/Booking';
 import { IUser, UserDTO } from '../models/User';
 import { SaunaRepository } from '../repositories/SaunaRepository';
+import { WaitingListService } from './WaitingListService';
+import mongoose from 'mongoose';
 
 @Service()
 export class BookingService {
@@ -16,7 +18,8 @@ export class BookingService {
     private bookingRepository: BookingRepository,
     private saunaRepository: SaunaRepository,
     private userService: UserService,
-    private userRepository: UserRepository
+    private userRepository: UserRepository,
+    private waitingListService: WaitingListService
   ) { }
 
   async getAvailableSlots(saunaId: string, date: Date) {
@@ -38,7 +41,20 @@ export class BookingService {
       sauna.maxConcurrentBookings
     );
 
-    return slots;
+    return slots.map(slot => {
+      if (!slot.isAvailable) {
+        const booking = existingBookings.find(b =>
+          new Date(b.startTime).getTime() === new Date(slot.startTime).getTime()
+        );
+        if (booking) {
+          return {
+            ...slot,
+            bookingId: booking._id.toString()
+          };
+        }
+      }
+      return slot;
+    });
   }
 
   async createBooking(userId: string, saunaId: string, startTime: Date) {
@@ -55,12 +71,12 @@ export class BookingService {
     const userBookings = await this.bookingRepository.countUserActiveBookings(userId, saunaId);
 
     if (sauna.maxTotalBookings && userBookings >= sauna.maxTotalBookings) {
-    console.log('Debug - Should block booking:', {
-      maxAllowed: sauna.maxTotalBookings,
-      current: userBookings
-    });
-    throw new ApplicationError(`Maximum limit of ${sauna.maxTotalBookings} active bookings reached for this sauna`, 400);
-  }
+      console.log('Debug - Should block booking:', {
+        maxAllowed: sauna.maxTotalBookings,
+        current: userBookings
+      });
+      throw new ApplicationError(`Maximum limit of ${sauna.maxTotalBookings} active bookings reached for this sauna`, 400);
+    }
 
 
     const endTime = new Date(startTime);
@@ -89,19 +105,37 @@ export class BookingService {
     const booking = await this.bookingRepository.findById(bookingId);
 
     if (!booking) {
-      throw new ApplicationError('Booking not found', 404);
+        throw new ApplicationError('Booking not found', 404);
     }
 
     if (booking.userId !== userId) {
-      throw new ApplicationError('Not authorized to cancel this booking', 403);
+        throw new ApplicationError('Not authorized to cancel this booking', 403);
     }
 
     if (booking.startTime <= new Date()) {
-      throw new ApplicationError('Cannot cancel past or ongoing bookings', 400);
+        throw new ApplicationError('Cannot cancel past or ongoing bookings', 400);
     }
 
-    return this.bookingRepository.updateStatus(bookingId, 'cancelled');
-  }
+    await this.bookingRepository.updateStatus(bookingId, 'cancelled');
+    
+    console.log('Booking saunaId:', booking.saunaId); 
+    
+    let saunaIdString;
+    if (typeof booking.saunaId === 'object') {
+        saunaIdString = booking.saunaId._id ? booking.saunaId._id.toString() : booking.saunaId.toString();
+    } else {
+        saunaIdString = booking.saunaId;
+    }
+
+    console.log('Extracted saunaIdString:', saunaIdString); 
+
+    await this.waitingListService.notifyNextInWaitlist(
+        saunaIdString,
+        booking.startTime
+    );
+
+    return booking;
+}
 
   async cancelBookingAdmin(bookingId: string, userId: string) {
     const booking = await this.bookingRepository.findById(bookingId);
@@ -109,14 +143,14 @@ export class BookingService {
     if (!booking) {
       throw new ApplicationError('Booking not found', 404);
     }
-    
+
     if (booking.startTime <= new Date()) {
       throw new ApplicationError('Cannot cancel past or ongoing bookings', 400);
     }
 
     return this.bookingRepository.updateStatus(bookingId, 'cancelled');
   }
-  
+
 
   async getUserBookings(userId: string) {
     return this.bookingRepository.findByUser(userId);
@@ -125,11 +159,11 @@ export class BookingService {
   async getUserBookingsCount(userId: string, saunaId: string): Promise<number> {
     const hasAccess = await this.userService.hasAccessToSauna(userId, saunaId);
     if (!hasAccess) {
-        throw new ApplicationError('User does not have access to this sauna', 403);
+      throw new ApplicationError('User does not have access to this sauna', 403);
     }
 
     return this.bookingRepository.countUserActiveBookings(userId, saunaId);
-}
+  }
 
   async getBooking(bookingId: string, userId: string) {
     const booking = await this.bookingRepository.findById(bookingId);
@@ -207,6 +241,6 @@ export class BookingService {
   async cancelAllFutureBookings(saunaId: string): Promise<void> {
     await this.bookingRepository.cancelAllFutureBookings(saunaId);
   }
-  
+
 
 }

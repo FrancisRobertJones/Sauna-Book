@@ -1,6 +1,8 @@
 import { Service } from 'typedi';
 import nodemailer from 'nodemailer';
 import { IBooking } from '../models/Booking';
+import { format } from 'date-fns';
+
 
 @Service()
 export class EmailService {
@@ -150,4 +152,32 @@ export class EmailService {
             throw error;
         }
     }
+
+    async sendWaitlistNotification(email: string, slotTime: Date, saunaName: string): Promise<void> {
+        if (!this.transporter) {
+            throw new Error('Email service not initialized');
+        }
+
+        const formattedTime = format(slotTime, 'PPpp'); 
+
+        try {
+            const result = await this.transporter.sendMail({
+                from: `"Sauna Booking" <${process.env.GMAIL_USER}>`,
+                to: email,
+                subject: 'A Slot is Available!',
+                html: `
+                    <h1>A Slot is Now Available!</h1>
+                    <p>Good news! A slot you were waiting for at ${saunaName} has become available.</p>
+                    <p>Time: ${formattedTime}</p>
+                    <p>Please log in to the booking system to secure your slot.</p>
+                    <p>Note: This slot may be booked by others if you don't act quickly.</p>
+                `
+            });
+            console.log('Waitlist notification email sent:', result);
+        } catch (error) {
+            console.error('Detailed email error:', error);
+            throw new Error('Failed to send waitlist notification email');
+        }
+    }
+
 }

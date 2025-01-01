@@ -59,6 +59,7 @@ export class ReminderService {
 
         return notification;
     }
+    
     async deleteReminder(bookingId: string, userId: string) {
         return this.reminderRepo.deleteByBookingAndUser(bookingId, userId);
     }

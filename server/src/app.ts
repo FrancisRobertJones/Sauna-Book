@@ -12,6 +12,7 @@ import adminRoutes from './routes/admin.routes';
 import reminderRoutes from './routes/reminder.routes';
 import webhookRoutes from './routes/webhook.routes';
 import { verifyQStashSignature } from './middleware/qstash.middleware';
+import waitlistRoutes from './routes/waitinglist.routes';
 
 
 
@@ -86,6 +87,7 @@ mongoose
 
 app.use('/api/users', baseAuth, userRoutes);
 app.use('/api/webhook', verifyQStashSignature, webhookRoutes);
+app.use('/api/waitlist', baseAuth, waitlistRoutes);
 app.use('/api/saunas', baseAuth, saunaRoutes);
 app.use('/api/reminder', baseAuth, reminderRoutes);
 app.use('/api/adminbooking', [...baseAuth, requireAdmin], adminRoutes)

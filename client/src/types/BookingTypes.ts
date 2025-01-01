@@ -5,6 +5,7 @@ export interface TimeSlot {
   endTime: string | Date;
   isAvailable: boolean;
   currentBookings: number;
+  bookingId?: string;
 }
 
 export interface TimeSlotSelection {
@@ -42,4 +43,15 @@ export interface BookingDetailsProps {
   selectedDate: Date;
   selectedSlots: TimeSlotSelection | null;
   handleRefresh: () => void;
+}
+
+export interface WaitlistModalProps {
+  slot: TimeSlot;
+  onJoinWaitlist: (slot: TimeSlot) => Promise<void>;
+  children?: React.ReactNode; 
+}
+
+export interface WaitlistPosition {
+  slotTime: string;
+  position: number;
 }
