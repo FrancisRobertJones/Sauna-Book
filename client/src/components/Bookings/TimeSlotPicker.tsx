@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { TimeSlot, TimeSlotPickerProps } from "@/types/BookingTypes";
+import { TimeSlot, TimeSlotPickerProps, WaitlistPosition } from "@/types/BookingTypes";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useState } from "react";
 import { LoadingAnimation } from "../Loading/Loading";
@@ -9,6 +9,10 @@ import { GlowCard } from "../ui/GlowCard";
 import { apiUrl } from "@/constants/api-url";
 import BookingLimitInfo from "./BookingLimitInfo";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useWaitlist } from "@/hooks/use-wait-list";
+import { WaitlistModal } from "./WaitListModal";
+import { toast } from "@/hooks/use-toast";
+
 
 
 
@@ -20,11 +24,14 @@ export function TimeSlotPicker({
     onSlotsSelect,
 }: TimeSlotPickerProps) {
     const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
+    const [waitlistPositions, setWaitlistPositions] = useState<WaitlistPosition[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const { getAccessTokenSilently } = useAuth0();
     const [hasReachedLimit, setHasReachedLimit] = useState(false);
     const [lastFetchedDate, setLastFetchedDate] = useState<string | null>(null);
     const [userTotalBookings, setUserTotalBookings] = useState<number>(0);
+    const { addToWaitlist, fetchWaitlistStatus } = useWaitlist();
+
 
 
     const normalizeDateString = (date: Date) => {
@@ -100,6 +107,65 @@ export function TimeSlotPicker({
         fetchUserBookings();
     }, [sauna._id, getAccessTokenSilently]);
 
+    useEffect(() => {
+        const fetchWaitlistPositions = async () => {
+            try {
+                const positions = await fetchWaitlistStatus(sauna._id);
+                setWaitlistPositions(positions);
+            } catch (error) {
+                console.error('Error fetching waitlist positions:', error);
+            }
+        };
+
+        fetchWaitlistPositions();
+    }, [sauna._id]);
+
+    const handleJoinWaitlist = async (slot: TimeSlot) => {
+        if (!slot.bookingId) {
+            toast({
+                title: "Error",
+                description: "Unable to join waitlist. Please try again later.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        try {
+            console.log('Attempting to join waitlist with:', {
+                saunaId: sauna._id,
+                slotTime: slot.startTime,
+                bookingId: slot.bookingId
+            });
+            const result = await addToWaitlist(sauna._id, slot.startTime, slot.bookingId);
+            const positions = await fetchWaitlistStatus(sauna._id);
+            setWaitlistPositions(positions);
+
+            const formattedTime = format(new Date(slot.startTime), 'HH:mm');
+            toast({
+                title: "Successfully joined waitlist",
+                description: `You are #${result.position} in line for the ${formattedTime} slot. We'll notify you if it becomes available.`,
+                variant: "default"
+            });
+        } catch (error) {
+            console.error('Error joining waitlist:', error);
+            if (error instanceof Error) {
+                const message = error.message;
+                if (message.includes('already on the waitlist')) {
+                    toast({
+                        title: "Already on waitlist",
+                        description: "You're already on the waitlist for this time slot.",
+                        variant: "destructive"
+                    });
+                    return;
+                }
+            }
+            toast({
+                title: "Failed to join waitlist",
+                description: error instanceof Error ? error.message : "An unexpected error occurred",
+                variant: "destructive"
+            });
+        }
+    };
     const getSlotStatus = (slot: TimeSlot) => {
         if (!slot.isAvailable) return "unavailable";
         if (isSlotSelectable(slot)) return "selectable";
@@ -210,6 +276,13 @@ export function TimeSlotPicker({
 
     const hasAvailableSlots = timeSlots.some(slot => slot.isAvailable);
 
+    const getWaitlistPosition = (slot: TimeSlot) => {
+        const position = waitlistPositions.find(
+            p => new Date(p.slotTime).getTime() === new Date(slot.startTime).getTime()
+        );
+        return position?.position;
+    };
+
     return (
         <GlowCard className="rounded-lg border bg-card p-6">
             <div className="flex justify-between items-center mb-4">
@@ -224,7 +297,7 @@ export function TimeSlotPicker({
                     </Button>
                 )}
             </div>
-            
+
             {!hasAvailableSlots && (
                 <Alert variant="destructive" className="mb-4">
                     <AlertTitle>No Available Times</AlertTitle>
@@ -237,13 +310,30 @@ export function TimeSlotPicker({
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
                 {timeSlots.map((slot) => {
                     const status = getSlotStatus(slot);
+                    const waitlistPosition = getWaitlistPosition(slot);
+
+                    if (!slot.isAvailable) {
+                        return (
+                            <div key={new Date(slot.startTime).toISOString()}>
+                                <WaitlistModal
+                                    slot={slot}
+                                    onJoinWaitlist={handleJoinWaitlist}
+                                />
+                                {waitlistPosition && (
+                                    <div className="text-xs text-center mt-1 text-muted-foreground">
+                                        #{waitlistPosition} in waitlist
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    }
+
                     return (
                         <Button
                             key={new Date(slot.startTime).toISOString()}
                             variant={isSlotSelected(slot) ? "default" : "outline"}
                             className={cn(
                                 "w-full",
-                                status === "unavailable" && "bg-destructive/10 text-destructive hover:bg-destructive/20",
                                 status === "selectable" && "hover:bg-primary/10",
                                 status === "disabled" && "opacity-50"
                             )}
@@ -255,7 +345,7 @@ export function TimeSlotPicker({
                     );
                 })}
             </div>
-            
+
             {selectedSlots && (
                 <div className="mt-4 space-y-2">
                     <p className="text-sm text-muted-foreground">

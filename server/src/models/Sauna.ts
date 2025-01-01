@@ -94,21 +94,6 @@ const bookingSchema = new mongoose.Schema({
   actualEndTime: Date
 });
 
-const waitingListSchema = new mongoose.Schema({
-  bookingId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Booking',
-    required: true
-  },
-  userId: {
-    type: String,
-    required: true
-  },
-  notified: {
-    type: Boolean,
-    default: false
-  }
-});
 
 export interface ISauna extends Document {
   name: string;
@@ -123,4 +108,3 @@ export interface ISauna extends Document {
 
 export const Sauna = mongoose.model<ISauna>('Sauna', saunaSchema);
 export const Booking = mongoose.model('Booking', bookingSchema);
-export const WaitingList = mongoose.model('WaitingList', waitingListSchema);
