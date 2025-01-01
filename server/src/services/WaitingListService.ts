@@ -2,20 +2,31 @@ import { Service } from 'typedi';
 import { WaitingListRepository } from '../repositories/WaitingListRepository';
 import { UserService } from './UserService';
 import { EmailService } from './EmailService';
-import { ApplicationError, isMongoError } from '../utils/errors';
-import mongoose from 'mongoose';
-import { SaunaService } from './SaunaService';
+import { ApplicationError } from '../utils/errors';
 import { IWaitingList } from '../models/WaitList';
 import { SaunaRepository } from '../repositories/SaunaRepository';
+import { Client } from '@upstash/qstash';
+import { BookingRepository } from '../repositories/BookingRepository';
 
 @Service()
 export class WaitingListService {
+    private qstash: Client;
+
     constructor(
         private waitingListRepository: WaitingListRepository,
         private userService: UserService,
         private emailService: EmailService,
-        private saunaRepository: SaunaRepository
-    ) { }
+        private saunaRepository: SaunaRepository,
+        private bookingRepository: BookingRepository
+    ) {
+        if (!process.env.QSTASH_TOKEN) {
+            throw new Error('QSTASH_TOKEN is not defined');
+        }
+
+        this.qstash = new Client({
+            token: process.env.QSTASH_TOKEN
+        });
+    }
 
     async addToWaitlist(userId: string, saunaId: string, slotTime: Date, bookingId: string) {
         const user = await this.userService.getUser(userId);
@@ -56,16 +67,19 @@ export class WaitingListService {
         }
     }
 
-
     async notifyNextInWaitlist(saunaId: string, slotTime: Date) {
         try {
-            const waitlistEntries = await this.waitingListRepository.findBySlot(saunaId, slotTime);
+            const booking = await this.bookingRepository.findActiveBookingForSlot(saunaId, slotTime);
+            if (booking) {
+                console.log('Slot has been booked in the meantime, stopping notification chain');
+                return;
+            }
 
+            const waitlistEntries = await this.waitingListRepository.findBySlot(saunaId, slotTime);
             if (waitlistEntries.length === 0) return;
 
             const nextUser = waitlistEntries[0] as IWaitingList;
             const user = await this.userService.getUser(nextUser.userId);
-
             const sauna = await this.saunaRepository.findById(saunaId);
 
             if (user?.email && sauna) {
@@ -75,17 +89,26 @@ export class WaitingListService {
                     sauna.name
                 );
 
-                if (!nextUser._id) {
-                    throw new Error('Invalid waitlist entry: missing _id');
-                }
-
                 await this.waitingListRepository.markAsNotified(nextUser._id.toString());
+
+                if (waitlistEntries.length > 1) {
+                    const nextNotificationTime = new Date(Date.now() + 60 * 60 * 1000);
+
+                    const baseUrl = process.env.API_URL || 'http://localhost:5001';
+                    const webhookUrl = new URL('/api/webhook/notifications/waitlist-next', baseUrl).toString();
+
+                    await this.qstash.publishJSON({
+                        url: webhookUrl,
+                        body: {
+                            saunaId,
+                            slotTime: slotTime.toISOString()
+                        },
+                        notBefore: Math.floor(nextNotificationTime.getTime() / 1000)
+                    });
+                }
             }
         } catch (error) {
             console.error('Error notifying waitlist user:', error);
-            if (error instanceof Error) {
-                throw new ApplicationError(error.message, 500);
-            }
             throw new ApplicationError('Failed to notify next user in waitlist', 500);
         }
     }

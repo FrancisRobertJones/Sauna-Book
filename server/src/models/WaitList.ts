@@ -1,7 +1,7 @@
-// models/WaitList.ts
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IWaitingList extends Document {
+  _id: mongoose.Types.ObjectId;
   userId: string;
   saunaId: mongoose.Types.ObjectId;
   slotTime: Date;

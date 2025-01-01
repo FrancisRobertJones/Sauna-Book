@@ -131,11 +131,6 @@ export function TimeSlotPicker({
         }
 
         try {
-            console.log('Attempting to join waitlist with:', {
-                saunaId: sauna._id,
-                slotTime: slot.startTime,
-                bookingId: slot.bookingId
-            });
             const result = await addToWaitlist(sauna._id, slot.startTime, slot.bookingId);
             const positions = await fetchWaitlistStatus(sauna._id);
             setWaitlistPositions(positions);
@@ -312,23 +307,32 @@ export function TimeSlotPicker({
                     const status = getSlotStatus(slot);
                     const waitlistPosition = getWaitlistPosition(slot);
 
-                    if (!slot.isAvailable) {
-                        return (
-                            <div key={new Date(slot.startTime).toISOString()}>
-                                <WaitlistModal
-                                    slot={slot}
-                                    onJoinWaitlist={handleJoinWaitlist}
-                                />
-                                {waitlistPosition && (
-                                    <div className="text-xs text-center mt-1 text-muted-foreground">
-                                        #{waitlistPosition} in waitlist
-                                    </div>
+                    return !slot.isAvailable ? (
+                        <div key={new Date(slot.startTime).toISOString()}>
+                            <Button
+                                variant="outline"
+                                className={cn(
+                                    "w-full bg-destructive/10 text-destructive hover:bg-destructive/20 relative group",
+                                    "transition-all duration-200"
                                 )}
-                            </div>
-                        );
-                    }
-
-                    return (
+                                asChild
+                            >
+                                <WaitlistModal slot={slot} onJoinWaitlist={handleJoinWaitlist}>
+                                    <div className="flex flex-col items-center">
+                                        <span>{format(new Date(slot.startTime), 'HH:mm')}</span>
+                                        <span className="text-[10px] opacity-70 mt-0.5">
+                                            Join Waitlist
+                                        </span>
+                                    </div>
+                                </WaitlistModal>
+                            </Button>
+                            {waitlistPosition && (
+                                <div className="text-xs text-center mt-1 text-muted-foreground">
+                                    #{waitlistPosition} in line
+                                </div>
+                            )}
+                        </div>
+                    ) : (
                         <Button
                             key={new Date(slot.startTime).toISOString()}
                             variant={isSlotSelected(slot) ? "default" : "outline"}

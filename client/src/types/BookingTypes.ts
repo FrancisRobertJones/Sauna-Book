@@ -48,6 +48,7 @@ export interface BookingDetailsProps {
 export interface WaitlistModalProps {
   slot: TimeSlot;
   onJoinWaitlist: (slot: TimeSlot) => Promise<void>;
+  children?: React.ReactNode; 
 }
 
 export interface WaitlistPosition {

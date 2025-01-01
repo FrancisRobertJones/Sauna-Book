@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { Booking } from '../models/Booking';
+import { Booking, IBooking } from '../models/Booking';
 import mongoose from 'mongoose';
 
 @Service()
@@ -143,4 +143,12 @@ export class BookingRepository {
       }
     );
   }
+
+  async findActiveBookingForSlot(saunaId: string, startTime: Date): Promise<IBooking | null> {
+    return Booking.findOne({
+        saunaId: new mongoose.Types.ObjectId(saunaId),
+        startTime,
+        status: 'active'
+    });
+}
 }
