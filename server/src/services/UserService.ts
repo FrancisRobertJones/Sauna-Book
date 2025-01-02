@@ -11,6 +11,8 @@ import { SaunaService } from './SaunaService';
 
 @Service()
 export class UserService {
+    private EXAMPLE_SAUNA_ID = '677649630abb71e9f05924c2';
+
     constructor(
         private userRepository: UserRepository,
         private saunaRepository: SaunaRepository,
@@ -23,14 +25,21 @@ export class UserService {
     }
 
     async createUser(auth0Id: string, email: string, name: string, role: 'admin' | 'user'): Promise<IUser> {
+        const defaultSaunaAccess = role === 'user' ? [this.EXAMPLE_SAUNA_ID] : [];
+
+
         const user = await this.userRepository.create({
             auth0Id,
             email,
             name,
             role,
-            saunaAccess: []
+            saunaAccess: defaultSaunaAccess
         });
         console.log('Created new user:', user);
+
+        if (role === 'user') {
+            await this.emailService.sendWelcomeEmail(email, name);
+        }
         return user;
     }
 
@@ -177,7 +186,7 @@ export class UserService {
     async deleteUser(auth0Id: string): Promise<boolean> {
         try {
             const existingUser = await this.userRepository.findByAuth0Id(auth0Id);
-            
+
             if (!existingUser) {
                 return false;
             }

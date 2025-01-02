@@ -180,4 +180,28 @@ export class EmailService {
         }
     }
 
+    async sendWelcomeEmail(email: string, name: string): Promise<void> {
+        if (!this.transporter) {
+            throw new Error('Email service not initialized');
+        }
+
+        try {
+            const result = await this.transporter.sendMail({
+                from: `"Sauna Booking" <${process.env.GMAIL_USER}>`,
+                to: email,
+                subject: `Welcome to SaunaBook ${name}!`,
+                html: `
+                    <h1>Welcome to SaunaBook!</h1>
+                    <p>We have invited you to a demo sauna where you can test our booking functionality</p>
+                    <h2>Important:</h2>
+                    <p>Contact your BRF admin with the email you have used to create your account, to get invited to your BRF's sauna.</p>
+                `
+            });
+            console.log('Welcome email sent:', result);
+        } catch (error) {
+            console.error('Welcome email error:', error);
+            throw error;
+        }
+    }
+
 }
