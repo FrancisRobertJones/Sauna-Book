@@ -2,6 +2,7 @@ import { Booking } from "@/types/BookingTypes"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog"
 import { useFetchSaunaUsersByBooking } from "@/hooks/use-fetch-sauna-users-by-booking"
 import { format } from "date-fns"
+import { LoadingAnimation } from "../Loading/Loading"
 
 
 interface UserDetailsModalProps {
@@ -22,6 +23,9 @@ export function UserDetailsModal({ booking, isOpen, onClose }: UserDetailsModalP
             return 'Invalid date';
         }
     };
+
+    if (isLoading) return <LoadingAnimation isLoading={true} text="Loading Users..." />;
+
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>

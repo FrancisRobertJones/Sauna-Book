@@ -28,6 +28,7 @@ import { useFetchSaunaUsersBySauna } from '@/hooks/use-fetch-sauna-users-by-saun
 import { useRemoveSaunaAccess } from '@/hooks/use-remove-sauna-access'
 import { useParams } from 'react-router-dom'
 import { SaunaUserStats } from '@/types/UserTypes'
+import { LoadingAnimation } from '../Loading/Loading'
 
 export function SaunaUserManagement() {
   const { saunaId } = useParams<{ saunaId: string }>();
@@ -66,7 +67,7 @@ export function SaunaUserManagement() {
   })
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-64">Loading...</div>
+    <LoadingAnimation isLoading={true} text="Loading Users..." />;
   }
 
 
