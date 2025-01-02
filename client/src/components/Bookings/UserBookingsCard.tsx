@@ -194,12 +194,11 @@ export function BookingCard({ userBookings: initialBookings, currentSaunaId, onR
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
-                            variant="ghost"
+                            variant="destructive"
                             size="sm"
                             onClick={() => toggleReminder(booking._id)}
                             disabled={isWithinHour(booking.startTime)}
                             className={cn(
-                              reminderStatuses[booking._id] ? 'text-blue-500' : 'text-muted-foreground',
                               isWithinHour(booking.startTime) && 'opacity-50 cursor-not-allowed'
                             )}
                           >

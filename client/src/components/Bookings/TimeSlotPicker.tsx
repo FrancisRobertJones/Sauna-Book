@@ -307,25 +307,26 @@ export function TimeSlotPicker({
                     const status = getSlotStatus(slot);
                     const waitlistPosition = getWaitlistPosition(slot);
 
+
                     return !slot.isAvailable ? (
                         <div key={new Date(slot.startTime).toISOString()}>
-                            <Button
-                                variant="outline"
-                                className={cn(
-                                    "w-full bg-destructive/10 text-destructive hover:bg-destructive/20 relative group",
-                                    "transition-all duration-200"
-                                )}
-                                asChild
-                            >
-                                <WaitlistModal slot={slot} onJoinWaitlist={handleJoinWaitlist}>
-                                    <div className="flex flex-col items-center cursor-pointer">
-                                        <span>{format(new Date(slot.startTime), 'HH:mm')}</span>
-                                        <span className="text-[10px] opacity-70 mt-0.5">
-                                            Join Waitlist
-                                        </span>
-                                    </div>
-                                </WaitlistModal>
-                            </Button>
+                            <WaitlistModal slot={slot} onJoinWaitlist={handleJoinWaitlist}>
+                                <Button
+                                    variant="outline"
+                                    disabled={Boolean(waitlistPosition)}
+                                    className={cn(
+                                        "w-full bg-destructive/10 text-destructive hover:bg-destructive/20 relative group",
+                                        "transition-all duration-200",
+                                        "flex flex-col items-center p-1.5 leading-none",
+                                        waitlistPosition && "opacity-50 cursor-not-allowed hover:bg-destructive/10"
+                                    )}
+                                >
+                                    <span className="text-xs whitespace-nowrap leading-none">{format(new Date(slot.startTime), 'HH:mm')}</span>
+                                    <span className="text-xs opacity-70 leading-none whitespace-nowrap -mt-0.5 text-white">
+                                        {waitlistPosition ? 'On Waitlist' : 'Join Waitlist'}
+                                    </span>
+                                </Button>
+                            </WaitlistModal>
                             {waitlistPosition && (
                                 <div className="text-xs text-center mt-1 text-muted-foreground">
                                     #{waitlistPosition} in line
