@@ -18,7 +18,8 @@ interface SaunaCardProps {
 
 export function SaunaCard({ sauna }: SaunaCardProps) {
     return (
-      <GlowCard className="overflow-hidden transition-all hover:shadow-lg">
+      <GlowCard className="overflow-hidden transition-all hover:shadow-lg" role="article" aria-label={`Sauna details for ${sauna.name}`}
+>
         <div className="relative h-[200px] w-full bg-muted">
           <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
             <span className="text-4xl font-bold">{sauna.name[0]}</span>
@@ -31,7 +32,7 @@ export function SaunaCard({ sauna }: SaunaCardProps) {
           </CardTitle>
           {sauna.location && (
             <CardDescription className="flex items-center gap-1">
-              <MapPin className="h-4 w-4" />
+              <MapPin className="h-4 w-4" aria-hidden="true"/>
               {sauna.location}
             </CardDescription>
           )}
@@ -42,13 +43,13 @@ export function SaunaCard({ sauna }: SaunaCardProps) {
             <p className="text-sm text-muted-foreground">{sauna.description}</p>
           )}
           
-          <div className="flex flex-wrap gap-4 text-sm">
-            <div className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
+          <div className="flex flex-wrap gap-4 text-sm" role="list">
+            <div className="flex items-center gap-1" role="listitem">
+              <Clock className="h-4 w-4" aria-hidden="true"/>
               {sauna.slotDurationMinutes} mins
             </div>
-            <div className="flex items-center gap-1">
-              <Users className="h-4 w-4" />
+            <div className="flex items-center gap-1" role="listitem">
+              <Users className="h-4 w-4" aria-hidden="true"/>
               Max {sauna.maxConcurrentBookings} people
             </div>
           </div>

@@ -17,7 +17,7 @@ export default function AuthSection() {
       },
     });
   };
-  
+
   const handleAdminLogin = () => {
     localStorage.setItem('register_intent', 'admin');
     loginWithRedirect({
@@ -28,9 +28,8 @@ export default function AuthSection() {
   };
 
   return (
-    <section className="relative overflow-hidden py-12 sm:py-12 lg:pb-12 xl:pb-36">
+    <section className="relative overflow-hidden py-12 sm:py-12 lg:pb-12 xl:pb-36" aria-label="Registration options">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -48,22 +47,23 @@ export default function AuthSection() {
               <CardContent className="space-y-4">
                 <ul className="space-y-2 mb-6 text-sm">
                   <li className="flex items-center">
-                    <ChevronRight className="mr-2 h-4 w-4 text-primary" />
+                    <ChevronRight className="mr-2 h-4 w-4 text-primary" aria-hidden="true" />
                     Easy online booking system
                   </li>
                   <li className="flex items-center">
-                    <ChevronRight className="mr-2 h-4 w-4 text-primary" />
+                    <ChevronRight className="mr-2 h-4 w-4 text-primary" aria-hidden="true" />
                     Real-time availability check
                   </li>
                   <li className="flex items-center">
-                    <ChevronRight className="mr-2 h-4 w-4 text-primary" />
-                    Automated reminders
+                    <ChevronRight className="mr-2 h-4 w-4 text-primary" aria-hidden="true" />
+                    Automated reminders & waiting lists
                   </li>
                 </ul>
-                <Button 
-                  className="w-full" 
-                  size="lg" 
+                <Button
+                  className="w-full"
+                  size="lg"
                   onClick={handleUserLogin}
+                  aria-label="Register as a sauna user to book and manage sessions"
                 >
                   Register as a User
                   <ChevronRight className="ml-2 h-4 w-4" />
@@ -100,11 +100,12 @@ export default function AuthSection() {
                     Customer management tools
                   </li>
                 </ul>
-                <Button 
-                  className="w-full" 
-                  size="lg" 
+                <Button
+                  className="w-full"
+                  size="lg"
                   variant="outline"
                   onClick={handleAdminLogin}
+                  aria-label="Register as an admin to create and manage saunas"
                 >
                   Register as an Admin
                   <ChevronRight className="ml-2 h-4 w-4" />

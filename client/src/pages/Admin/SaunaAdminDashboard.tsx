@@ -47,24 +47,25 @@ const SaunaAdminDashboard = () => {
         return <LoadingAnimation
             isLoading={isLoading}
             text="Loading sauna stats"
+            aria-label="Loading sauna dashboard data"
         />;
     }
 
 
     return (
-        <div className="container mx-auto py-4 sm:py-6">
+        <div className="container mx-auto py-4 sm:py-6" role="main">
             <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Sauna Dashboard</h1>
 
-            <Tabs defaultValue="overview" className="space-y-4">
-                <TabsList className="w-full flex-wrap justify-start overflow-x-auto">
-                    <TabsTrigger value="overview" className="px-1 sm:px-3 md:px-4">Overview</TabsTrigger>
-                    <TabsTrigger value="invite" className="px-2 sm:px-4 md:px-6">Invites</TabsTrigger>
-                    <TabsTrigger value="users" className="px-2 sm:px-4 md:px-6">Users</TabsTrigger>
-                    <TabsTrigger value="bookings" className="px-2 sm:px-4 md:px-6">Bookings</TabsTrigger>
-                    <TabsTrigger value="settings" className="px-2 sm:px-4 md:px-6">Settings</TabsTrigger>
+            <Tabs defaultValue="overview" className="space-y-4" aria-label="Sauna management sections">
+                <TabsList className="w-full flex-wrap justify-start overflow-x-auto" aria-label="Dashboard sections">
+                    <TabsTrigger value="overview" className="px-1 sm:px-3 md:px-4" aria-label="Overview section">Overview</TabsTrigger>
+                    <TabsTrigger value="invite" className="px-2 sm:px-4 md:px-6" aria-label="Manage invites">Invites</TabsTrigger>
+                    <TabsTrigger value="users" className="px-2 sm:px-4 md:px-6" aria-label="Manage users">Users</TabsTrigger>
+                    <TabsTrigger value="bookings" className="px-2 sm:px-4 md:px-6" aria-label="View bookings">Bookings</TabsTrigger>
+                    <TabsTrigger value="settings" className="px-2 sm:px-4 md:px-6" aria-label="Sauna settings">Settings</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="overview">
+                <TabsContent value="overview" role="tabpanel">
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-lg sm:text-xl">Sauna Overview</CardTitle>
@@ -78,7 +79,7 @@ const SaunaAdminDashboard = () => {
                         </CardContent>
                     </Card>
                 </TabsContent>
-                <TabsContent value="invite">
+                <TabsContent value="invite" role="tabpanel">
                     {saunaId &&
                         <>
                             <CreateInviteForm saunaId={saunaId} />
@@ -87,7 +88,7 @@ const SaunaAdminDashboard = () => {
                     }
                 </TabsContent>
 
-                <TabsContent value="users">
+                <TabsContent value="users" role="tabpanel">
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-lg sm:text-xl">User Management</CardTitle>
@@ -97,7 +98,7 @@ const SaunaAdminDashboard = () => {
                         </CardContent>
                     </Card>
                 </TabsContent>
-                <TabsContent value="settings">
+                <TabsContent value="settings" role="tabpanel">
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-lg sm:text-xl">Sauna settings</CardTitle>
@@ -109,7 +110,7 @@ const SaunaAdminDashboard = () => {
                         </CardContent>
                     </Card>
                 </TabsContent>
-                <TabsContent value="bookings">
+                <TabsContent value="bookings" role="tabpanel">
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-lg sm:text-xl">Bookings</CardTitle>

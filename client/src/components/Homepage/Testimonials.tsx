@@ -1,23 +1,20 @@
 import { CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { GlowCard } from "../ui/GlowCard";
 
 export const Testimonial = ({ 
     name, 
     role, 
     quote, 
-    avatar 
   }: { 
     name: string;
     role: string;
     quote: string;
-    avatar: string;
   }) => (
     <GlowCard className="bg-background/50 backdrop-blur-lg border-border shadow-lg">
       <CardHeader>
         <div className="flex items-center space-x-4">
           <Avatar>
-            <AvatarImage src={avatar} alt={name} />
             <AvatarFallback>{name[0]}</AvatarFallback>
           </Avatar>
           <div>
