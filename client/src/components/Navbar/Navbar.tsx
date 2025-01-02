@@ -29,7 +29,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { UserState } from '@/reducers/userReducer';
-import { NavButtons } from './NavButtons';
 import { useAuth0 } from '@auth0/auth0-react';
 
 interface NavbarProps {
@@ -78,27 +77,16 @@ export default function Navbar({
     setIsLogoutDialogOpen(false);
   };
 
-  const handleUserLogin = () => {
-    localStorage.setItem('register_intent', 'user');
-
+  const handleLogin = () => {
+    localStorage.removeItem('register_intent');
     loginWithRedirect({
       authorizationParams: {
-        redirect_uri: `${window.location.origin}/callback`,
-      },
-    });
-  };
-
-  const handleAdminLogin = () => {
-    localStorage.setItem('register_intent', 'admin');
-    loginWithRedirect({
-      authorizationParams: {
-        redirect_uri: `${window.location.origin}/callback`,
-      },
+        redirect_uri: `${window.location.origin}/callback`
+      }
     });
   };
 
   const navItems = [
-    { name: 'Home', href: '/' },
     ...(isAuthenticated && userState.role !== 'admin' ? [
       { name: 'Book a Sauna', href: '/booking' }
     ] : []),
@@ -108,14 +96,9 @@ export default function Navbar({
     ] : []),
     ...(!isAuthenticated ? [
       {
-        name: 'Login as User',
+        name: 'Login',
         href: '#',
-        onClick: handleUserLogin
-      },
-      {
-        name: 'Login as Admin',
-        href: '#',
-        onClick: handleAdminLogin
+        onClick: handleLogin
       },
       {
         name: 'Register',
@@ -137,6 +120,7 @@ export default function Navbar({
                 <NavigationMenuItem key={item.name}>
                   <NavigationMenuLink
                     href={item.href}
+                    onClick={item.onClick}
                     className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
                   >
                     {item.name}
@@ -148,7 +132,6 @@ export default function Navbar({
                   </NavigationMenuLink>
                 </NavigationMenuItem>
               ))}
-              {!isAuthenticated && <NavButtons />}
             </NavigationMenuList>
           </NavigationMenu>
         </div>
@@ -169,6 +152,7 @@ export default function Navbar({
                   <NavigationMenuItem key={item.name} className="w-full">
                     <NavigationMenuLink
                       href={item.href}
+                      onClick={item.onClick}
                       className="flex w-full items-center justify-start rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
                     >
                       {item.name}
@@ -177,11 +161,8 @@ export default function Navbar({
                           {userState.adminSaunas.length}
                         </Badge>
                       )}
-                      {item.name === 'Login as User' && (
+                      {item.name === 'Login' && (
                         <span className="ml-2">👤</span>
-                      )}
-                      {item.name === 'Login as Admin' && (
-                        <span className="ml-2">👑</span>
                       )}
                       {item.name === 'Register' && (
                         <span className="ml-2">📝</span>
@@ -209,11 +190,6 @@ export default function Navbar({
           <div className="flex items-center space-x-2">
             {isAuthenticated && (
               <>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="h-5 w-5" />
-                  <span className="sr-only">Notifications</span>
-                  <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-red-600" />
-                </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">

@@ -318,7 +318,7 @@ export function TimeSlotPicker({
                                 asChild
                             >
                                 <WaitlistModal slot={slot} onJoinWaitlist={handleJoinWaitlist}>
-                                    <div className="flex flex-col items-center">
+                                    <div className="flex flex-col items-center cursor-pointer">
                                         <span>{format(new Date(slot.startTime), 'HH:mm')}</span>
                                         <span className="text-[10px] opacity-70 mt-0.5">
                                             Join Waitlist
