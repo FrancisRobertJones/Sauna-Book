@@ -6,18 +6,15 @@ export const Testimonial = ({
     name, 
     role, 
     quote, 
-    avatar 
   }: { 
     name: string;
     role: string;
     quote: string;
-    avatar: string;
   }) => (
     <GlowCard className="bg-background/50 backdrop-blur-lg border-border shadow-lg">
       <CardHeader>
         <div className="flex items-center space-x-4">
           <Avatar>
-            <AvatarImage src={avatar} alt={name} />
             <AvatarFallback>{name[0]}</AvatarFallback>
           </Avatar>
           <div>

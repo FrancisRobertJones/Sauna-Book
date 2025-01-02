@@ -279,7 +279,7 @@ export function TimeSlotPicker({
     };
 
     return (
-        <GlowCard className="rounded-lg border bg-card p-6">
+        <GlowCard className="rounded-lg border bg-card p-6" role="region" aria-label="Time slot selection">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Available Time Slots</h2>
                 {selectedSlots && (
@@ -287,6 +287,7 @@ export function TimeSlotPicker({
                         variant="outline"
                         size="sm"
                         onClick={resetSelection}
+                        aria-label="Clear all selected time slots"
                     >
                         Clear Selection
                     </Button>
@@ -294,7 +295,7 @@ export function TimeSlotPicker({
             </div>
 
             {!hasAvailableSlots && (
-                <Alert variant="destructive" className="mb-4">
+                <Alert variant="destructive" className="mb-4" role="alert">
                     <AlertTitle>No Available Times</AlertTitle>
                     <AlertDescription>
                         There are no available time slots for this day. Please select another date.
@@ -302,7 +303,8 @@ export function TimeSlotPicker({
                 </Alert>
             )}
 
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2" role="group"
+                aria-label="Available time slots grid">
                 {timeSlots.map((slot) => {
                     const status = getSlotStatus(slot);
                     const waitlistPosition = getWaitlistPosition(slot);
@@ -320,6 +322,8 @@ export function TimeSlotPicker({
                                         "flex flex-col items-center p-1.5 leading-none",
                                         waitlistPosition && "opacity-50 cursor-not-allowed hover:bg-destructive/10"
                                     )}
+                                    aria-label="wait list status"
+                                    aria-selected={isSlotSelected(slot)}
                                 >
                                     <span className="text-xs whitespace-nowrap leading-none">{format(new Date(slot.startTime), 'HH:mm')}</span>
                                     <span className="text-xs opacity-70 leading-none whitespace-nowrap -mt-0.5 text-white">
@@ -328,7 +332,7 @@ export function TimeSlotPicker({
                                 </Button>
                             </WaitlistModal>
                             {waitlistPosition && (
-                                <div className="text-xs text-center mt-1 text-muted-foreground">
+                                <div className="text-xs text-center mt-1 text-muted-foreground" role="status">
                                     #{waitlistPosition} in line
                                 </div>
                             )}

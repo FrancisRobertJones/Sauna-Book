@@ -83,7 +83,7 @@ export function BookingDetails({
 
 
   return (
-    <GlowCard>
+    <GlowCard role="region" aria-label="Booking details summary">
       <CardHeader>
         <CardTitle>Booking Details</CardTitle>
       </CardHeader>
@@ -91,22 +91,22 @@ export function BookingDetails({
         <div className="space-y-2">
           <h3 className="font-semibold">{sauna.name}</h3>
           <p className="text-sm text-muted-foreground flex items-center gap-2">
-            <MapPin className="h-4 w-4" />
+            <MapPin className="h-4 w-4" aria-hidden="true"/>
             {sauna.location}
           </p>
         </div>
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm">
-            <CalendarIcon className="h-4 w-4" />
+            <CalendarIcon className="h-4 w-4" aria-hidden="true"/>
             {format(selectedDate, "EEEE, MMMM d, yyyy")}
           </div>
           {selectedSlots && (
             <>
               <div className="flex items-center gap-2 text-sm">
-                <Clock className="h-4 w-4" />
+                <Clock className="h-4 w-4" aria-hidden="true"/>
                 {format(parseISO(selectedSlots.startSlot), "h:mm a")} - {format(getEndTime()!, "h:mm a")}
               </div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-muted-foreground" role="status">
                 Duration: {getTotalDuration()} minutes
                 {selectedSlots.numberOfSlots > 1 && (
                   <span> ({selectedSlots.numberOfSlots} slots booked)</span>
@@ -122,7 +122,7 @@ export function BookingDetails({
         </div>
         {!canBook && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <AlertCircle className="h-4 w-4" />
+            <AlertCircle className="h-4 w-4" aria-hidden="true"/>
             Please select a time slot to continue
           </div>
         )}
