@@ -4,7 +4,7 @@ import { motion, useAnimation } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import { ChevronRight, Mail, Smartphone, Clock, Users, BarChart, CheckCircle } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Accordion,
