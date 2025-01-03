@@ -66,9 +66,8 @@ export function SaunaUserManagement() {
     getCoreRowModel: getCoreRowModel(),
   })
 
-  if (isLoading) {
-    <LoadingAnimation isLoading={true} text="Loading Users..." />;
-  }
+  return <div className="flex justify-center items-center h-64">Loading users...</div>
+
 
 
   return (
