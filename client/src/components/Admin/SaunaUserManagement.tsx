@@ -31,7 +31,7 @@ import { SaunaUserStats } from '@/types/UserTypes'
 
 export function SaunaUserManagement() {
   const { saunaId } = useParams<{ saunaId: string }>();
-  const { users, setUsers, isLoading } = useFetchSaunaUsersBySauna(saunaId as string)
+  const { users, setUsers } = useFetchSaunaUsersBySauna(saunaId as string)
   const { removeAccess, isRemoving, removeError } = useRemoveSaunaAccess(saunaId as string, setUsers)
   const [userToRemove, setUserToRemove] = useState<SaunaUserStats | null>(null)
 
